@@ -85,6 +85,44 @@
   </div>
 
   <!-- ===================================================================== -->
+  <!-- GLOBAL TOP BRAND & SETTINGS BAR                                       -->
+  <!-- ===================================================================== -->
+  <nav id="globalAppTopBar" class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+      <!-- Left: Web Logo & Brand Name -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-sm shadow-emerald-600/20 shrink-0">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+            <path d="M6 12v5c3 3 9 3 12 0v-5" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <span class="text-base font-extrabold tracking-tight text-slate-900 block leading-none">StudyBridge</span>
+          <span class="text-[10px] font-semibold text-slate-400 block mt-0.5 truncate">Student–Parent Sync</span>
+        </div>
+      </div>
+
+      <!-- Right: Live Sync Indicator + Settings Button -->
+      <div class="flex items-center gap-2 shrink-0">
+        <span id="globalLiveBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Live</span>
+        </span>
+        <button
+          type="button"
+          id="globalSettingsBtn"
+          onclick="openAccountSettingsModal()"
+          class="hidden px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition flex items-center gap-2 border border-slate-200/80"
+        >
+          <i class="fa-solid fa-gear text-slate-600"></i>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================================================================== -->
   <!-- VIEW 1: LOADING / HARDWARE BOOT SCREEN                                -->
   <!-- ===================================================================== -->
   <div id="viewLoading" class="flex-grow flex flex-col items-center justify-center p-6 text-center">
@@ -265,35 +303,17 @@
   <!-- VIEW 5: STUDENT STUDY & TEST DASHBOARD                                -->
   <!-- ===================================================================== -->
   <div id="viewStudentDashboard" class="hidden flex-grow flex flex-col max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 pb-20 space-y-5">
-    <!-- Top Student Header -->
-    <header class="card-surface rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div class="flex items-center gap-3.5">
-        <div id="stuHeaderAvatar" class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 border border-emerald-200"></div>
-        <div>
-          <div class="flex flex-wrap items-center gap-2">
-            <h1 id="stuHeaderName" class="text-base sm:text-lg font-extrabold text-slate-900">Student Name</h1>
-            <span id="stuLinkedParentLabel" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Linked to Parent</span>
-          </div>
-          <p id="stuHeaderDevice" class="font-mono-code text-[11px] text-slate-500 mt-0.5">HW-0000-0000</p>
-        </div>
+    <!-- Compact Student Action Bar (Details moved to Settings) -->
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <h1 class="text-base sm:text-lg font-extrabold text-slate-900">My Study Workspace</h1>
+        <p class="text-[11px] text-slate-500">Plan daily topics & complete parent-assigned tests</p>
       </div>
-
-      <div class="flex flex-wrap items-center gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-        <div class="px-3.5 py-2 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-2">
-          <div>
-            <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 block">Student ID</span>
-            <span id="stuHeaderDeviceId" class="font-mono-code text-xs font-extrabold text-slate-900">000000</span>
-          </div>
-          <button type="button" onclick="copyTextToClipboard(currentProfile ? currentProfile.device_number_id : '')" class="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-700">
-            Copy
-          </button>
-        </div>
-
-        <button type="button" onclick="loadStudentDashboardData(true)" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition" title="Sync Now">
-          <i class="fa-solid fa-arrows-rotate text-xs" id="stuSyncIcon"></i>
-        </button>
-      </div>
-    </header>
+      <button type="button" onclick="loadStudentDashboardData(true)" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-2xs transition" title="Sync Now">
+        <i class="fa-solid fa-arrows-rotate text-xs text-emerald-600" id="stuSyncIcon"></i>
+        <span>Sync</span>
+      </button>
+    </div>
 
     <!-- Parent Notes Banner -->
     <section class="card-surface rounded-3xl p-4 sm:p-5">
@@ -401,41 +421,6 @@
   <!-- VIEW 6: PARENT DASHBOARD (DEDICATED 1-STUDENT CONSOLE)                -->
   <!-- ===================================================================== -->
   <div id="viewParentDashboard" class="hidden flex-grow flex flex-col max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 pb-20 space-y-5">
-    <!-- Top Parent Header -->
-    <header class="card-surface rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div class="flex items-center gap-3.5">
-        <div id="parHeaderAvatar" class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 border border-indigo-200"></div>
-        <div>
-          <div class="flex flex-wrap items-center gap-2">
-            <h1 id="parHeaderName" class="text-base sm:text-lg font-extrabold text-slate-900">Parent Name</h1>
-            <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold uppercase tracking-wider">Parent Console</span>
-            <span id="parRealtimePill" class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Live Sync</span>
-            </span>
-          </div>
-          <p id="parHeaderDevice" class="font-mono-code text-[11px] text-slate-500 mt-0.5">HW-0000-0000</p>
-        </div>
-      </div>
-
-      <!-- Shareable Parent Device ID + Sync Button -->
-      <div class="flex flex-wrap items-center gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-        <div class="px-3.5 py-2 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center gap-2.5">
-          <div>
-            <span class="text-[9px] font-extrabold uppercase tracking-wider text-indigo-600 block">Your Parent Device ID</span>
-            <span id="parHeaderDeviceId" class="font-mono-code text-sm font-extrabold text-indigo-950 tracking-wider">000000</span>
-          </div>
-          <button type="button" onclick="copyTextToClipboard(currentProfile ? currentProfile.device_number_id : '')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] font-bold transition">
-            <i class="fa-regular fa-copy mr-1"></i>Copy
-          </button>
-        </div>
-
-        <button type="button" onclick="loadParentDashboardData(true)" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition" title="Refresh Live Data">
-          <i class="fa-solid fa-arrows-rotate text-xs" id="parSyncIcon"></i>
-        </button>
-      </div>
-    </header>
-
     <!-- Single-Student Link Gate (Shown ONLY when no student is linked yet) -->
     <section id="parLinkStudentGateCard" class="card-surface rounded-3xl p-6 sm:p-10 text-center">
       <div class="w-16 h-16 rounded-3xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center text-2xl mb-3">
@@ -443,7 +428,7 @@
       </div>
       <h2 class="text-lg font-extrabold text-slate-900">Link Your Student's Device</h2>
       <p class="text-xs text-slate-500 max-w-md mx-auto mt-1.5 leading-relaxed">
-        Share your Parent Device ID (<strong id="emptyParIdCopy" class="font-mono-code text-indigo-700">000000</strong>) with your student, or enter their 6-digit Student Device ID below to bind your 1-on-1 dashboard.
+        Share your Parent Device ID (<strong id="emptyParIdCopy" class="font-mono-code text-indigo-700">000000</strong>) with your student (also available in Settings), or enter their 6-digit Student Device ID below.
       </p>
 
       <form onsubmit="handleParentLinkStudent(event)" class="mt-5 max-w-sm mx-auto flex items-center gap-2">
@@ -464,48 +449,30 @@
       </form>
     </section>
 
-    <!-- Active Single-Student Monitoring Workspace -->
+    <!-- Active Single-Student Monitoring Workspace (Student/Parent identity details moved to Settings) -->
     <div id="parStudentWorkspace" class="hidden space-y-5">
-      <!-- Live Student Presence & Device Telemetry Card -->
+      <!-- Clean Action & KPI Overview Card -->
       <section class="card-surface rounded-3xl p-4 sm:p-6 bg-gradient-to-r from-white to-slate-50/80">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <div id="monitoredStuAvatar" class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-extrabold overflow-hidden shrink-0 border-2 border-emerald-200"></div>
-            <div>
-              <div class="flex flex-wrap items-center gap-2">
-                <h2 id="monitoredStuName" class="text-lg font-extrabold text-slate-900">Student Name</h2>
-                <span id="monitoredStuIdBadge" class="font-mono-code text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">#000000</span>
-                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">1:1 Linked</span>
-              </div>
-
-              <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs">
-                <span class="inline-flex items-center gap-1.5 text-slate-600 font-medium">
-                  <i class="fa-solid fa-microchip text-emerald-600"></i>
-                  <span>Hardware Key: <strong id="monitoredStuDevice" class="font-mono-code text-slate-900">Unknown</strong></span>
-                </span>
-                <span class="inline-flex items-center gap-1.5 text-slate-600 font-medium">
-                  <i class="fa-regular fa-clock text-indigo-600"></i>
-                  <span>Last Visit: <strong id="monitoredStuLastVisit" class="text-slate-900">Just now</strong></span>
-                </span>
-              </div>
-            </div>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Student Progress Overview</h2>
+            <p class="text-[11px] text-slate-500">Real-time academic tracking & test management</p>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+          <div class="flex items-center gap-2">
             <button type="button" onclick="openScheduleTestModal()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold shadow-sm shadow-amber-500/20 transition flex items-center gap-1.5">
               <i class="fa-solid fa-calendar-plus"></i>
               <span>Schedule Test</span>
             </button>
 
-            <button type="button" onclick="handleResetStudentDeviceLock()" class="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition flex items-center gap-1.5" title="Allow student to re-bind on a new phone">
-              <i class="fa-solid fa-unlock-keyhole"></i>
-              <span>Reset Device Lock</span>
+            <button type="button" onclick="loadParentDashboardData(true)" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition" title="Refresh Live Data">
+              <i class="fa-solid fa-arrows-rotate text-xs" id="parSyncIcon"></i>
             </button>
           </div>
         </div>
 
         <!-- 4-Card KPI Performance Overview Dashboard -->
-        <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80">
             <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block">Today's Coverage</span>
             <div class="flex items-baseline justify-between mt-1">
@@ -791,6 +758,105 @@
   </div>
 
   <!-- ===================================================================== -->
+  <!-- MODAL 4: ACCOUNT & LINKED DEVICE SETTINGS MODAL                       -->
+  <!-- ===================================================================== -->
+  <div id="modalAccountSettings" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+    <div class="card-surface rounded-3xl max-w-lg w-full p-6 my-auto animate-in space-y-5">
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-sm">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Account & Link Settings</h3>
+            <p class="text-[11px] text-slate-500">Parent & Student profile details, hardware keys & unbonding</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('modalAccountSettings')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Parent Details Card -->
+      <div class="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200/80 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">Parent Account Details</span>
+          <span id="settingsParentStatusBadge" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">Linked</span>
+        </div>
+        <div id="settingsParentCardBody" class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="settingsParentAvatar" class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-base font-extrabold overflow-hidden shrink-0"></div>
+            <div class="min-w-0">
+              <p id="settingsParentName" class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">—</p>
+              <p id="settingsParentHardware" class="font-mono-code text-[10px] text-slate-500 truncate mt-0.5">HW-0000</p>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="text-[9px] font-bold uppercase text-slate-400 block">Parent ID</span>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span id="settingsParentDeviceId" class="font-mono-code text-xs font-extrabold text-indigo-900">000000</span>
+              <button type="button" id="settingsCopyParentIdBtn" class="px-2 py-0.5 rounded-lg bg-white border border-indigo-200 text-[10px] font-bold text-indigo-700 hover:bg-indigo-100">
+                Copy
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Details Card -->
+      <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Student Account Details</span>
+          <span id="settingsStudentStatusBadge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Active</span>
+        </div>
+        <div id="settingsStudentCardBody" class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="settingsStudentAvatar" class="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-base font-extrabold overflow-hidden shrink-0"></div>
+            <div class="min-w-0">
+              <p id="settingsStudentName" class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">—</p>
+              <p id="settingsStudentHardware" class="font-mono-code text-[10px] text-slate-500 truncate mt-0.5">HW-0000</p>
+              <p id="settingsStudentLastVisit" class="text-[10px] font-semibold text-emerald-700 mt-0.5">Last visit: —</p>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="text-[9px] font-bold uppercase text-slate-400 block">Student ID</span>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span id="settingsStudentDeviceId" class="font-mono-code text-xs font-extrabold text-emerald-950">000000</span>
+              <button type="button" id="settingsCopyStudentIdBtn" class="px-2 py-0.5 rounded-lg bg-white border border-emerald-200 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100">
+                Copy
+              </button>
+            </div>
+          </div>
+        </div>
+        <p id="settingsNoStudentMsg" class="hidden text-xs text-slate-500 py-1">No student is currently linked to your Parent account.</p>
+      </div>
+
+      <!-- Parent-Only Hardware Lock Reset + Unbond Controls -->
+      <div class="pt-1 space-y-2.5">
+        <button
+          type="button"
+          id="settingsResetLockBtn"
+          onclick="closeModal('modalAccountSettings'); handleResetStudentDeviceLock();"
+          class="hidden w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-extrabold transition flex items-center justify-center gap-2"
+        >
+          <i class="fa-solid fa-unlock-keyhole"></i>
+          <span>Reset Student Device Hardware Lock</span>
+        </button>
+
+        <button
+          type="button"
+          id="settingsUnbondBtn"
+          onclick="handleUnbondRelationship()"
+          class="hidden w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-sm shadow-rose-600/20 transition flex items-center justify-center gap-2"
+        >
+          <i class="fa-solid fa-link-slash"></i>
+          <span id="settingsUnbondBtnText">Unbond from Parent</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
   <!-- APPLICATION JAVASCRIPT                                                -->
   <!-- ===================================================================== -->
   <script>
@@ -884,6 +950,7 @@
     let studentTopics = [];
     let studentTests = [];
     let studentNotes = [];
+    let linkedParentProfile = null;
 
     // Single-Student Parent state
     let singleLinkedStudent = null;
@@ -976,22 +1043,28 @@
       return 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 12);
     }
 
-    function generateSixDigitId() {
-      return String(Math.floor(100000 + Math.random() * 900000));
+    function deriveDeterministicSixDigitId(hwKey) {
+      let hash = 2166136261;
+      const str = String(hwKey || 'HW-0000-0000-0000');
+      for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      const sixDigit = 100000 + ((hash >>> 0) % 900000);
+      return String(sixDigit);
     }
 
     async function ensureLocalDeviceIdentity() {
       detectedDeviceModel = await computeUniqueHardwareFingerprint();
       localDeviceToken = safeStorage.getItem(KEY_DEVICE_TOKEN);
-      localDeviceNumId = safeStorage.getItem(KEY_DEVICE_NUM_ID);
+
+      // Single permanent 6-digit code per physical device derived from hardware
+      localDeviceNumId = deriveDeterministicSixDigitId(detectedDeviceModel);
+      safeStorage.setItem(KEY_DEVICE_NUM_ID, localDeviceNumId);
 
       if (!localDeviceToken) {
         localDeviceToken = generateCryptographicToken();
         safeStorage.setItem(KEY_DEVICE_TOKEN, localDeviceToken);
-      }
-      if (!localDeviceNumId || !/^\d{6}$/.test(localDeviceNumId)) {
-        localDeviceNumId = generateSixDigitId();
-        safeStorage.setItem(KEY_DEVICE_NUM_ID, localDeviceNumId);
       }
     }
 
@@ -1017,6 +1090,16 @@
           el.classList.add('hidden');
         }
       });
+
+      const settingsBtn = document.getElementById('globalSettingsBtn');
+      const liveBadge = document.getElementById('globalLiveBadge');
+      const showHeaderControls = Boolean(currentProfile) && (
+        targetId === 'viewStudentDashboard' ||
+        targetId === 'viewParentDashboard' ||
+        targetId === 'viewStudentLinkGate'
+      );
+      if (settingsBtn) settingsBtn.classList.toggle('hidden', !showHeaderControls);
+      if (liveBadge) liveBadge.classList.toggle('hidden', !showHeaderControls);
     }
 
     function updateDbConnectionPill(isLive, customText = '') {
@@ -1148,55 +1231,58 @@
       initOnboardingUI();
 
       try {
-        // Query Supabase for existing profile bound to this device token
-        const { data: existingProfile, error } = await dbClient
+        // 1. Check if this physical device already has an account by hardware key or 6-digit code
+        let existingProfile = null;
+        const { data: hwProfiles, error: hwErr } = await dbClient
           .from('study_profiles')
           .select('*')
-          .eq('device_token', localDeviceToken)
-          .maybeSingle();
+          .or(`device_model.eq.${detectedDeviceModel},device_number_id.eq.${localDeviceNumId}`)
+          .order('created_at', { ascending: true })
+          .limit(1);
 
-        if (error) {
-          throw error;
+        if (hwErr) {
+          throw hwErr;
         }
 
-        if (!existingProfile) {
-          // Check if a profile exists with the same 6-digit device ID (e.g. different device attempt)
-          const { data: idMatchProfile } = await dbClient
+        if (hwProfiles && hwProfiles.length > 0) {
+          existingProfile = hwProfiles[0];
+        } else {
+          // Fallback check by stored device_token
+          const { data: tokenProfile, error: tokErr } = await dbClient
             .from('study_profiles')
             .select('*')
-            .eq('device_number_id', localDeviceNumId)
+            .eq('device_token', localDeviceToken)
             .maybeSingle();
 
-          if (idMatchProfile && idMatchProfile.role === 'student' && idMatchProfile.device_token !== localDeviceToken) {
-            document.getElementById('lockCurrentDevice').textContent = detectedDeviceModel;
-            document.getElementById('lockRegisteredDevice').textContent = idMatchProfile.device_model || 'Registered Hardware';
-            showView('viewDeviceLocked');
-            return;
-          }
+          if (tokErr) throw tokErr;
+          existingProfile = tokenProfile;
+        }
 
-          // First-time device launch -> show onboarding
+        // First-time device launch -> show onboarding
+        if (!existingProfile) {
           updateDbConnectionPill(true);
           showView('viewOnboarding');
           return;
         }
 
-        // Verify hardware lock if student profile exists
-        if (existingProfile.role === 'student' && existingProfile.device_token !== localDeviceToken) {
-          document.getElementById('lockCurrentDevice').textContent = detectedDeviceModel;
-          document.getElementById('lockRegisteredDevice').textContent = existingProfile.device_model || 'Registered Hardware';
-          showView('viewDeviceLocked');
-          return;
+        // Auto-login: sync local storage identity with this device's existing account
+        localDeviceNumId = existingProfile.device_number_id || localDeviceNumId;
+        safeStorage.setItem(KEY_DEVICE_NUM_ID, localDeviceNumId);
+        if (existingProfile.device_token) {
+          localDeviceToken = existingProfile.device_token;
+          safeStorage.setItem(KEY_DEVICE_TOKEN, localDeviceToken);
         }
 
         currentProfile = existingProfile;
         updateDbConnectionPill(true);
 
-        // Update last_visit_at and latest hardware key
+        // Update last_visit_at and keep hardware key & 6-digit ID synchronized
         await dbClient
           .from('study_profiles')
           .update({
             last_visit_at: new Date().toISOString(),
-            device_model: detectedDeviceModel
+            device_model: detectedDeviceModel,
+            device_number_id: localDeviceNumId
           })
           .eq('id', currentProfile.id);
 
@@ -1227,7 +1313,9 @@
 
     function bootLocalSandboxFallback() {
       const localProfiles = getSandboxTable('study_profiles');
-      const existing = localProfiles.find(p => p.device_token === localDeviceToken);
+      const existing = localProfiles.find(
+        p => p.device_model === detectedDeviceModel || p.device_number_id === localDeviceNumId || p.device_token === localDeviceToken
+      );
       if (!existing) {
         showView('viewOnboarding');
         return;
@@ -1529,8 +1617,7 @@
       try {
         if (isLocalSandboxMode) {
           const profiles = getSandboxTable('study_profiles');
-          const parent = profiles.find(p => p.id === currentProfile.linked_parent_id);
-          document.getElementById('stuLinkedParentLabel').textContent = parent ? `Linked: ${parent.name}` : 'Linked to Parent';
+          linkedParentProfile = profiles.find(p => p.id === currentProfile.linked_parent_id) || null;
 
           studentSubjects = getSandboxTable('student_subjects').filter(s => s.student_id === currentProfile.id);
           studentTopics = getSandboxTable('study_topics').filter(t => t.student_id === currentProfile.id);
@@ -1555,16 +1642,16 @@
             .update({ last_visit_at: new Date().toISOString() })
             .eq('id', currentProfile.id);
 
-          // Fetch linked parent name
+          // Fetch linked parent full profile
           if (currentProfile.linked_parent_id) {
             const { data: parentData } = await dbClient
               .from('study_profiles')
-              .select('name')
+              .select('*')
               .eq('id', currentProfile.linked_parent_id)
               .maybeSingle();
-            document.getElementById('stuLinkedParentLabel').textContent = parentData
-              ? `Linked: ${parentData.name}`
-              : 'Linked to Parent';
+            linkedParentProfile = parentData || null;
+          } else {
+            linkedParentProfile = null;
           }
 
           const [subjRes, topicsRes, testsRes, notesRes] = await Promise.all([
@@ -1693,24 +1780,6 @@
       } catch (err) {
         showToast('Could not remove subject.', 'error');
       }
-    }
-
-    function switchStudentPlanTab(tab) {
-      studentPlanTab = tab;
-      const todayBtn = document.getElementById('stuTabTodayBtn');
-      const tmrBtn = document.getElementById('stuTabTomorrowBtn');
-      const daySelect = document.getElementById('topicDaySelect');
-
-      if (tab === 'today') {
-        todayBtn.className = 'px-3.5 py-1.5 rounded-xl bg-white text-emerald-700 shadow-xs transition';
-        tmrBtn.className = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
-        if (daySelect) daySelect.value = 'today';
-      } else {
-        tmrBtn.className = 'px-3.5 py-1.5 rounded-xl bg-white text-indigo-700 shadow-xs transition';
-        todayBtn.className = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
-        if (daySelect) daySelect.value = 'tomorrow';
-      }
-      renderStudentTopics();
     }
 
     function switchStudentPlanTab(tab) {
@@ -2059,44 +2128,71 @@
     function startRealtimeSyncEngine() {
       if (isLocalSandboxMode || !currentProfile) return;
 
+      // Clean up any previous channel
       if (activeRealtimeChannel) {
         try {
           dbClient.removeChannel(activeRealtimeChannel);
         } catch (e) {}
+        activeRealtimeChannel = null;
       }
 
-      // Subscribe to live postgres_changes across all 5 tables for instantaneous sync
-      activeRealtimeChannel = dbClient
-        .channel('studybridge-live-' + currentProfile.id)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_profiles' }, () => {
-          if (currentProfile.role === 'parent') loadParentDashboardData(false);
-          else loadStudentDashboardData(false);
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'student_subjects' }, () => {
-          if (currentProfile.role === 'parent') loadParentDashboardData(false);
-          else loadStudentDashboardData(false);
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
-          if (currentProfile.role === 'parent') loadParentDashboardData(false);
-          else loadStudentDashboardData(false);
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'scheduled_tests' }, () => {
-          if (currentProfile.role === 'parent') loadParentDashboardData(false);
-          else loadStudentDashboardData(false);
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_notes' }, () => {
-          if (currentProfile.role === 'parent') loadParentDashboardData(false);
-          else loadStudentDashboardData(false);
-        })
-        .subscribe();
+      // Guard WebSocket Realtime against sandboxed iframe/Canvas CSP restrictions
+      let webSocketAllowed = true;
+      try {
+        const isEmbeddedFrame = window.self !== window.top;
+        if (isEmbeddedFrame) {
+          webSocketAllowed = false;
+        }
+      } catch (e) {
+        webSocketAllowed = false;
+      }
 
-      // Fast 6-second fallback sync + instant tab-focus refresh
+      if (webSocketAllowed && typeof window.WebSocket === 'function') {
+        try {
+          const channel = dbClient
+            .channel('studybridge-live-' + currentProfile.id)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'study_profiles' }, () => {
+              if (currentProfile.role === 'parent') loadParentDashboardData(false);
+              else loadStudentDashboardData(false);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'student_subjects' }, () => {
+              if (currentProfile.role === 'parent') loadParentDashboardData(false);
+              else loadStudentDashboardData(false);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
+              if (currentProfile.role === 'parent') loadParentDashboardData(false);
+              else loadStudentDashboardData(false);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'scheduled_tests' }, () => {
+              if (currentProfile.role === 'parent') loadParentDashboardData(false);
+              else loadStudentDashboardData(false);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_notes' }, () => {
+              if (currentProfile.role === 'parent') loadParentDashboardData(false);
+              else loadStudentDashboardData(false);
+            });
+
+          channel.subscribe(status => {
+            if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+              try {
+                dbClient.removeChannel(channel);
+              } catch (e) {}
+            }
+          });
+          activeRealtimeChannel = channel;
+        } catch (wsErr) {
+          // Silently fall back to fast HTTPS REST polling when WebSockets are blocked
+          activeRealtimeChannel = null;
+        }
+      }
+
+      // Fast 2.5-second HTTPS REST sync + instant tab-focus refresh (works in all environments)
       if (backgroundPollTimer) clearInterval(backgroundPollTimer);
       backgroundPollTimer = setInterval(() => {
         if (document.hidden) return;
         if (currentProfile.role === 'parent') loadParentDashboardData(false);
         else loadStudentDashboardData(false);
-      }, 6000);
+      }, 2500);
     }
 
     document.addEventListener('visibilitychange', () => {
@@ -2108,23 +2204,6 @@
 
     async function mountStudentDashboard() {
       showView('viewStudentDashboard');
-      renderAvatarIntoElement(document.getElementById('stuHeaderAvatar'), currentProfile.avatar_url, 'fa-user-graduate');
-      document.getElementById('stuHeaderName').textContent = currentProfile.name;
-      document.getElementById('stuHeaderDevice').textContent = currentProfile.device_model || detectedDeviceModel;
-      document.getElementById('stuHeaderDeviceId').textContent = currentProfile.device_number_id;
-
-      // Inject "Past Records" tab button into student planner if not already present
-      const tabBar = document.getElementById('stuTabTomorrowBtn')?.parentElement;
-      if (tabBar && !document.getElementById('stuTabHistoryBtn')) {
-        const histBtn = document.createElement('button');
-        histBtn.type = 'button';
-        histBtn.id = 'stuTabHistoryBtn';
-        histBtn.onclick = () => switchStudentPlanTab('history');
-        histBtn.className = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
-        histBtn.textContent = 'Past Records';
-        tabBar.appendChild(histBtn);
-      }
-
       mountStudentColorDots();
       await loadStudentDashboardData(false);
       startRealtimeSyncEngine();
@@ -2132,11 +2211,10 @@
 
     async function mountParentDashboard() {
       showView('viewParentDashboard');
-      renderAvatarIntoElement(document.getElementById('parHeaderAvatar'), currentProfile.avatar_url, 'fa-user-tie');
-      document.getElementById('parHeaderName').textContent = currentProfile.name;
-      document.getElementById('parHeaderDevice').textContent = currentProfile.device_model || detectedDeviceModel;
-      document.getElementById('parHeaderDeviceId').textContent = currentProfile.device_number_id;
-      document.getElementById('emptyParIdCopy').textContent = currentProfile.device_number_id;
+      const emptyParEl = document.getElementById('emptyParIdCopy');
+      if (emptyParEl && currentProfile) {
+        emptyParEl.textContent = currentProfile.device_number_id;
+      }
 
       await loadParentDashboardData(false);
       startRealtimeSyncEngine();
@@ -2254,12 +2332,6 @@
 
     async function loadMonitoredStudentWorkspace(studentId) {
       if (!singleLinkedStudent || singleLinkedStudent.id !== studentId) return;
-
-      renderAvatarIntoElement(document.getElementById('monitoredStuAvatar'), singleLinkedStudent.avatar_url, 'fa-user-graduate');
-      document.getElementById('monitoredStuName').textContent = singleLinkedStudent.name;
-      document.getElementById('monitoredStuIdBadge').textContent = `#${singleLinkedStudent.device_number_id}`;
-      document.getElementById('monitoredStuDevice').textContent = singleLinkedStudent.device_model || 'Hardware Verified';
-      document.getElementById('monitoredStuLastVisit').textContent = formatRelativeTime(singleLinkedStudent.last_visit_at);
 
       if (isLocalSandboxMode) {
         monitoredSubjects = getSandboxTable('student_subjects').filter(s => s.student_id === studentId);
@@ -2617,7 +2689,125 @@
     }
 
     // -----------------------------------------------------------------------
-    // 11. MODAL & BOOT INITIALIZATION
+    // 11. ACCOUNT SETTINGS & UNBONDING ENGINE
+    // -----------------------------------------------------------------------
+    async function openAccountSettingsModal() {
+      if (!currentProfile) return;
+
+      const isStudent = currentProfile.role === 'student';
+      const parentData = isStudent ? linkedParentProfile : currentProfile;
+      const studentData = isStudent ? currentProfile : singleLinkedStudent;
+
+      // Populate Parent Section
+      const parStatusBadge = document.getElementById('settingsParentStatusBadge');
+      const parBody = document.getElementById('settingsParentCardBody');
+      if (parentData) {
+        parStatusBadge.textContent = isStudent ? 'Linked Parent' : 'You (Parent)';
+        parBody.classList.remove('hidden');
+        renderAvatarIntoElement(document.getElementById('settingsParentAvatar'), parentData.avatar_url, 'fa-user-tie');
+        document.getElementById('settingsParentName').textContent = parentData.name;
+        document.getElementById('settingsParentHardware').textContent = parentData.device_model || 'Hardware Verified';
+        document.getElementById('settingsParentDeviceId').textContent = parentData.device_number_id;
+        document.getElementById('settingsCopyParentIdBtn').onclick = () => copyTextToClipboard(parentData.device_number_id);
+      } else {
+        parStatusBadge.textContent = 'Not Linked';
+        parBody.classList.add('hidden');
+      }
+
+      // Populate Student Section
+      const stuStatusBadge = document.getElementById('settingsStudentStatusBadge');
+      const stuBody = document.getElementById('settingsStudentCardBody');
+      const noStuMsg = document.getElementById('settingsNoStudentMsg');
+      if (studentData) {
+        stuStatusBadge.textContent = isStudent ? 'You (Student)' : '1:1 Linked';
+        stuBody.classList.remove('hidden');
+        noStuMsg.classList.add('hidden');
+        renderAvatarIntoElement(document.getElementById('settingsStudentAvatar'), studentData.avatar_url, 'fa-user-graduate');
+        document.getElementById('settingsStudentName').textContent = studentData.name;
+        document.getElementById('settingsStudentHardware').textContent = studentData.device_model || 'Hardware Verified';
+        document.getElementById('settingsStudentLastVisit').textContent = `Last visit: ${formatRelativeTime(studentData.last_visit_at)}`;
+        document.getElementById('settingsStudentDeviceId').textContent = studentData.device_number_id;
+        document.getElementById('settingsCopyStudentIdBtn').onclick = () => copyTextToClipboard(studentData.device_number_id);
+      } else {
+        stuStatusBadge.textContent = 'Unlinked';
+        stuBody.classList.add('hidden');
+        noStuMsg.classList.remove('hidden');
+      }
+
+      // Configure Reset Hardware Lock & Unbond Buttons
+      const resetLockBtn = document.getElementById('settingsResetLockBtn');
+      const unbondBtn = document.getElementById('settingsUnbondBtn');
+      const unbondText = document.getElementById('settingsUnbondBtnText');
+
+      if (!isStudent && studentData) {
+        resetLockBtn.classList.remove('hidden');
+      } else {
+        resetLockBtn.classList.add('hidden');
+      }
+
+      if (isStudent && currentProfile.linked_parent_id) {
+        unbondBtn.classList.remove('hidden');
+        unbondText.textContent = 'Unbond from Parent';
+      } else if (!isStudent && studentData) {
+        unbondBtn.classList.remove('hidden');
+        unbondText.textContent = `Unbond Student (${studentData.name})`;
+      } else {
+        unbondBtn.classList.add('hidden');
+      }
+
+      openModal('modalAccountSettings');
+    }
+
+    function handleUnbondRelationship() {
+      if (!currentProfile) return;
+      const isStudent = currentProfile.role === 'student';
+      const targetStudentId = isStudent ? currentProfile.id : (singleLinkedStudent ? singleLinkedStudent.id : null);
+      if (!targetStudentId) return;
+
+      const title = isStudent ? 'Unbond from Parent?' : 'Unbond Student Account?';
+      const desc = isStudent
+        ? 'You will be disconnected from your Parent and returned to the linking screen until you link a Parent ID again.'
+        : `This will disconnect ${singleLinkedStudent.name} from your Parent console. You can link a student again anytime.`;
+
+      closeModal('modalAccountSettings');
+      openConfirmModal(title, desc, async () => {
+        try {
+          if (isLocalSandboxMode) {
+            const profiles = getSandboxTable('study_profiles');
+            const idx = profiles.findIndex(p => p.id === targetStudentId);
+            if (idx !== -1) {
+              profiles[idx].linked_parent_id = null;
+              saveSandboxTable('study_profiles', profiles);
+              if (isStudent) currentProfile = profiles[idx];
+            }
+          } else {
+            const { data, error } = await dbClient
+              .from('study_profiles')
+              .update({ linked_parent_id: null })
+              .eq('id', targetStudentId)
+              .select()
+              .single();
+            if (error) throw error;
+            if (isStudent && data) currentProfile = data;
+          }
+
+          showToast('Unbonded successfully.');
+          if (isStudent) {
+            linkedParentProfile = null;
+            await mountStudentLinkGate();
+          } else {
+            singleLinkedStudent = null;
+            await loadParentDashboardData(false);
+          }
+        } catch (err) {
+          console.error('Unbond error:', err);
+          showToast('Could not unbond account.', 'error');
+        }
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // 12. MODAL & BOOT INITIALIZATION
     // -----------------------------------------------------------------------
     function openModal(id) {
       const el = document.getElementById(id);
