@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudyBridge — Student & Parent Accountability</title>
+  <title>Study Domain — Student & Parent Accountability</title>
 
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -85,7 +85,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- GLOBAL TOP BRAND & SETTINGS BAR                                       -->
+  <!-- GLOBAL TOP BRAND, DASHBOARD & SETTINGS BAR                            -->
   <!-- ===================================================================== -->
   <nav id="globalAppTopBar" class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
@@ -98,17 +98,22 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <span class="text-base font-extrabold tracking-tight text-slate-900 block leading-none">StudyBridge</span>
+          <span class="text-base font-extrabold tracking-tight text-slate-900 block leading-none">Study Domain</span>
           <span class="text-[10px] font-semibold text-slate-400 block mt-0.5 truncate">Student–Parent Sync</span>
         </div>
       </div>
 
-      <!-- Right: Live Sync Indicator + Settings Button -->
+      <!-- Right: Dashboard Button + Settings Button (Live sync runs silently in background) -->
       <div class="flex items-center gap-2 shrink-0">
-        <span id="globalLiveBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Live</span>
-        </span>
+        <button
+          type="button"
+          id="globalDashboardBtn"
+          onclick="openAnalyticsPopupModal()"
+          class="hidden px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-extrabold transition flex items-center gap-2 border border-emerald-200/90"
+        >
+          <i class="fa-solid fa-chart-column text-emerald-600"></i>
+          <span>Dashboard</span>
+        </button>
         <button
           type="button"
           id="globalSettingsBtn"
@@ -130,7 +135,7 @@
       <i class="fa-solid fa-shield-halved animate-pulse"></i>
     </div>
     <h2 class="text-base font-extrabold text-slate-900">Verifying Device Hardware & Syncing...</h2>
-    <p class="text-xs text-slate-500 mt-1">Connecting securely to StudyBridge</p>
+    <p class="text-xs text-slate-500 mt-1">Connecting securely to Study Domain</p>
   </div>
 
   <!-- ===================================================================== -->
@@ -175,12 +180,12 @@
             <i class="fa-solid fa-graduation-cap"></i>
           </div>
           <div>
-            <h1 class="text-lg font-extrabold text-slate-900 leading-none">StudyBridge</h1>
-            <p class="text-[11px] text-slate-500 mt-1">1:1 Student–Parent Accountability</p>
+            <h1 class="text-lg font-extrabold text-slate-900 leading-none">Study Domain</h1>
+            <p class="text-[11px] text-slate-500 mt-1">Student–Parent Accountability</p>
           </div>
         </div>
         <span id="dbConnectionPill" class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
-          <i class="fa-solid fa-database mr-1"></i>Supabase Live
+          <i class="fa-solid fa-database mr-1"></i>Connected
         </span>
       </div>
 
@@ -239,7 +244,7 @@
         </div>
 
         <button type="submit" id="onboardSubmitBtn" class="w-full py-3.5 rounded-2xl bg-slate-900 hover:bg-black text-white text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg transition">
-          <span>Continue to StudyBridge</span>
+          <span>Continue to Study Domain</span>
           <i class="fa-solid fa-arrow-right"></i>
         </button>
       </form>
@@ -257,7 +262,7 @@
       <div>
         <h2 class="text-lg font-extrabold text-slate-900">Link Your Parent's Account</h2>
         <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-          Enter your Parent's 6-digit Device ID below, or share your Student ID (<strong id="gateStudentOwnId" class="font-mono-code text-emerald-700">000000</strong>) with them.
+          Enter your Parent's 6-digit Device ID below, or share your Student ID (<strong id="gateStudentOwnId" class="font-mono-code text-emerald-700">000000</strong>) with them. You can link up to 2 parents.
         </p>
       </div>
 
@@ -769,7 +774,7 @@
           </div>
           <div>
             <h3 class="text-base font-extrabold text-slate-900">Account & Link Settings</h3>
-            <p class="text-[11px] text-slate-500">Parent & Student profile details, hardware keys & unbonding</p>
+            <p class="text-[11px] text-slate-500">Manage linked parents (up to 2) & device lock</p>
           </div>
         </div>
         <button type="button" onclick="closeModal('modalAccountSettings')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs">
@@ -777,28 +782,36 @@
         </button>
       </div>
 
-      <!-- Parent Details Card -->
-      <div class="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200/80 space-y-2.5">
+      <!-- Parent Details Card (Supports up to 2 Parents) -->
+      <div class="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200/80 space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">Parent Account Details</span>
-          <span id="settingsParentStatusBadge" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">Linked</span>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">Linked Parents (Max 2)</span>
+          <span id="settingsParentStatusBadge" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">0 / 2 Linked</span>
         </div>
-        <div id="settingsParentCardBody" class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3 min-w-0">
-            <div id="settingsParentAvatar" class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-base font-extrabold overflow-hidden shrink-0"></div>
-            <div class="min-w-0">
-              <p id="settingsParentName" class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">—</p>
-              <p id="settingsParentHardware" class="font-mono-code text-[10px] text-slate-500 truncate mt-0.5">HW-0000</p>
-            </div>
-          </div>
-          <div class="text-right shrink-0">
-            <span class="text-[9px] font-bold uppercase text-slate-400 block">Parent ID</span>
-            <div class="flex items-center gap-1.5 mt-0.5">
-              <span id="settingsParentDeviceId" class="font-mono-code text-xs font-extrabold text-indigo-900">000000</span>
-              <button type="button" id="settingsCopyParentIdBtn" class="px-2 py-0.5 rounded-lg bg-white border border-indigo-200 text-[10px] font-bold text-indigo-700 hover:bg-indigo-100">
-                Copy
-              </button>
-            </div>
+
+        <div id="settingsParentsListContainer" class="space-y-2.5"></div>
+
+        <!-- Add Second Parent Box (Shown when only 1 parent is linked) -->
+        <div id="settingsAddSecondParentBox" class="hidden pt-2.5 border-t border-indigo-200/70 space-y-2">
+          <label class="block text-[11px] font-extrabold text-indigo-900">
+            <i class="fa-solid fa-user-plus mr-1"></i>Add Second Parent (6-Digit ID)
+          </label>
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              id="settingsSecondParentInput"
+              maxlength="6"
+              inputmode="numeric"
+              placeholder="e.g. 734910"
+              class="flex-grow px-3 py-2 rounded-xl border border-indigo-200 bg-white font-mono-code text-xs font-extrabold text-slate-900 focus:outline-none focus:border-indigo-600"
+            />
+            <button
+              type="button"
+              onclick="handleAddSecondParentFromSettings()"
+              class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition shrink-0"
+            >
+              Add Parent
+            </button>
           </div>
         </div>
       </div>
@@ -842,16 +855,91 @@
           <i class="fa-solid fa-unlock-keyhole"></i>
           <span>Reset Student Device Hardware Lock</span>
         </button>
+      </div>
+    </div>
+  </div>
 
-        <button
-          type="button"
-          id="settingsUnbondBtn"
-          onclick="handleUnbondRelationship()"
-          class="hidden w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-sm shadow-rose-600/20 transition flex items-center justify-center gap-2"
-        >
-          <i class="fa-solid fa-link-slash"></i>
-          <span id="settingsUnbondBtnText">Unbond from Parent</span>
-        </button>
+  <!-- ===================================================================== -->
+  <!-- MODAL 5: DAILY / WEEKLY / MONTHLY ANALYTICS DASHBOARD MODAL           -->
+  <!-- ===================================================================== -->
+  <div id="modalAnalyticsPopup" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+    <div class="card-surface rounded-3xl max-w-2xl w-full p-5 sm:p-6 my-auto animate-in space-y-5">
+      <!-- Modal Header & Period Switcher -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm shadow-sm">
+            <i class="fa-solid fa-chart-pie"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Study Analytics Dashboard</h3>
+            <p id="analyticsSubtitle" class="text-[11px] text-slate-500">Performance breakdown across topics & tests</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Period Tabs -->
+          <div class="inline-flex p-1 rounded-xl bg-slate-100 text-xs font-extrabold">
+            <button type="button" id="dashPeriodDailyBtn" onclick="switchDashboardPeriod('daily')" class="px-3 py-1.5 rounded-lg bg-white text-emerald-700 shadow-2xs transition">
+              Daily
+            </button>
+            <button type="button" id="dashPeriodWeeklyBtn" onclick="switchDashboardPeriod('weekly')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+              Weekly
+            </button>
+            <button type="button" id="dashPeriodMonthlyBtn" onclick="switchDashboardPeriod('monthly')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+              Monthly
+            </button>
+          </div>
+
+          <button type="button" onclick="closeModal('modalAnalyticsPopup')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 KPI Cards for Selected Period -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block">Topics Covered</span>
+          <p id="dashStatCovered" class="font-mono-code text-xl font-extrabold text-emerald-950 mt-1">0 / 0</p>
+          <span id="dashStatPeriodLabel" class="text-[10px] font-semibold text-emerald-700 block mt-0.5">Today</span>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200/80">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 block">Completion Rate</span>
+          <p id="dashStatRate" class="font-mono-code text-xl font-extrabold text-indigo-950 mt-1">0%</p>
+          <span class="text-[10px] font-semibold text-indigo-700 block mt-0.5">Target efficiency</span>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 block">Tests Taken</span>
+          <p id="dashStatTestsCount" class="font-mono-code text-xl font-extrabold text-amber-950 mt-1">0</p>
+          <span class="text-[10px] font-semibold text-amber-700 block mt-0.5">Completed reports</span>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-100/90 border border-slate-200">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600 block">Test Average</span>
+          <p id="dashStatTestAvg" class="font-mono-code text-xl font-extrabold text-slate-900 mt-1">—</p>
+          <span class="text-[10px] font-semibold text-slate-500 block mt-0.5">Mean score %</span>
+        </div>
+      </div>
+
+      <!-- Subject-Wise Breakdown Bars -->
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Subject-Wise Topic Coverage</h4>
+          <span id="dashSubjectTotalBadge" class="text-[11px] font-bold text-slate-500">0 Subjects</span>
+        </div>
+        <div id="dashSubjectBarsList" class="space-y-2.5 max-h-52 overflow-y-auto soft-scroll pr-1">
+          <p class="text-xs text-slate-400 text-center py-4">No topics recorded in this period.</p>
+        </div>
+      </div>
+
+      <!-- Period Activity Timeline / Trend -->
+      <div class="p-4 rounded-2xl bg-white border border-slate-200/80 space-y-2.5">
+        <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Daily Activity Breakdown</h4>
+        <div id="dashDailyTrendList" class="space-y-2 max-h-44 overflow-y-auto soft-scroll pr-1">
+          <p class="text-xs text-slate-400 text-center py-3">No daily entries for this timeframe.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -861,96 +949,91 @@
   <!-- ===================================================================== -->
   <script>
     // -----------------------------------------------------------------------
-    // 1. SUPABASE CONFIGURATION & SAFE STORAGE LAYER
+    // 1. SUPABASE CONFIGURATION & SAFE FALLBACK ENGINE
     // -----------------------------------------------------------------------
     const SUPABASE_URL = 'https://phwuikndcwrogeairtte.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_22G9HkO4P3dYGVod07uIkg_wI43-36l';
 
-    // Track whether live Supabase network calls are reachable or if running in an isolated preview sandbox
-    let isLocalSandboxMode = false;
-
-    const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false
-      }
-    });
-
-    // Safe localStorage wrapper (prevents SecurityError in restricted iframes)
-    const memoryStorageFallback = {};
+    const memoryStore = {};
     const safeStorage = {
       getItem(key) {
         try {
           return window.localStorage.getItem(key);
         } catch (e) {
-          return Object.prototype.hasOwnProperty.call(memoryStorageFallback, key)
-            ? memoryStorageFallback[key]
-            : null;
+          return memoryStore[key] || null;
         }
       },
-      setItem(key, value) {
+      setItem(key, val) {
         try {
-          window.localStorage.setItem(key, value);
+          window.localStorage.setItem(key, val);
         } catch (e) {
-          memoryStorageFallback[key] = String(value);
+          memoryStore[key] = String(val);
         }
       }
     };
 
-    function getSandboxTable(tableName) {
-      try {
-        const raw = safeStorage.getItem('sb_sandbox_' + tableName);
-        return raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveSandboxTable(tableName, rows) {
-      safeStorage.setItem('sb_sandbox_' + tableName, JSON.stringify(rows));
-    }
-
-    // -----------------------------------------------------------------------
-    // 2. APPLICATION STATE & CONSTANTS
-    // -----------------------------------------------------------------------
-    const KEY_DEVICE_TOKEN = 'studybridge_device_token_v1';
-    const KEY_DEVICE_NUM_ID = 'studybridge_device_num_id_v1';
+    const STORAGE_KEY_HARDWARE_SIG = 'studydomain_hw_sig_v2';
+    const STORAGE_KEY_SANDBOX_DB = 'studydomain_sandbox_db_v2';
 
     const PRESET_AVATARS = [
-      { id: 'grad', icon: 'fa-user-graduate' },
-      { id: 'tie', icon: 'fa-user-tie' },
-      { id: 'astronaut', icon: 'fa-user-astronaut' },
-      { id: 'ninja', icon: 'fa-user-ninja' },
-      { id: 'book', icon: 'fa-book-open-reader' },
-      { id: 'atom', icon: 'fa-atom' }
+      'fa-user-graduate',
+      'fa-user-astronaut',
+      'fa-user-ninja',
+      'fa-user-tie',
+      'fa-user-doctor',
+      'fa-brain',
+      'fa-rocket',
+      'fa-bolt'
     ];
 
     const SUBJECT_COLORS = [
       '#10b981',
-      '#4f46e5',
+      '#6366f1',
       '#f59e0b',
       '#ec4899',
       '#06b6d4',
-      '#8b5cf6'
+      '#8b5cf6',
+      '#ef4444'
     ];
 
-    let detectedDeviceModel = 'Computing SHA-256...';
-    let localDeviceToken = null;
-    let localDeviceNumId = null;
+    let dbClient = null;
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('Supabase client init warning:', err);
+    }
 
+    // -----------------------------------------------------------------------
+    // 2. APPLICATION STATE
+    // -----------------------------------------------------------------------
+    let isLocalSandboxMode = false;
+    let currentDeviceToken = '';
+    let currentDeviceNumberId = '';
+    let currentDeviceModel = '';
     let currentProfile = null;
+
+    // Onboarding state
     let selectedRole = 'student';
-    let selectedAvatarData = 'fa-user-graduate';
-    let selectedSubjectColor = '#10b981';
+    let selectedAvatarValue = 'fa-user-graduate';
     let pendingFoundParent = null;
 
     // Student state
+    let selectedSubjectColor = SUBJECT_COLORS[0];
     let studentPlanTab = 'today';
     let studentSubjects = [];
     let studentTopics = [];
     let studentTests = [];
     let studentNotes = [];
-    let linkedParentProfile = null;
+    let linkedParentProfiles = [];
+    let activeDashboardPeriod = 'daily';
 
     // Single-Student Parent state
     let singleLinkedStudent = null;
@@ -958,130 +1041,179 @@
     let monitoredTopics = [];
     let monitoredTests = [];
     let monitoredNotes = [];
-    let activeRealtimeChannel = null;
-    let backgroundPollTimer = null;
+
+    // Realtime & Polling handles
+    let realtimeChannel = null;
+    let backgroundSyncTimer = null;
 
     // -----------------------------------------------------------------------
-    // 3. DEVICE DETECTION & HARDWARE TOKEN ENGINE
+    // 3. SANDBOX STORAGE HELPERS (Fallback if network blocked)
     // -----------------------------------------------------------------------
-    async function computeUniqueHardwareFingerprint() {
+    function getSandboxDb() {
+      const raw = safeStorage.getItem(STORAGE_KEY_SANDBOX_DB);
+      if (raw) {
+        try {
+          return JSON.parse(raw);
+        } catch (e) {}
+      }
+      const initial = {
+        study_profiles: [],
+        student_subjects: [],
+        study_topics: [],
+        scheduled_tests: [],
+        parent_notes: []
+      };
+      safeStorage.setItem(STORAGE_KEY_SANDBOX_DB, JSON.stringify(initial));
+      return initial;
+    }
+
+    function getSandboxTable(tableName) {
+      const db = getSandboxDb();
+      return Array.isArray(db[tableName]) ? db[tableName] : [];
+    }
+
+    function saveSandboxTable(tableName, rows) {
+      const db = getSandboxDb();
+      db[tableName] = rows;
+      safeStorage.setItem(STORAGE_KEY_SANDBOX_DB, JSON.stringify(db));
+    }
+
+    function isNetworkOrFetchError(err) {
+      if (!err) return false;
+      const msg = String(err.message || err.details || err || '').toLowerCase();
+      return (
+        msg.includes('failed to fetch') ||
+        msg.includes('networkerror') ||
+        msg.includes('load failed') ||
+        msg.includes('cors') ||
+        msg.includes('fetch')
+      );
+    }
+
+    // -----------------------------------------------------------------------
+    // 4. DETERMINISTIC HARDWARE FINGERPRINT & 6-DIGIT DEVICE ID
+    // -----------------------------------------------------------------------
+    async function computeUniqueHardwareSignature() {
+      const cached = safeStorage.getItem(STORAGE_KEY_HARDWARE_SIG);
+      if (cached && cached.startsWith('HW-')) {
+        return cached;
+      }
+
+      const components = [];
       try {
-        const components = [];
+        const nav = window.navigator || {};
+        components.push(nav.platform || '');
+        components.push(String(nav.hardwareConcurrency || ''));
+        components.push(String(nav.deviceMemory || ''));
+        components.push(String(nav.maxTouchPoints || ''));
+        components.push(Intl.DateTimeFormat().resolvedOptions().timeZone || '');
 
-        // 1. WebGL GPU Vendor & Renderer (distinct across laptop models & GPUs)
+        const scr = window.screen || {};
+        components.push(`${scr.width || 0}x${scr.height || 0}x${scr.colorDepth || 0}@${window.devicePixelRatio || 1}`);
+
         try {
           const glCanvas = document.createElement('canvas');
           const gl = glCanvas.getContext('webgl') || glCanvas.getContext('experimental-webgl');
           if (gl) {
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            if (debugInfo) {
-              components.push(gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || '');
-              components.push(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '');
-            }
+            const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+            const vendor = dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
+            const renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+            components.push(`${vendor || ''}|${renderer || ''}`);
           }
         } catch (e) {}
 
-        // 2. Canvas 2D GPU Rasterization Signature
         try {
           const c2d = document.createElement('canvas');
-          c2d.width = 220;
-          c2d.height = 40;
+          c2d.width = 160;
+          c2d.height = 36;
           const ctx = c2d.getContext('2d');
           if (ctx) {
             ctx.textBaseline = 'top';
-            ctx.font = '14px "Plus Jakarta Sans", Arial, sans-serif';
+            ctx.font = '13px monospace';
             ctx.fillStyle = '#059669';
             ctx.fillRect(10, 4, 90, 24);
             ctx.fillStyle = '#4f46e5';
-            ctx.fillText('StudyBridge-HW-Sig', 14, 10);
+            ctx.fillText('StudyDomain-HW-Sig', 14, 10);
             components.push(c2d.toDataURL());
           }
         } catch (e) {}
+      } catch (e) {}
 
-        // 3. Physical Display, CPU Cores, Memory & Timezone
-        components.push(`${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}@${window.devicePixelRatio || 1}`);
-        components.push(`cores:${navigator.hardwareConcurrency || 0}`);
-        components.push(`mem:${navigator.deviceMemory || 0}`);
-        components.push(`lang:${navigator.language || ''}`);
-        components.push(`tz:${Intl.DateTimeFormat().resolvedOptions().timeZone || ''}`);
+      const rawSeed = components.join('||');
+      let hexString = '';
 
-        const rawPayload = components.join('||');
-        if (window.crypto && window.crypto.subtle) {
-          const encoded = new TextEncoder().encode(rawPayload);
-          const hashBuffer = await window.crypto.subtle.digest('SHA-256', encoded);
-          const hex = Array.from(new Uint8Array(hashBuffer))
+      if (window.crypto && window.crypto.subtle) {
+        try {
+          const buf = new TextEncoder().encode(rawSeed);
+          const digest = await window.crypto.subtle.digest('SHA-256', buf);
+          hexString = Array.from(new Uint8Array(digest))
             .map(b => b.toString(16).padStart(2, '0'))
             .join('')
             .toUpperCase();
-          return `HW-${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}`;
-        }
-
-        // Fallback deterministic FNV-1a 48-bit hash if SubtleCrypto is unavailable
-        let h1 = 0x811c9dc5;
-        let h2 = 0x01000193;
-        for (let i = 0; i < rawPayload.length; i++) {
-          const ch = rawPayload.charCodeAt(i);
-          h1 ^= ch;
-          h1 = Math.imul(h1, 0x01000193);
-          h2 ^= ch;
-          h2 = Math.imul(h2, 0x85ebca6b);
-        }
-        const hex1 = (h1 >>> 0).toString(16).padStart(8, '0').toUpperCase();
-        const hex2 = (h2 >>> 0).toString(16).padStart(8, '0').toUpperCase();
-        return `HW-${hex1.slice(0, 4)}-${hex1.slice(4, 8)}-${hex2.slice(0, 4)}`;
-      } catch (e) {
-        return 'HW-0000-0000-0000';
+        } catch (e) {}
       }
-    }
 
-    function generateCryptographicToken() {
-      try {
-        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-          return 'dev_' + window.crypto.randomUUID();
+      if (!hexString || hexString.length < 12) {
+        let h1 = 0xdeadbeef ^ rawSeed.length;
+        let h2 = 0x41c6ce57 ^ rawSeed.length;
+        for (let i = 0; i < rawSeed.length; i++) {
+          const ch = rawSeed.charCodeAt(i);
+          h1 = Math.imul(h1 ^ ch, 2654435761);
+          h2 = Math.imul(h2 ^ ch, 1597334677);
         }
-      } catch (e) {}
-      return 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 12);
+        h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+        h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+        hexString = ((h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0')).toUpperCase();
+      }
+
+      const hwCode = `HW-${hexString.slice(0, 4)}-${hexString.slice(4, 8)}-${hexString.slice(8, 12)}`;
+      safeStorage.setItem(STORAGE_KEY_HARDWARE_SIG, hwCode);
+      return hwCode;
     }
 
-    function deriveDeterministicSixDigitId(hwKey) {
+    function deriveDeterministicSixDigitId(hwCode) {
+      const clean = String(hwCode || 'HW-0000-0000-0000');
       let hash = 2166136261;
-      const str = String(hwKey || 'HW-0000-0000-0000');
-      for (let i = 0; i < str.length; i++) {
-        hash ^= str.charCodeAt(i);
+      for (let i = 0; i < clean.length; i++) {
+        hash ^= clean.charCodeAt(i);
         hash = Math.imul(hash, 16777619);
       }
-      const sixDigit = 100000 + ((hash >>> 0) % 900000);
-      return String(sixDigit);
+      const num = (Math.abs(hash) % 900000) + 100000;
+      return String(num);
     }
 
-    async function ensureLocalDeviceIdentity() {
-      detectedDeviceModel = await computeUniqueHardwareFingerprint();
-      localDeviceToken = safeStorage.getItem(KEY_DEVICE_TOKEN);
+    function getLinkedParentIdsArray(profile) {
+      if (!profile || !profile.linked_parent_id) return [];
+      return String(profile.linked_parent_id)
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .slice(0, 2);
+    }
 
-      // Single permanent 6-digit code per physical device derived from hardware
-      localDeviceNumId = deriveDeterministicSixDigitId(detectedDeviceModel);
-      safeStorage.setItem(KEY_DEVICE_NUM_ID, localDeviceNumId);
+    function formatLinkedParentIdsString(idsArray) {
+      const unique = [...new Set((idsArray || []).map(s => String(s).trim()).filter(Boolean))].slice(0, 2);
+      return unique.length > 0 ? unique.join(',') : null;
+    }
 
-      if (!localDeviceToken) {
-        localDeviceToken = generateCryptographicToken();
-        safeStorage.setItem(KEY_DEVICE_TOKEN, localDeviceToken);
-      }
+    function isStudentLinkedToParent(studentProfile, parentId) {
+      if (!studentProfile || !parentId) return false;
+      return getLinkedParentIdsArray(studentProfile).includes(String(parentId));
     }
 
     // -----------------------------------------------------------------------
-    // 4. VIEW ROUTER & UI UTILITIES
+    // 5. UI, DATE & CLIPBOARD HELPERS
     // -----------------------------------------------------------------------
-    const ALL_VIEW_IDS = [
-      'viewLoading',
-      'viewDeviceLocked',
-      'viewOnboarding',
-      'viewStudentLinkGate',
-      'viewStudentDashboard',
-      'viewParentDashboard'
-    ];
-
     function showView(targetId) {
-      ALL_VIEW_IDS.forEach(id => {
+      const views = [
+        'viewLoading',
+        'viewDeviceLocked',
+        'viewOnboarding',
+        'viewStudentLinkGate',
+        'viewStudentDashboard',
+        'viewParentDashboard'
+      ];
+      views.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         if (id === targetId) {
@@ -1092,14 +1224,20 @@
       });
 
       const settingsBtn = document.getElementById('globalSettingsBtn');
-      const liveBadge = document.getElementById('globalLiveBadge');
+      const dashboardBtn = document.getElementById('globalDashboardBtn');
       const showHeaderControls = Boolean(currentProfile) && (
         targetId === 'viewStudentDashboard' ||
         targetId === 'viewParentDashboard' ||
         targetId === 'viewStudentLinkGate'
       );
       if (settingsBtn) settingsBtn.classList.toggle('hidden', !showHeaderControls);
-      if (liveBadge) liveBadge.classList.toggle('hidden', !showHeaderControls);
+      if (dashboardBtn) {
+        const showDash = Boolean(currentProfile) && (
+          targetId === 'viewStudentDashboard' ||
+          targetId === 'viewParentDashboard'
+        );
+        dashboardBtn.classList.toggle('hidden', !showDash);
+      }
     }
 
     function updateDbConnectionPill(isLive, customText = '') {
@@ -1107,20 +1245,10 @@
       if (!pill) return;
       if (isLive) {
         pill.className = 'px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0';
-        pill.innerHTML = `<i class="fa-solid fa-database mr-1"></i>${escapeHtml(customText || 'Supabase Live')}`;
+        pill.innerHTML = `<i class="fa-solid fa-database mr-1"></i>${escapeHtml(customText || 'Connected')}`;
       } else {
         pill.className = 'px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold shrink-0';
         pill.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>${escapeHtml(customText || 'Offline Mode')}`;
-      }
-    }
-
-    function renderAvatarIntoElement(el, avatarUrl, fallbackIcon = 'fa-user') {
-      if (!el) return;
-      if (avatarUrl && avatarUrl.startsWith('data:image')) {
-        el.innerHTML = `<img src="${avatarUrl}" alt="Avatar" class="w-full h-full object-cover" />`;
-      } else {
-        const iconClass = avatarUrl && avatarUrl.startsWith('fa-') ? avatarUrl : fallbackIcon;
-        el.innerHTML = `<i class="fa-solid ${escapeHtml(iconClass)}"></i>`;
       }
     }
 
@@ -1145,26 +1273,26 @@
 
       if (toastTimer) clearTimeout(toastTimer);
       toastTimer = setTimeout(() => {
-        banner.classList.add('opacity-0', 'translate-y-4');
         banner.classList.remove('opacity-100', 'translate-y-0');
+        banner.classList.add('opacity-0', 'translate-y-4');
       }, 3200);
     }
 
-    function copyTextToClipboard(text) {
-      if (!text) return;
+    function copyTextToClipboard(str) {
+      if (!str) return;
+      const temp = document.createElement('textarea');
+      temp.value = String(str);
+      temp.style.position = 'fixed';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.select();
       try {
-        const tempInput = document.createElement('textarea');
-        tempInput.value = text;
-        tempInput.style.position = 'fixed';
-        tempInput.style.opacity = '0';
-        document.body.appendChild(tempInput);
-        tempInput.select();
         document.execCommand('copy');
-        document.body.removeChild(tempInput);
-        showToast(`Copied ID: ${text}`);
+        showToast(`Copied ID #${str} to clipboard!`);
       } catch (e) {
-        showToast('Could not copy ID.', 'error');
+        showToast('Could not copy automatically.', 'error');
       }
+      document.body.removeChild(temp);
     }
 
     function escapeHtml(str) {
@@ -1177,15 +1305,24 @@
         .replace(/'/g, '&#039;');
     }
 
-    // -----------------------------------------------------------------------
-    // 5. DATE & TIME FORMATTING HELPERS
-    // -----------------------------------------------------------------------
+    function renderAvatarIntoElement(el, avatarVal, fallbackIcon = 'fa-user-graduate') {
+      if (!el) return;
+      const val = avatarVal || fallbackIcon;
+      if (val.startsWith('data:image')) {
+        el.innerHTML = `<img src="${val}" alt="Avatar" class="w-full h-full object-cover" />`;
+      } else {
+        const iconCls = val.startsWith('fa-') ? val : fallbackIcon;
+        el.innerHTML = `<i class="fa-solid ${escapeHtml(iconCls)}"></i>`;
+      }
+    }
+
     function getLocalIsoDate(offsetDays = 0) {
-      const d = new Date(Date.now() + offsetDays * 86400000);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
     }
 
     function getTodayDateString() {
@@ -1196,12 +1333,12 @@
       return getLocalIsoDate(1);
     }
 
-    function formatRelativeTime(isoStr) {
-      if (!isoStr) return 'Just now';
-      const ts = new Date(isoStr).getTime();
-      if (isNaN(ts)) return 'Recently';
-      const diffSec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
-      if (diffSec < 60) return 'Just now';
+    function formatRelativeTime(isoString) {
+      if (!isoString) return 'Never';
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) return 'Unknown';
+      const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (diffSec < 45) return 'Just now';
       const diffMin = Math.floor(diffSec / 60);
       if (diffMin < 60) return `${diffMin}m ago`;
       const diffHr = Math.floor(diffMin / 60);
@@ -1210,11 +1347,11 @@
       return `${diffDays}d ago`;
     }
 
-    function formatDateTimeShort(isoStr) {
-      if (!isoStr) return '';
-      const d = new Date(isoStr);
-      if (isNaN(d.getTime())) return isoStr;
-      return d.toLocaleString(undefined, {
+    function formatDateTimeShort(isoString) {
+      if (!isoString) return '—';
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return isoString;
+      return d.toLocaleString([], {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
@@ -1223,208 +1360,194 @@
     }
 
     // -----------------------------------------------------------------------
-    // 6. BOOT SEQUENCE & DEVICE LOCK VERIFICATION
+    // 6. BOOT & HARDWARE AUTO-LOGIN ENGINE
     // -----------------------------------------------------------------------
     async function bootApplication() {
       showView('viewLoading');
-      await ensureLocalDeviceIdentity();
-      initOnboardingUI();
+
+      currentDeviceModel = await computeUniqueHardwareSignature();
+      currentDeviceNumberId = deriveDeterministicSixDigitId(currentDeviceModel);
+      currentDeviceToken = `TOKEN-${currentDeviceModel}-${currentDeviceNumberId}`;
+
+      if (!dbClient) {
+        isLocalSandboxMode = true;
+        updateDbConnectionPill(false, 'Local Sandbox');
+        bootFromSandboxStorage();
+        return;
+      }
 
       try {
-        // 1. Check if this physical device already has an account by hardware key or 6-digit code
-        let existingProfile = null;
-        const { data: hwProfiles, error: hwErr } = await dbClient
+        const { data: matchedRows, error } = await dbClient
           .from('study_profiles')
           .select('*')
-          .or(`device_model.eq.${detectedDeviceModel},device_number_id.eq.${localDeviceNumId}`)
+          .or(`device_number_id.eq.${currentDeviceNumberId},device_token.eq.${currentDeviceToken},device_model.eq.${currentDeviceModel}`)
           .order('created_at', { ascending: true })
           .limit(1);
 
-        if (hwErr) {
-          throw hwErr;
-        }
-
-        if (hwProfiles && hwProfiles.length > 0) {
-          existingProfile = hwProfiles[0];
-        } else {
-          // Fallback check by stored device_token
-          const { data: tokenProfile, error: tokErr } = await dbClient
-            .from('study_profiles')
-            .select('*')
-            .eq('device_token', localDeviceToken)
-            .maybeSingle();
-
-          if (tokErr) throw tokErr;
-          existingProfile = tokenProfile;
-        }
-
-        // First-time device launch -> show onboarding
-        if (!existingProfile) {
-          updateDbConnectionPill(true);
-          showView('viewOnboarding');
+        if (error) {
+          if (isNetworkOrFetchError(error)) {
+            isLocalSandboxMode = true;
+            updateDbConnectionPill(false, 'Local Sandbox');
+            bootFromSandboxStorage();
+            return;
+          }
+          console.error('Supabase query error:', error);
+          updateDbConnectionPill(false, 'DB Error: Check SQL');
+          mountOnboardingView();
           return;
         }
 
-        // Auto-login: sync local storage identity with this device's existing account
-        localDeviceNumId = existingProfile.device_number_id || localDeviceNumId;
-        safeStorage.setItem(KEY_DEVICE_NUM_ID, localDeviceNumId);
-        if (existingProfile.device_token) {
-          localDeviceToken = existingProfile.device_token;
-          safeStorage.setItem(KEY_DEVICE_TOKEN, localDeviceToken);
+        isLocalSandboxMode = false;
+        updateDbConnectionPill(true, 'Connected');
+
+        const existingProfile = matchedRows && matchedRows.length > 0 ? matchedRows[0] : null;
+        if (!existingProfile) {
+          mountOnboardingView();
+          return;
+        }
+
+        if (
+          existingProfile.role === 'student' &&
+          existingProfile.device_model &&
+          existingProfile.device_model !== currentDeviceModel
+        ) {
+          document.getElementById('lockCurrentDevice').textContent = currentDeviceModel;
+          document.getElementById('lockRegisteredDevice').textContent = existingProfile.device_model;
+          showView('viewDeviceLocked');
+          return;
         }
 
         currentProfile = existingProfile;
-        updateDbConnectionPill(true);
+        currentDeviceNumberId = existingProfile.device_number_id || currentDeviceNumberId;
 
-        // Update last_visit_at and keep hardware key & 6-digit ID synchronized
         await dbClient
           .from('study_profiles')
           .update({
             last_visit_at: new Date().toISOString(),
-            device_model: detectedDeviceModel,
-            device_number_id: localDeviceNumId
+            device_token: currentDeviceToken,
+            device_model: currentDeviceModel
           })
           .eq('id', currentProfile.id);
 
+        setupRealtimeAndBackgroundSync();
+
         if (currentProfile.role === 'parent') {
           await mountParentDashboard();
-        } else if (!currentProfile.linked_parent_id) {
+        } else if (getLinkedParentIdsArray(currentProfile).length === 0) {
           await mountStudentLinkGate();
         } else {
           await mountStudentDashboard();
         }
       } catch (err) {
-        console.warn('Supabase boot check fallback:', err);
-        const msg = (err && err.message) ? err.message : '';
-        if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+        if (isNetworkOrFetchError(err)) {
           isLocalSandboxMode = true;
-          updateDbConnectionPill(false, 'Sandbox Local Mode');
-          bootLocalSandboxFallback();
-        } else {
-          updateDbConnectionPill(false, 'DB Error: Check SQL');
-          showView('viewOnboarding');
+          updateDbConnectionPill(false, 'Local Sandbox');
+          bootFromSandboxStorage();
+          return;
         }
+        console.error('Boot error:', err);
+        mountOnboardingView();
       }
     }
 
-    function retryBootSequence() {
-      bootApplication();
-    }
-
-    function bootLocalSandboxFallback() {
-      const localProfiles = getSandboxTable('study_profiles');
-      const existing = localProfiles.find(
-        p => p.device_model === detectedDeviceModel || p.device_number_id === localDeviceNumId || p.device_token === localDeviceToken
+    function bootFromSandboxStorage() {
+      const profiles = getSandboxTable('study_profiles');
+      const existing = profiles.find(
+        p =>
+          p.device_number_id === currentDeviceNumberId ||
+          p.device_token === currentDeviceToken ||
+          p.device_model === currentDeviceModel
       );
+
       if (!existing) {
-        showView('viewOnboarding');
+        mountOnboardingView();
         return;
       }
+
       currentProfile = existing;
       if (currentProfile.role === 'parent') {
         mountParentDashboard();
-      } else if (!currentProfile.linked_parent_id) {
+      } else if (getLinkedParentIdsArray(currentProfile).length === 0) {
         mountStudentLinkGate();
       } else {
         mountStudentDashboard();
       }
     }
 
-    function mountStudentColorDots() {
-      const container = document.getElementById('subjectColorPicker');
-      if (!container) return;
-      container.innerHTML = '';
-      SUBJECT_COLORS.forEach(hex => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `w-5 h-5 rounded-full transition transform ${selectedSubjectColor === hex ? 'scale-125 ring-2 ring-offset-1 ring-slate-400' : 'opacity-75 hover:opacity-100'}`;
-        btn.style.backgroundColor = hex;
-        btn.onclick = () => {
-          selectedSubjectColor = hex;
-          mountStudentColorDots();
-        };
-        container.appendChild(btn);
-      });
-    }
-
     // -----------------------------------------------------------------------
-    // 7. ONBOARDING & ACCOUNT REGISTRATION
+    // 7. FIRST-TIME ONBOARDING & REGISTRATION
     // -----------------------------------------------------------------------
-    function initOnboardingUI() {
-      const idBadge = document.getElementById('onboardDeviceIdBadge');
-      const modelEl = document.getElementById('onboardDeviceModel');
-      if (idBadge) idBadge.textContent = `#${localDeviceNumId}`;
-      if (modelEl) modelEl.textContent = detectedDeviceModel;
-
-      const presetsRow = document.getElementById('presetAvatarsRow');
-      if (presetsRow) {
-        presetsRow.innerHTML = '';
-        PRESET_AVATARS.forEach((av, idx) => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = `w-8 h-8 rounded-xl border text-xs flex items-center justify-center transition ${
-            selectedAvatarData === av.icon
-              ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-          }`;
-          btn.innerHTML = `<i class="fa-solid ${av.icon}"></i>`;
-          btn.onclick = () => {
-            selectedAvatarData = av.icon;
-            updateOnboardingAvatarPreview();
-            initOnboardingUI();
-          };
-          presetsRow.appendChild(btn);
-        });
-      }
-      updateOnboardingAvatarPreview();
-    }
-
-    function updateOnboardingAvatarPreview() {
-      const preview = document.getElementById('onboardAvatarPreview');
-      if (!preview) return;
-      if (selectedAvatarData && selectedAvatarData.startsWith('data:image')) {
-        preview.innerHTML = `<img src="${selectedAvatarData}" alt="Avatar" class="w-full h-full object-cover" />`;
-      } else {
-        const iconClass = selectedAvatarData || 'fa-user-graduate';
-        preview.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
-      }
+    function mountOnboardingView() {
+      document.getElementById('onboardDeviceModel').textContent = currentDeviceModel;
+      document.getElementById('onboardDeviceIdBadge').textContent = `#${currentDeviceNumberId}`;
+      selectOnboardingRole('student');
+      renderPresetAvatars();
+      showView('viewOnboarding');
     }
 
     function selectOnboardingRole(role) {
       selectedRole = role;
-      const btnStu = document.getElementById('roleBtnStudent');
-      const btnPar = document.getElementById('roleBtnParent');
+      const stuBtn = document.getElementById('roleBtnStudent');
+      const parBtn = document.getElementById('roleBtnParent');
+
       if (role === 'student') {
-        btnStu.className = 'p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 text-left transition relative';
-        btnPar.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
+        stuBtn.className = 'p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 text-left transition relative';
+        parBtn.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
+        if (selectedAvatarValue === 'fa-user-tie') {
+          selectedAvatarValue = 'fa-user-graduate';
+          updateOnboardingAvatarPreview();
+        }
       } else {
-        btnPar.className = 'p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50/60 text-left transition relative';
-        btnStu.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
+        parBtn.className = 'p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50/60 text-left transition relative';
+        stuBtn.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
+        if (selectedAvatarValue === 'fa-user-graduate') {
+          selectedAvatarValue = 'fa-user-tie';
+          updateOnboardingAvatarPreview();
+        }
       }
+    }
+
+    function renderPresetAvatars() {
+      const container = document.getElementById('presetAvatarsRow');
+      if (!container) return;
+      container.innerHTML = PRESET_AVATARS.map(icon => `
+        <button
+          type="button"
+          onclick="selectPresetAvatar('${icon}')"
+          class="w-8 h-8 rounded-xl border ${selectedAvatarValue === icon ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600'} flex items-center justify-center text-xs transition"
+        >
+          <i class="fa-solid ${icon}"></i>
+        </button>
+      `).join('');
+    }
+
+    function selectPresetAvatar(icon) {
+      selectedAvatarValue = icon;
+      updateOnboardingAvatarPreview();
+      renderPresetAvatars();
+    }
+
+    function updateOnboardingAvatarPreview() {
+      const preview = document.getElementById('onboardAvatarPreview');
+      renderAvatarIntoElement(preview, selectedAvatarValue);
     }
 
     function handleAvatarUpload(event) {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = e => {
+      reader.onload = function (e) {
         const img = new Image();
-        img.onload = () => {
+        img.onload = function () {
           const canvas = document.createElement('canvas');
-          const MAX = 160;
-          let w = img.width;
-          let h = img.height;
-          if (w > h) {
-            if (w > MAX) { h *= MAX / w; w = MAX; }
-          } else {
-            if (h > MAX) { w *= MAX / h; h = MAX; }
-          }
-          canvas.width = w;
-          canvas.height = h;
+          const size = 96;
+          canvas.width = size;
+          canvas.height = size;
           const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          selectedAvatarData = canvas.toDataURL('image/jpeg', 0.78);
+          ctx.drawImage(img, 0, 0, size, size);
+          selectedAvatarValue = canvas.toDataURL('image/jpeg', 0.78);
           updateOnboardingAvatarPreview();
+          renderPresetAvatars();
         };
         img.src = e.target.result;
       };
@@ -1433,22 +1556,20 @@
 
     async function handleRegisterProfile(event) {
       event.preventDefault();
-      const nameVal = document.getElementById('onboardNameInput').value.trim();
-      if (!nameVal) {
-        showToast('Please enter your full name.', 'error');
-        return;
-      }
-
+      const nameInput = document.getElementById('onboardNameInput');
       const submitBtn = document.getElementById('onboardSubmitBtn');
+      const cleanName = (nameInput.value || '').trim();
+      if (!cleanName) return;
+
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Binding Hardware...</span>';
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Registering Device...</span>';
 
       const payload = {
-        device_number_id: localDeviceNumId,
-        device_token: localDeviceToken,
-        device_model: detectedDeviceModel,
-        name: nameVal,
-        avatar_url: selectedAvatarData || (selectedRole === 'parent' ? 'fa-user-tie' : 'fa-user-graduate'),
+        device_number_id: currentDeviceNumberId,
+        device_token: currentDeviceToken,
+        device_model: currentDeviceModel,
+        name: cleanName,
+        avatar_url: selectedAvatarValue,
         role: selectedRole,
         linked_parent_id: null,
         last_visit_at: new Date().toISOString()
@@ -1457,19 +1578,20 @@
       try {
         if (isLocalSandboxMode) {
           const profiles = getSandboxTable('study_profiles');
-          const created = { id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() };
+          const created = { ...payload, id: 'loc_' + Date.now(), created_at: new Date().toISOString() };
           profiles.push(created);
           saveSandboxTable('study_profiles', profiles);
           currentProfile = created;
         } else {
           const { data, error } = await dbClient
             .from('study_profiles')
-            .insert([payload])
+            .upsert(payload, { onConflict: 'device_number_id' })
             .select()
             .single();
 
           if (error) throw error;
           currentProfile = data;
+          setupRealtimeAndBackgroundSync();
         }
 
         showToast(`Welcome, ${currentProfile.name}! Device bound.`);
@@ -1483,7 +1605,7 @@
         showToast(err.message || 'Could not save profile. Check Supabase SQL.', 'error');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Continue to StudyBridge</span><i class="fa-solid fa-arrow-right"></i>';
+        submitBtn.innerHTML = '<span>Continue to Study Domain</span><i class="fa-solid fa-arrow-right"></i>';
       }
     }
 
@@ -1491,19 +1613,22 @@
     // 8. STUDENT -> PARENT LINKING GATE
     // -----------------------------------------------------------------------
     async function mountStudentLinkGate() {
-      showView('viewStudentLinkGate');
+      pendingFoundParent = null;
       document.getElementById('gateStudentOwnId').textContent = currentProfile.device_number_id;
+      document.getElementById('parentSearchIdInput').value = '';
+      document.getElementById('parentLookupPreview').classList.add('hidden');
+      showView('viewStudentLinkGate');
     }
 
     async function handleLookupParentById(rawInput) {
-      const cleanId = (rawInput || '').replace(/\D/g, '').slice(0, 6);
+      const cleanDigits = String(rawInput || '').replace(/\D/g, '').slice(0, 6);
       const inputEl = document.getElementById('parentSearchIdInput');
-      if (inputEl && inputEl.value !== cleanId) {
-        inputEl.value = cleanId;
+      if (inputEl && inputEl.value !== cleanDigits) {
+        inputEl.value = cleanDigits;
       }
 
       const previewBox = document.getElementById('parentLookupPreview');
-      if (cleanId.length < 6) {
+      if (cleanDigits.length < 6) {
         pendingFoundParent = null;
         previewBox.classList.add('hidden');
         return;
@@ -1513,16 +1638,15 @@
         let foundParent = null;
         if (isLocalSandboxMode) {
           foundParent = getSandboxTable('study_profiles').find(
-            p => p.device_number_id === cleanId && p.role === 'parent'
+            p => p.device_number_id === cleanDigits && p.role === 'parent'
           );
         } else {
           const { data, error } = await dbClient
             .from('study_profiles')
             .select('*')
-            .eq('device_number_id', cleanId)
+            .eq('device_number_id', cleanDigits)
             .eq('role', 'parent')
             .maybeSingle();
-
           if (error) throw error;
           foundParent = data;
         }
@@ -1530,18 +1654,18 @@
         if (!foundParent) {
           pendingFoundParent = null;
           previewBox.classList.add('hidden');
-          showToast('No Parent account found with that 6-digit ID.', 'error');
+          showToast(`No Parent found with ID #${cleanDigits}`, 'error');
           return;
         }
 
         pendingFoundParent = foundParent;
         renderAvatarIntoElement(document.getElementById('lookupParentAvatar'), foundParent.avatar_url, 'fa-user-tie');
         document.getElementById('lookupParentName').textContent = foundParent.name;
-        document.getElementById('lookupParentDevice').textContent = foundParent.device_model || 'Verified Parent Hardware';
+        document.getElementById('lookupParentDevice').textContent = foundParent.device_model || 'Verified Parent';
         previewBox.classList.remove('hidden');
       } catch (err) {
         console.error('Parent lookup error:', err);
-        showToast('Search failed. Verify connection.', 'error');
+        showToast('Error searching for Parent ID.', 'error');
       }
     }
 
@@ -1551,18 +1675,31 @@
       btn.disabled = true;
 
       try {
+        const existingIds = getLinkedParentIdsArray(currentProfile);
+        if (existingIds.includes(pendingFoundParent.id)) {
+          showToast('This parent is already linked.', 'info');
+          await mountStudentDashboard();
+          return;
+        }
+        if (existingIds.length >= 2) {
+          showToast('Maximum 2 parents can be linked.', 'error');
+          return;
+        }
+
+        const nextLinkedStr = formatLinkedParentIdsString([...existingIds, pendingFoundParent.id]);
+
         if (isLocalSandboxMode) {
           const profiles = getSandboxTable('study_profiles');
           const idx = profiles.findIndex(p => p.id === currentProfile.id);
           if (idx !== -1) {
-            profiles[idx].linked_parent_id = pendingFoundParent.id;
+            profiles[idx].linked_parent_id = nextLinkedStr;
             saveSandboxTable('study_profiles', profiles);
             currentProfile = profiles[idx];
           }
         } else {
           const { data, error } = await dbClient
             .from('study_profiles')
-            .update({ linked_parent_id: pendingFoundParent.id })
+            .update({ linked_parent_id: nextLinkedStr })
             .eq('id', currentProfile.id)
             .select()
             .single();
@@ -1596,7 +1733,7 @@
           if (data) currentProfile = data;
         }
 
-        if (currentProfile.linked_parent_id) {
+        if (getLinkedParentIdsArray(currentProfile).length > 0) {
           showToast('Parent link verified!');
           await mountStudentDashboard();
         } else {
@@ -1610,6 +1747,30 @@
     // -----------------------------------------------------------------------
     // 9. STUDENT DASHBOARD LOGIC
     // -----------------------------------------------------------------------
+    function mountStudentColorDots() {
+      const picker = document.getElementById('subjectColorPicker');
+      if (!picker) return;
+      picker.innerHTML = SUBJECT_COLORS.map(hex => `
+        <button
+          type="button"
+          onclick="selectSubjectColor('${hex}')"
+          class="w-5 h-5 rounded-full transition transform ${selectedSubjectColor === hex ? 'scale-125 ring-2 ring-offset-1 ring-slate-900' : 'opacity-70 hover:opacity-100'}"
+          style="background-color: ${hex};"
+        ></button>
+      `).join('');
+    }
+
+    function selectSubjectColor(hex) {
+      selectedSubjectColor = hex;
+      mountStudentColorDots();
+    }
+
+    async function mountStudentDashboard() {
+      mountStudentColorDots();
+      showView('viewStudentDashboard');
+      await loadStudentDashboardData(false);
+    }
+
     async function loadStudentDashboardData(manualRefresh = false) {
       const syncIcon = document.getElementById('stuSyncIcon');
       if (syncIcon) syncIcon.classList.add('fa-spin');
@@ -1617,14 +1778,16 @@
       try {
         if (isLocalSandboxMode) {
           const profiles = getSandboxTable('study_profiles');
-          linkedParentProfile = profiles.find(p => p.id === currentProfile.linked_parent_id) || null;
+          const latestSelf = profiles.find(p => p.id === currentProfile.id);
+          if (latestSelf) currentProfile = latestSelf;
+          const parentIds = getLinkedParentIdsArray(currentProfile);
+          linkedParentProfiles = profiles.filter(p => parentIds.includes(p.id));
 
           studentSubjects = getSandboxTable('student_subjects').filter(s => s.student_id === currentProfile.id);
           studentTopics = getSandboxTable('study_topics').filter(t => t.student_id === currentProfile.id);
           studentTests = getSandboxTable('scheduled_tests').filter(t => t.student_id === currentProfile.id);
           studentNotes = getSandboxTable('parent_notes').filter(n => n.student_id === currentProfile.id);
 
-          // Mark unseen notes as seen
           const allNotes = getSandboxTable('parent_notes');
           let changed = false;
           allNotes.forEach(n => {
@@ -1636,22 +1799,23 @@
           });
           if (changed) saveSandboxTable('parent_notes', allNotes);
         } else {
-          // Heartbeat update
-          await dbClient
+          const { data: freshSelf } = await dbClient
             .from('study_profiles')
             .update({ last_visit_at: new Date().toISOString() })
-            .eq('id', currentProfile.id);
+            .eq('id', currentProfile.id)
+            .select()
+            .maybeSingle();
+          if (freshSelf) currentProfile = freshSelf;
 
-          // Fetch linked parent full profile
-          if (currentProfile.linked_parent_id) {
-            const { data: parentData } = await dbClient
+          const parentIds = getLinkedParentIdsArray(currentProfile);
+          if (parentIds.length > 0) {
+            const { data: parentsData } = await dbClient
               .from('study_profiles')
               .select('*')
-              .eq('id', currentProfile.linked_parent_id)
-              .maybeSingle();
-            linkedParentProfile = parentData || null;
+              .in('id', parentIds);
+            linkedParentProfiles = parentsData || [];
           } else {
-            linkedParentProfile = null;
+            linkedParentProfiles = [];
           }
 
           const [subjRes, topicsRes, testsRes, notesRes] = await Promise.all([
@@ -1666,7 +1830,6 @@
           studentTests = testsRes.data || [];
           studentNotes = notesRes.data || [];
 
-          // Mark unseen parent messages as seen with timestamp
           const unseenIds = studentNotes.filter(n => !n.is_seen).map(n => n.id);
           if (unseenIds.length > 0) {
             const nowIso = new Date().toISOString();
@@ -1688,7 +1851,12 @@
         renderStudentTests();
         renderStudentMessages();
 
-        if (manualRefresh) showToast('Dashboard synced with Supabase.');
+        const dashModal = document.getElementById('modalAnalyticsPopup');
+        if (dashModal && !dashModal.classList.contains('hidden')) {
+          renderAnalyticsPopupData();
+        }
+
+        if (manualRefresh) showToast('Dashboard synced.');
       } catch (err) {
         console.error('Student dashboard load error:', err);
         showToast('Sync error while loading data.', 'error');
@@ -1698,101 +1866,116 @@
     }
 
     function renderStudentSubjects() {
+      const countEl = document.getElementById('stuSubjectCount');
       const listEl = document.getElementById('stuSubjectsList');
       const selectEl = document.getElementById('topicSubjectSelect');
-      const countEl = document.getElementById('stuSubjectCount');
+      if (!listEl || !selectEl) return;
 
-      if (countEl) countEl.textContent = `${studentSubjects.length} Total`;
+      countEl.textContent = `${studentSubjects.length} Total`;
 
-      if (selectEl) {
-        const prevVal = selectEl.value;
-        selectEl.innerHTML = '<option value="">Select Subject...</option>';
-        studentSubjects.forEach(s => {
-          const opt = document.createElement('option');
-          opt.value = s.id;
-          opt.textContent = s.subject_name;
-          selectEl.appendChild(opt);
-        });
-        if (prevVal) selectEl.value = prevVal;
+      const currentVal = selectEl.value;
+      selectEl.innerHTML = '<option value="">Select Subject...</option>' +
+        studentSubjects.map(s => `<option value="${s.id}">${escapeHtml(s.subject_name)}</option>`).join('');
+      if (currentVal && studentSubjects.some(s => s.id === currentVal)) {
+        selectEl.value = currentVal;
       }
 
-      if (!listEl) return;
       if (studentSubjects.length === 0) {
-        listEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Add your subjects above to begin planning.</p>';
+        listEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Add your subjects above to start logging daily topics.</p>';
         return;
       }
 
-      listEl.innerHTML = studentSubjects
-        .map(s => `
-          <div class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+      listEl.innerHTML = studentSubjects.map(subj => {
+        const subjTopics = studentTopics.filter(t => t.subject_id === subj.id);
+        const doneCount = subjTopics.filter(t => t.is_completed).length;
+        return `
+          <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2.5 min-w-0">
-              <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${escapeHtml(s.color_hex || '#10b981')};"></span>
-              <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(s.subject_name)}</span>
+              <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${escapeHtml(subj.color_hex || '#10b981')};"></span>
+              <div class="min-w-0">
+                <p class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(subj.subject_name)}</p>
+                <p class="text-[10px] text-slate-500 font-semibold">${doneCount}/${subjTopics.length} topics completed</p>
+              </div>
             </div>
-            <button type="button" onclick="handleDeleteSubject('${s.id}')" class="w-7 h-7 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition" title="Remove Subject">
-              <i class="fa-solid fa-trash-can text-[11px]"></i>
+            <button
+              type="button"
+              onclick="handleDeleteSubject('${subj.id}')"
+              class="w-7 h-7 rounded-lg hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition text-xs shrink-0"
+              title="Delete Subject"
+            >
+              <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
-        `)
-        .join('');
+        `;
+      }).join('');
     }
 
     async function handleAddSubject(event) {
       event.preventDefault();
-      const input = document.getElementById('newSubjectNameInput');
-      const name = input.value.trim();
-      if (!name) return;
-
-      const payload = {
-        student_id: currentProfile.id,
-        subject_name: name,
-        color_hex: selectedSubjectColor
-      };
+      const inputEl = document.getElementById('newSubjectNameInput');
+      const cleanName = (inputEl.value || '').trim();
+      if (!cleanName || !currentProfile) return;
 
       try {
         if (isLocalSandboxMode) {
-          const table = getSandboxTable('student_subjects');
-          table.push({ id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() });
-          saveSandboxTable('student_subjects', table);
+          const all = getSandboxTable('student_subjects');
+          all.push({
+            id: 'subj_' + Date.now(),
+            student_id: currentProfile.id,
+            subject_name: cleanName,
+            color_hex: selectedSubjectColor,
+            created_at: new Date().toISOString()
+          });
+          saveSandboxTable('student_subjects', all);
         } else {
-          const { error } = await dbClient.from('student_subjects').insert([payload]);
+          const { error } = await dbClient.from('student_subjects').insert({
+            student_id: currentProfile.id,
+            subject_name: cleanName,
+            color_hex: selectedSubjectColor
+          });
           if (error) throw error;
         }
-        input.value = '';
-        showToast(`Subject "${name}" added.`);
+
+        inputEl.value = '';
+        showToast(`Subject "${cleanName}" added!`);
         await loadStudentDashboardData(false);
       } catch (err) {
         showToast('Could not add subject.', 'error');
       }
     }
 
-    async function handleDeleteSubject(subjectId) {
-      try {
-        if (isLocalSandboxMode) {
-          saveSandboxTable('student_subjects', getSandboxTable('student_subjects').filter(s => s.id !== subjectId));
-          saveSandboxTable('study_topics', getSandboxTable('study_topics').filter(t => t.subject_id !== subjectId));
-        } else {
-          const { error } = await dbClient.from('student_subjects').delete().eq('id', subjectId);
-          if (error) throw error;
+    function handleDeleteSubject(subjectId) {
+      openConfirmModal(
+        'Remove Subject?',
+        'Deleting this subject will also delete all daily topics logged under it.',
+        async () => {
+          try {
+            if (isLocalSandboxMode) {
+              saveSandboxTable('student_subjects', getSandboxTable('student_subjects').filter(s => s.id !== subjectId));
+              saveSandboxTable('study_topics', getSandboxTable('study_topics').filter(t => t.subject_id !== subjectId));
+            } else {
+              await dbClient.from('student_subjects').delete().eq('id', subjectId);
+            }
+            showToast('Subject deleted.');
+            await loadStudentDashboardData(false);
+          } catch (e) {
+            showToast('Could not delete subject.', 'error');
+          }
         }
-        showToast('Subject removed.');
-        await loadStudentDashboardData(false);
-      } catch (err) {
-        showToast('Could not remove subject.', 'error');
-      }
+      );
     }
 
     function switchStudentPlanTab(tab) {
       studentPlanTab = tab;
       const todayBtn = document.getElementById('stuTabTodayBtn');
       const tmrBtn = document.getElementById('stuTabTomorrowBtn');
-      const historyBtn = document.getElementById('stuTabHistoryBtn');
+      const histBtn = document.getElementById('stuTabHistoryBtn');
       const daySelect = document.getElementById('topicDaySelect');
 
       const inactiveCls = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
       if (todayBtn) todayBtn.className = tab === 'today' ? 'px-3.5 py-1.5 rounded-xl bg-white text-emerald-700 shadow-xs transition' : inactiveCls;
       if (tmrBtn) tmrBtn.className = tab === 'tomorrow' ? 'px-3.5 py-1.5 rounded-xl bg-white text-indigo-700 shadow-xs transition' : inactiveCls;
-      if (historyBtn) historyBtn.className = tab === 'history' ? 'px-3.5 py-1.5 rounded-xl bg-white text-slate-900 shadow-xs transition' : inactiveCls;
+      if (histBtn) histBtn.className = tab === 'history' ? 'px-3.5 py-1.5 rounded-xl bg-white text-slate-900 shadow-xs transition' : inactiveCls;
 
       if (daySelect && (tab === 'today' || tab === 'tomorrow')) {
         daySelect.value = tab;
@@ -1800,183 +1983,154 @@
       renderStudentTopics();
     }
 
-    async function handleAddTopic(event) {
-      event.preventDefault();
-      const subjectId = document.getElementById('topicSubjectSelect').value;
-      const titleInput = document.getElementById('topicTitleInput');
-      const dayVal = document.getElementById('topicDaySelect').value;
-      const title = titleInput.value.trim();
-
-      if (!subjectId) {
-        showToast('Please select or add a subject first.', 'error');
-        return;
-      }
-      if (!title) return;
-
-      const targetDate = dayVal === 'tomorrow' ? getTomorrowDateString() : getTodayDateString();
-      const payload = {
-        student_id: currentProfile.id,
-        subject_id: subjectId,
-        topic_title: title,
-        target_date: targetDate,
-        is_completed: false
-      };
-
-      try {
-        if (isLocalSandboxMode) {
-          const table = getSandboxTable('study_topics');
-          table.push({ id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() });
-          saveSandboxTable('study_topics', table);
-        } else {
-          const { error } = await dbClient.from('study_topics').insert([payload]);
-          if (error) throw error;
-        }
-        titleInput.value = '';
-        showToast(`Topic queued for ${dayVal === 'tomorrow' ? 'Tomorrow' : 'Today'}.`);
-        await loadStudentDashboardData(false);
-      } catch (err) {
-        showToast('Could not save topic.', 'error');
-      }
-    }
-
     function renderStudentTopics() {
       const container = document.getElementById('stuTopicsContainer');
-      const progressWrap = document.getElementById('stuTodayProgressWrap');
+      const progressText = document.getElementById('stuProgressText');
+      const progressBar = document.getElementById('stuProgressBar');
+      if (!container) return;
+
       const todayStr = getTodayDateString();
       const tomorrowStr = getTomorrowDateString();
-
-      const todayTopics = studentTopics.filter(t => t.target_date === todayStr);
-      const completedCount = todayTopics.filter(t => t.is_completed).length;
-      const pct = todayTopics.length > 0 ? Math.round((completedCount / todayTopics.length) * 100) : 0;
-
-      document.getElementById('stuProgressText').textContent = `${completedCount} / ${todayTopics.length} Covered (${pct}%)`;
-      document.getElementById('stuProgressBar').style.width = `${pct}%`;
-
-      if (progressWrap) {
-        progressWrap.classList.toggle('hidden', studentPlanTab !== 'today');
-      }
-
       const subjectMap = new Map(studentSubjects.map(s => [s.id, s]));
 
+      const todayTopics = studentTopics.filter(t => t.target_date === todayStr);
+      const todayDone = todayTopics.filter(t => t.is_completed).length;
+      const pct = todayTopics.length > 0 ? Math.round((todayDone / todayTopics.length) * 100) : 0;
+
+      if (progressText) progressText.textContent = `${todayDone} / ${todayTopics.length} Covered (${pct}%)`;
+      if (progressBar) progressBar.style.width = `${pct}%`;
+
       if (studentPlanTab === 'history') {
-        const pastTopics = studentTopics.filter(t => t.target_date < todayStr);
+        const pastTopics = studentTopics
+          .filter(t => t.target_date < todayStr)
+          .sort((a, b) => b.target_date.localeCompare(a.target_date));
+
         if (pastTopics.length === 0) {
-          container.innerHTML = '<p class="text-xs text-slate-400 text-center py-8">No past study records yet. Completed & past days appear here automatically.</p>';
+          container.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">No past daily study records before today yet.</p>';
           return;
         }
-        const grouped = {};
-        pastTopics.forEach(t => {
-          if (!grouped[t.target_date]) grouped[t.target_date] = [];
-          grouped[t.target_date].push(t);
-        });
-        const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
-        container.innerHTML = sortedDates.map(dateKey => {
-          const items = grouped[dateKey];
-          const done = items.filter(i => i.is_completed).length;
+
+        container.innerHTML = pastTopics.map(topic => {
+          const subj = subjectMap.get(topic.subject_id);
           return `
-            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="font-mono-code text-xs font-extrabold text-slate-800">${escapeHtml(dateKey)}</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${done === items.length ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                  ${done} / ${items.length} Covered
-                </span>
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono-code text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700">${escapeHtml(topic.target_date)}</span>
+                  <span class="text-[10px] font-extrabold uppercase" style="color: ${escapeHtml(subj ? subj.color_hex : '#64748b')};">${escapeHtml(subj ? subj.subject_name : 'Subject')}</span>
+                </div>
+                <p class="text-xs font-bold text-slate-800 mt-1 truncate">${escapeHtml(topic.topic_title)}</p>
               </div>
-              <div class="space-y-1.5">
-                ${items.map(item => {
-                  const subj = subjectMap.get(item.subject_id) || { subject_name: 'General', color_hex: '#10b981' };
-                  return `
-                    <div class="flex items-center justify-between gap-2 text-xs bg-white px-3 py-2 rounded-xl border border-slate-100">
-                      <div class="flex items-center gap-2 min-w-0">
-                        <i class="fa-solid ${item.is_completed ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-400'} shrink-0"></i>
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold text-white shrink-0" style="background-color: ${escapeHtml(subj.color_hex)};">${escapeHtml(subj.subject_name)}</span>
-                        <span class="font-bold text-slate-800 truncate">${escapeHtml(item.topic_title)}</span>
-                      </div>
-                      <span class="text-[10px] font-bold shrink-0 ${item.is_completed ? 'text-emerald-700' : 'text-rose-600'}">${item.is_completed ? 'Done' : 'Missed'}</span>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold shrink-0 ${topic.is_completed ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">
+                ${topic.is_completed ? 'Covered' : 'Missed'}
+              </span>
             </div>
           `;
         }).join('');
         return;
       }
 
-      const activeList = studentPlanTab === 'today'
-        ? todayTopics
-        : studentTopics.filter(t => t.target_date === tomorrowStr);
+      const targetDate = studentPlanTab === 'tomorrow' ? tomorrowStr : todayStr;
+      const filtered = studentTopics.filter(t => t.target_date === targetDate);
 
-      if (activeList.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No topics scheduled for ${studentPlanTab === 'today' ? 'Today' : 'Tomorrow'} yet.</p>`;
+      if (filtered.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No topics queued for ${studentPlanTab === 'tomorrow' ? 'tomorrow' : 'today'} yet.</p>`;
         return;
       }
 
-      container.innerHTML = activeList
-        .map(topic => {
-          const subj = subjectMap.get(topic.subject_id) || { subject_name: 'General', color_hex: '#10b981' };
-          const isToday = topic.target_date === todayStr;
-
-          return `
-            <div class="flex items-center justify-between gap-3 p-3.5 rounded-2xl border ${
-              topic.is_completed ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200'
-            } transition">
-              <div class="flex items-center gap-3 min-w-0">
-                ${
-                  isToday
-                    ? `<button type="button" onclick="handleToggleTopicComplete('${topic.id}', ${!topic.is_completed})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition shrink-0 ${
-                        topic.is_completed
-                          ? 'bg-emerald-600 border-emerald-600 text-white'
-                          : 'border-slate-300 hover:border-emerald-500 bg-white'
-                      }">
-                        ${topic.is_completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
-                      </button>`
-                    : `<div class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-[11px] shrink-0" title="Unlocks tomorrow">
-                        <i class="fa-regular fa-clock"></i>
-                      </div>`
-                }
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold text-white" style="background-color: ${escapeHtml(subj.color_hex)};">
-                      ${escapeHtml(subj.subject_name)}
-                    </span>
-                    ${
-                      topic.is_completed
-                        ? '<span class="text-[10px] font-bold text-emerald-700">Covered</span>'
-                        : !isToday
-                        ? '<span class="text-[10px] font-bold text-indigo-600">Queued for Tomorrow</span>'
-                        : ''
-                    }
-                  </div>
-                  <p class="text-xs sm:text-sm font-bold mt-1 truncate ${
-                    topic.is_completed ? 'line-through text-slate-400' : 'text-slate-900'
-                  }">${escapeHtml(topic.topic_title)}</p>
-                </div>
+      container.innerHTML = filtered.map(topic => {
+        const subj = subjectMap.get(topic.subject_id);
+        const color = subj ? subj.color_hex : '#10b981';
+        return `
+          <div class="p-3.5 rounded-2xl border ${topic.is_completed ? 'bg-emerald-50/40 border-emerald-200' : 'bg-white border-slate-200'} flex items-center justify-between gap-3 transition">
+            <label class="flex items-center gap-3 min-w-0 cursor-pointer flex-grow">
+              <input
+                type="checkbox"
+                ${topic.is_completed ? 'checked' : ''}
+                onchange="handleToggleTopicCompletion('${topic.id}', this.checked)"
+                class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+              />
+              <div class="min-w-0">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider block" style="color: ${escapeHtml(color)};">
+                  ${escapeHtml(subj ? subj.subject_name : 'Subject')}
+                </span>
+                <p class="text-xs font-bold ${topic.is_completed ? 'line-through text-slate-400' : 'text-slate-900'} truncate">
+                  ${escapeHtml(topic.topic_title)}
+                </p>
               </div>
-
-              <button type="button" onclick="handleDeleteTopic('${topic.id}')" class="w-8 h-8 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition shrink-0">
-                <i class="fa-solid fa-xmark text-xs"></i>
-              </button>
-            </div>
-          `;
-        })
-        .join('');
+            </label>
+            <button
+              type="button"
+              onclick="handleDeleteTopic('${topic.id}')"
+              class="w-7 h-7 rounded-lg hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition text-xs shrink-0"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
     }
 
-    async function handleToggleTopicComplete(topicId, nextState) {
-      const completedAt = nextState ? new Date().toISOString() : null;
+    async function handleAddTopic(event) {
+      event.preventDefault();
+      const subjSelect = document.getElementById('topicSubjectSelect');
+      const titleInput = document.getElementById('topicTitleInput');
+      const daySelect = document.getElementById('topicDaySelect');
+
+      const subjectId = subjSelect.value;
+      const cleanTitle = (titleInput.value || '').trim();
+      const targetDate = daySelect.value === 'tomorrow' ? getTomorrowDateString() : getTodayDateString();
+
+      if (!subjectId || !cleanTitle || !currentProfile) return;
+
       try {
         if (isLocalSandboxMode) {
-          const table = getSandboxTable('study_topics');
-          const idx = table.findIndex(t => t.id === topicId);
+          const all = getSandboxTable('study_topics');
+          all.push({
+            id: 'top_' + Date.now(),
+            student_id: currentProfile.id,
+            subject_id: subjectId,
+            topic_title: cleanTitle,
+            target_date: targetDate,
+            is_completed: false,
+            completed_at: null,
+            created_at: new Date().toISOString()
+          });
+          saveSandboxTable('study_topics', all);
+        } else {
+          const { error } = await dbClient.from('study_topics').insert({
+            student_id: currentProfile.id,
+            subject_id: subjectId,
+            topic_title: cleanTitle,
+            target_date: targetDate,
+            is_completed: false
+          });
+          if (error) throw error;
+        }
+
+        titleInput.value = '';
+        showToast('Topic added to study plan!');
+        await loadStudentDashboardData(false);
+      } catch (err) {
+        showToast('Could not add study topic.', 'error');
+      }
+    }
+
+    async function handleToggleTopicCompletion(topicId, isChecked) {
+      try {
+        const completedAt = isChecked ? new Date().toISOString() : null;
+        if (isLocalSandboxMode) {
+          const all = getSandboxTable('study_topics');
+          const idx = all.findIndex(t => t.id === topicId);
           if (idx !== -1) {
-            table[idx].is_completed = nextState;
-            table[idx].completed_at = completedAt;
-            saveSandboxTable('study_topics', table);
+            all[idx].is_completed = isChecked;
+            all[idx].completed_at = completedAt;
+            saveSandboxTable('study_topics', all);
           }
         } else {
           const { error } = await dbClient
             .from('study_topics')
-            .update({ is_completed: nextState, completed_at: completedAt })
+            .update({ is_completed: isChecked, completed_at: completedAt })
             .eq('id', topicId);
           if (error) throw error;
         }
@@ -1991,8 +2145,7 @@
         if (isLocalSandboxMode) {
           saveSandboxTable('study_topics', getSandboxTable('study_topics').filter(t => t.id !== topicId));
         } else {
-          const { error } = await dbClient.from('study_topics').delete().eq('id', topicId);
-          if (error) throw error;
+          await dbClient.from('study_topics').delete().eq('id', topicId);
         }
         await loadStudentDashboardData(false);
       } catch (err) {
@@ -2005,58 +2158,57 @@
       if (!listEl) return;
 
       if (studentTests.length === 0) {
-        listEl.innerHTML = `
-          <div class="col-span-full text-center py-6 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-            No tests scheduled by your parent yet.
-          </div>
-        `;
+        listEl.innerHTML = '<p class="text-xs text-slate-400 col-span-full py-3">No tests scheduled by your parent right now.</p>';
         return;
       }
 
-      listEl.innerHTML = studentTests
-        .map(test => {
-          const isCompleted = test.status === 'completed';
-          const pct = isCompleted && test.max_marks > 0 ? Math.round((test.marks_obtained / test.max_marks) * 100) : 0;
-
-          return `
-            <div class="p-4 rounded-2xl border ${isCompleted ? 'bg-emerald-50/40 border-emerald-200' : 'bg-amber-50/40 border-amber-200'} flex flex-col justify-between gap-3">
-              <div>
-                <div class="flex items-center justify-between gap-2">
-                  <span class="px-2.5 py-0.5 rounded-lg bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
-                    ${escapeHtml(test.subject_name)}
-                  </span>
-                  <span class="text-[11px] font-bold ${isCompleted ? 'text-emerald-700' : 'text-amber-700'}">
-                    ${isCompleted ? `Score: ${test.marks_obtained}/${test.max_marks} (${pct}%)` : 'Scheduled by Parent'}
-                  </span>
-                </div>
-                <h3 class="text-sm font-extrabold text-slate-900 mt-2">${escapeHtml(test.topic_name)}</h3>
-                <div class="flex flex-wrap items-center gap-3 mt-2 text-[11px] text-slate-600 font-medium">
-                  <span><i class="fa-regular fa-calendar mr-1 text-amber-600"></i>${formatDateTimeShort(test.scheduled_at)}</span>
-                  <span><i class="fa-solid fa-list-ol mr-1 text-indigo-600"></i>${test.question_count} Qs</span>
-                  <span><i class="fa-regular fa-hourglass-half mr-1 text-emerald-600"></i>${test.duration_minutes} mins</span>
-                </div>
+      listEl.innerHTML = studentTests.map(test => {
+        const isDone = test.status === 'completed';
+        const pct = isDone && test.max_marks > 0 ? Math.round((test.marks_obtained / test.max_marks) * 100) : null;
+        return `
+          <div class="p-4 rounded-2xl border ${isDone ? 'bg-emerald-50/40 border-emerald-200' : 'bg-amber-50/50 border-amber-200'} flex flex-col justify-between gap-3">
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-200/80 text-amber-950'}">
+                  ${escapeHtml(test.subject_name)}
+                </span>
+                <span class="font-mono-code text-[11px] font-bold text-slate-500">
+                  <i class="fa-regular fa-clock mr-1"></i>${formatDateTimeShort(test.scheduled_at)}
+                </span>
               </div>
+              <h4 class="text-xs sm:text-sm font-extrabold text-slate-900 mt-2">${escapeHtml(test.topic_name)}</h4>
+              <p class="text-[11px] text-slate-600 font-semibold mt-1">
+                ${test.question_count} Questions • ${test.duration_minutes} Mins
+              </p>
+            </div>
 
+            <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between">
               ${
-                !isCompleted
-                  ? `<button type="button" onclick="openSubmitTestReportModal('${test.id}', '${escapeHtml(test.subject_name)} - ${escapeHtml(test.topic_name)}')" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold transition">
-                      Submit Test Report
+                isDone
+                  ? `<span class="font-mono-code text-xs font-extrabold text-emerald-800">
+                      Score: ${test.marks_obtained} / ${test.max_marks} (${pct}%)
+                    </span>
+                    <button type="button" onclick="openSubmitTestReportModal('${test.id}')" class="text-[11px] font-bold text-slate-500 hover:text-slate-900 underline">
+                      Edit Score
                     </button>`
-                  : `<div class="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5">
-                      <i class="fa-solid fa-circle-check"></i><span>Report sent to Parent</span>
-                    </div>`
+                  : `<span class="text-[11px] font-bold text-amber-800">Pending Report</span>
+                    <button type="button" onclick="openSubmitTestReportModal('${test.id}')" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-extrabold transition">
+                      Submit Score
+                    </button>`
               }
             </div>
-          `;
-        })
-        .join('');
+          </div>
+        `;
+      }).join('');
     }
 
-    function openSubmitTestReportModal(testId, title) {
-      document.getElementById('submitReportTestId').value = testId;
-      document.getElementById('submitReportTestTitle').textContent = title;
-      document.getElementById('reportMarksObtainedInput').value = '';
-      document.getElementById('reportMaxMarksInput').value = '';
+    function openSubmitTestReportModal(testId) {
+      const test = studentTests.find(t => t.id === testId);
+      if (!test) return;
+      document.getElementById('submitReportTestId').value = test.id;
+      document.getElementById('submitReportTestTitle').textContent = `${test.subject_name} — ${test.topic_name}`;
+      document.getElementById('reportMarksObtainedInput').value = test.marks_obtained !== null && test.marks_obtained !== undefined ? test.marks_obtained : '';
+      document.getElementById('reportMaxMarksInput').value = test.max_marks !== null && test.max_marks !== undefined ? test.max_marks : test.question_count || 25;
       openModal('modalSubmitTestReport');
     }
 
@@ -2067,37 +2219,37 @@
       const maxMarks = parseFloat(document.getElementById('reportMaxMarksInput').value);
 
       if (isNaN(obtained) || isNaN(maxMarks) || maxMarks <= 0 || obtained > maxMarks) {
-        showToast('Enter valid marks (obtained cannot exceed max marks).', 'error');
+        showToast('Marks obtained cannot exceed Total Marks.', 'error');
         return;
       }
 
       try {
         if (isLocalSandboxMode) {
-          const table = getSandboxTable('scheduled_tests');
-          const idx = table.findIndex(t => t.id === testId);
+          const all = getSandboxTable('scheduled_tests');
+          const idx = all.findIndex(t => t.id === testId);
           if (idx !== -1) {
-            table[idx].status = 'completed';
-            table[idx].marks_obtained = obtained;
-            table[idx].max_marks = maxMarks;
-            saveSandboxTable('scheduled_tests', table);
+            all[idx].marks_obtained = obtained;
+            all[idx].max_marks = maxMarks;
+            all[idx].status = 'completed';
+            saveSandboxTable('scheduled_tests', all);
           }
         } else {
           const { error } = await dbClient
             .from('scheduled_tests')
             .update({
-              status: 'completed',
               marks_obtained: obtained,
-              max_marks: maxMarks
+              max_marks: maxMarks,
+              status: 'completed'
             })
             .eq('id', testId);
           if (error) throw error;
         }
 
         closeModal('modalSubmitTestReport');
-        showToast('Test report submitted to your Parent!');
+        showToast('Test report submitted to Parent!');
         await loadStudentDashboardData(false);
       } catch (err) {
-        showToast('Failed to submit test report.', 'error');
+        showToast('Could not submit test score.', 'error');
       }
     }
 
@@ -2110,137 +2262,60 @@
         return;
       }
 
+      const parentNameMap = new Map(linkedParentProfiles.map(p => [p.id, p.name]));
+
       listEl.innerHTML = studentNotes
-        .map(note => `
-          <div class="p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-start justify-between gap-3">
-            <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(note.message_text)}</p>
-            <span class="text-[10px] font-bold text-indigo-600 shrink-0 whitespace-nowrap">
-              <i class="fa-solid fa-check-double mr-0.5"></i>${formatRelativeTime(note.created_at)}
-            </span>
-          </div>
-        `)
+        .map(note => {
+          const senderLabel = parentNameMap.get(note.parent_id) || 'Parent';
+          return `
+            <div class="p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <span class="text-[10px] font-extrabold text-indigo-700 block mb-0.5">${escapeHtml(senderLabel)}</span>
+                <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(note.message_text)}</p>
+              </div>
+              <span class="text-[10px] font-bold text-indigo-600 shrink-0 whitespace-nowrap">
+                <i class="fa-solid fa-check-double mr-0.5"></i>${formatRelativeTime(note.created_at)}
+              </span>
+            </div>
+          `;
+        })
         .join('');
     }
 
     // -----------------------------------------------------------------------
     // 10. DEDICATED 1-STUDENT PARENT DASHBOARD & REALTIME SYNC ENGINE
     // -----------------------------------------------------------------------
-    function startRealtimeSyncEngine() {
-      if (isLocalSandboxMode || !currentProfile) return;
-
-      // Clean up any previous channel
-      if (activeRealtimeChannel) {
-        try {
-          dbClient.removeChannel(activeRealtimeChannel);
-        } catch (e) {}
-        activeRealtimeChannel = null;
-      }
-
-      // Guard WebSocket Realtime against sandboxed iframe/Canvas CSP restrictions
-      let webSocketAllowed = true;
-      try {
-        const isEmbeddedFrame = window.self !== window.top;
-        if (isEmbeddedFrame) {
-          webSocketAllowed = false;
-        }
-      } catch (e) {
-        webSocketAllowed = false;
-      }
-
-      if (webSocketAllowed && typeof window.WebSocket === 'function') {
-        try {
-          const channel = dbClient
-            .channel('studybridge-live-' + currentProfile.id)
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'study_profiles' }, () => {
-              if (currentProfile.role === 'parent') loadParentDashboardData(false);
-              else loadStudentDashboardData(false);
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'student_subjects' }, () => {
-              if (currentProfile.role === 'parent') loadParentDashboardData(false);
-              else loadStudentDashboardData(false);
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
-              if (currentProfile.role === 'parent') loadParentDashboardData(false);
-              else loadStudentDashboardData(false);
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'scheduled_tests' }, () => {
-              if (currentProfile.role === 'parent') loadParentDashboardData(false);
-              else loadStudentDashboardData(false);
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_notes' }, () => {
-              if (currentProfile.role === 'parent') loadParentDashboardData(false);
-              else loadStudentDashboardData(false);
-            });
-
-          channel.subscribe(status => {
-            if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-              try {
-                dbClient.removeChannel(channel);
-              } catch (e) {}
-            }
-          });
-          activeRealtimeChannel = channel;
-        } catch (wsErr) {
-          // Silently fall back to fast HTTPS REST polling when WebSockets are blocked
-          activeRealtimeChannel = null;
-        }
-      }
-
-      // Fast 2.5-second HTTPS REST sync + instant tab-focus refresh (works in all environments)
-      if (backgroundPollTimer) clearInterval(backgroundPollTimer);
-      backgroundPollTimer = setInterval(() => {
-        if (document.hidden) return;
-        if (currentProfile.role === 'parent') loadParentDashboardData(false);
-        else loadStudentDashboardData(false);
-      }, 2500);
-    }
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && currentProfile) {
-        if (currentProfile.role === 'parent') loadParentDashboardData(false);
-        else loadStudentDashboardData(false);
-      }
-    });
-
-    async function mountStudentDashboard() {
-      showView('viewStudentDashboard');
-      mountStudentColorDots();
-      await loadStudentDashboardData(false);
-      startRealtimeSyncEngine();
-    }
-
     async function mountParentDashboard() {
-      showView('viewParentDashboard');
-      const emptyParEl = document.getElementById('emptyParIdCopy');
-      if (emptyParEl && currentProfile) {
-        emptyParEl.textContent = currentProfile.device_number_id;
+      const emptyParCopy = document.getElementById('emptyParIdCopy');
+      if (emptyParCopy && currentProfile) {
+        emptyParCopy.textContent = currentProfile.device_number_id;
       }
-
+      showView('viewParentDashboard');
       await loadParentDashboardData(false);
-      startRealtimeSyncEngine();
     }
 
     async function loadParentDashboardData(manualRefresh = false) {
+      if (!currentProfile) return;
       const syncIcon = document.getElementById('parSyncIcon');
-      if (syncIcon && manualRefresh) syncIcon.classList.add('fa-spin');
+      if (syncIcon) syncIcon.classList.add('fa-spin');
 
       try {
         let linkedList = [];
         if (isLocalSandboxMode) {
           linkedList = getSandboxTable('study_profiles').filter(
-            p => p.role === 'student' && p.linked_parent_id === currentProfile.id
+            p => p.role === 'student' && isStudentLinkedToParent(p, currentProfile.id)
           );
         } else {
           const { data, error } = await dbClient
             .from('study_profiles')
             .select('*')
             .eq('role', 'student')
-            .eq('linked_parent_id', currentProfile.id)
+            .ilike('linked_parent_id', `%${currentProfile.id}%`)
             .order('created_at', { ascending: true })
             .limit(1);
 
           if (error) throw error;
-          linkedList = data || [];
+          linkedList = (data || []).filter(s => isStudentLinkedToParent(s, currentProfile.id));
         }
 
         singleLinkedStudent = linkedList.length > 0 ? linkedList[0] : null;
@@ -2254,10 +2329,15 @@
           await loadMonitoredStudentWorkspace(singleLinkedStudent.id);
         }
 
+        const dashModal = document.getElementById('modalAnalyticsPopup');
+        if (dashModal && !dashModal.classList.contains('hidden')) {
+          renderAnalyticsPopupData();
+        }
+
         if (manualRefresh) showToast('Parent console synced.');
       } catch (err) {
         console.error('Parent load error:', err);
-        if (manualRefresh) showToast('Failed to refresh student data.', 'error');
+        showToast('Could not sync parent dashboard.', 'error');
       } finally {
         if (syncIcon) syncIcon.classList.remove('fa-spin');
       }
@@ -2265,14 +2345,8 @@
 
     async function handleParentLinkStudent(event) {
       event.preventDefault();
-      if (singleLinkedStudent) {
-        showToast('Only 1 student can be linked to this Parent account.', 'error');
-        return;
-      }
-
       const inputEl = document.getElementById('parSearchStudentIdInput');
-      const cleanId = (inputEl.value || '').replace(/\D/g, '').slice(0, 6);
-
+      const cleanId = (inputEl ? inputEl.value : '').replace(/\D/g, '').slice(0, 6);
       if (cleanId.length !== 6) {
         showToast('Enter a valid 6-digit Student Device ID.', 'error');
         return;
@@ -2291,7 +2365,6 @@
             .eq('device_number_id', cleanId)
             .eq('role', 'student')
             .maybeSingle();
-
           if (error) throw error;
           studentProfile = data;
         }
@@ -2301,77 +2374,100 @@
           return;
         }
 
-        if (studentProfile.linked_parent_id && studentProfile.linked_parent_id !== currentProfile.id) {
-          showToast('This student is already linked to another parent account.', 'error');
+        const existingParentIds = getLinkedParentIdsArray(studentProfile);
+        if (existingParentIds.includes(currentProfile.id)) {
+          showToast('This student is already linked to your account.', 'info');
+          await loadParentDashboardData(false);
           return;
         }
+        if (existingParentIds.length >= 2) {
+          showToast('This student already has 2 parents linked (maximum allowed).', 'error');
+          return;
+        }
+
+        const updatedLinkedStr = formatLinkedParentIdsString([...existingParentIds, currentProfile.id]);
 
         if (isLocalSandboxMode) {
           const profiles = getSandboxTable('study_profiles');
           const idx = profiles.findIndex(p => p.id === studentProfile.id);
           if (idx !== -1) {
-            profiles[idx].linked_parent_id = currentProfile.id;
+            profiles[idx].linked_parent_id = updatedLinkedStr;
             saveSandboxTable('study_profiles', profiles);
           }
         } else {
           const { error: updateErr } = await dbClient
             .from('study_profiles')
-            .update({ linked_parent_id: currentProfile.id })
+            .update({ linked_parent_id: updatedLinkedStr })
             .eq('id', studentProfile.id);
           if (updateErr) throw updateErr;
         }
 
         inputEl.value = '';
-        showToast(`Linked 1:1 with Student ${studentProfile.name}!`);
+        showToast(`Linked with Student ${studentProfile.name}!`);
         await loadParentDashboardData(false);
       } catch (err) {
-        console.error('Link student error:', err);
+        console.error('Parent link student error:', err);
         showToast('Could not link student account.', 'error');
       }
     }
 
     async function loadMonitoredStudentWorkspace(studentId) {
-      if (!singleLinkedStudent || singleLinkedStudent.id !== studentId) return;
+      if (!studentId) return;
 
-      if (isLocalSandboxMode) {
-        monitoredSubjects = getSandboxTable('student_subjects').filter(s => s.student_id === studentId);
-        monitoredTopics = getSandboxTable('study_topics').filter(t => t.student_id === studentId);
-        monitoredTests = getSandboxTable('scheduled_tests').filter(t => t.student_id === studentId);
-        monitoredNotes = getSandboxTable('parent_notes').filter(n => n.student_id === studentId);
-      } else {
-        const [subjRes, topicsRes, testsRes, notesRes] = await Promise.all([
-          dbClient.from('student_subjects').select('*').eq('student_id', studentId).order('created_at', { ascending: true }),
-          dbClient.from('study_topics').select('*').eq('student_id', studentId).order('created_at', { ascending: true }),
-          dbClient.from('scheduled_tests').select('*').eq('student_id', studentId).order('scheduled_at', { ascending: false }),
-          dbClient.from('parent_notes').select('*').eq('student_id', studentId).order('created_at', { ascending: false })
-        ]);
+      try {
+        if (isLocalSandboxMode) {
+          const freshStu = getSandboxTable('study_profiles').find(p => p.id === studentId);
+          if (freshStu) singleLinkedStudent = freshStu;
+          monitoredSubjects = getSandboxTable('student_subjects').filter(s => s.student_id === studentId);
+          monitoredTopics = getSandboxTable('study_topics').filter(t => t.student_id === studentId);
+          monitoredTests = getSandboxTable('scheduled_tests').filter(t => t.student_id === studentId);
+          monitoredNotes = getSandboxTable('parent_notes').filter(n => n.student_id === studentId);
+        } else {
+          const [stuRes, subjRes, topicsRes, testsRes, notesRes] = await Promise.all([
+            dbClient.from('study_profiles').select('*').eq('id', studentId).single(),
+            dbClient.from('student_subjects').select('*').eq('student_id', studentId).order('created_at', { ascending: true }),
+            dbClient.from('study_topics').select('*').eq('student_id', studentId).order('created_at', { ascending: true }),
+            dbClient.from('scheduled_tests').select('*').eq('student_id', studentId).order('scheduled_at', { ascending: false }),
+            dbClient.from('parent_notes').select('*').eq('student_id', studentId).order('created_at', { ascending: false })
+          ]);
 
-        monitoredSubjects = subjRes.data || [];
-        monitoredTopics = topicsRes.data || [];
-        monitoredTests = testsRes.data || [];
-        monitoredNotes = notesRes.data || [];
+          if (stuRes.data) singleLinkedStudent = stuRes.data;
+          monitoredSubjects = subjRes.data || [];
+          monitoredTopics = topicsRes.data || [];
+          monitoredTests = testsRes.data || [];
+          monitoredNotes = notesRes.data || [];
+        }
+
+        renderMonitoredStudentDetails();
+      } catch (err) {
+        console.error('Workspace load error:', err);
       }
+    }
+
+    function renderMonitoredStudentDetails() {
+      if (!singleLinkedStudent) return;
 
       const subjectMap = new Map(monitoredSubjects.map(s => [s.id, s]));
       const todayStr = getTodayDateString();
       const tomorrowStr = getTomorrowDateString();
-      const sevenDaysAgoStr = getLocalIsoDate(-7);
+      const sevenDaysAgoStr = getLocalIsoDate(-6);
 
       const todayTopics = monitoredTopics.filter(t => t.target_date === todayStr);
       const tomorrowTopics = monitoredTopics.filter(t => t.target_date === tomorrowStr);
-      const last7DaysTopics = monitoredTopics.filter(t => t.target_date >= sevenDaysAgoStr && t.target_date <= todayStr);
+      const todayDone = todayTopics.filter(t => t.is_completed).length;
+      const todayPct = todayTopics.length > 0 ? Math.round((todayDone / todayTopics.length) * 100) : 0;
 
-      // Update 4-Card KPI Dashboard
-      const coveredToday = todayTopics.filter(t => t.is_completed).length;
-      const pctToday = todayTopics.length > 0 ? Math.round((coveredToday / todayTopics.length) * 100) : 0;
-      document.getElementById('kpiTodayPct').textContent = `${pctToday}%`;
-      document.getElementById('kpiTodayRatio').textContent = `${coveredToday}/${todayTopics.length} Topics`;
-      document.getElementById('parTodayProgressBar').style.width = `${pctToday}%`;
+      // 1. Today KPI
+      document.getElementById('kpiTodayPct').textContent = `${todayPct}%`;
+      document.getElementById('kpiTodayRatio').textContent = `${todayDone}/${todayTopics.length} Topics`;
+      document.getElementById('parTodayProgressBar').style.width = `${todayPct}%`;
 
-      const covered7Days = last7DaysTopics.filter(t => t.is_completed).length;
-      document.getElementById('kpi7DayCovered').textContent = String(covered7Days);
-      document.getElementById('kpi7DayTotal').textContent = `of ${last7DaysTopics.length} Planned`;
+      // 2. 7-Day Consistency KPI
+      const last7Topics = monitoredTopics.filter(t => t.target_date >= sevenDaysAgoStr && t.target_date <= todayStr);
+      const last7Done = last7Topics.filter(t => t.is_completed).length;
+      document.getElementById('kpi7DayCovered').textContent = `${last7Done}/${last7Topics.length}`;
 
+      // 3. Test Avg KPI
       const completedTests = monitoredTests.filter(t => t.status === 'completed' && t.max_marks > 0);
       if (completedTests.length > 0) {
         const avgPct = Math.round(
@@ -2383,31 +2479,27 @@
       }
       document.getElementById('kpiTestCount').textContent = `${completedTests.length} Completed`;
 
+      // 4. Enrolled Subjects KPI
       document.getElementById('kpiSubjectCount').textContent = String(monitoredSubjects.length);
       document.getElementById('kpiSubjectNames').textContent =
-        monitoredSubjects.length > 0
-          ? monitoredSubjects.map(s => s.subject_name).join(', ')
-          : 'None added yet';
-
-      document.getElementById('parTodayCountPill').textContent = String(todayTopics.length);
-      document.getElementById('parTomorrowCountPill').textContent = String(tomorrowTopics.length);
+        monitoredSubjects.length > 0 ? monitoredSubjects.map(s => s.subject_name).join(', ') : 'None added yet';
 
       // Render Today's Topics
-      const parTodayList = document.getElementById('parTodayTopicsList');
-      parTodayList.innerHTML = todayTopics.length === 0
+      document.getElementById('parTodayCountPill').textContent = `${todayDone}/${todayTopics.length} Done`;
+      const todayListEl = document.getElementById('parTodayTopicsList');
+      todayListEl.innerHTML = todayTopics.length === 0
         ? '<p class="text-xs text-slate-400 text-center py-6">No topics logged for today yet.</p>'
         : todayTopics.map(t => {
-            const subj = subjectMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#10b981' };
+            const subj = subjectMap.get(t.subject_id);
             return `
-              <div class="flex items-center justify-between gap-2.5 p-3 rounded-2xl border ${t.is_completed ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200/80'}">
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <i class="fa-solid ${t.is_completed ? 'fa-circle-check text-emerald-600' : 'fa-circle text-slate-300'} text-sm shrink-0"></i>
-                  <div class="min-w-0">
-                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md text-white inline-block" style="background-color: ${escapeHtml(subj.color_hex)};">${escapeHtml(subj.subject_name)}</span>
-                    <p class="text-xs font-bold text-slate-900 mt-1 truncate">${escapeHtml(t.topic_title)}</p>
-                  </div>
+              <div class="p-3 rounded-2xl border ${t.is_completed ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200'} flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                  <span class="text-[10px] font-extrabold uppercase block" style="color: ${escapeHtml(subj ? subj.color_hex : '#10b981')};">
+                    ${escapeHtml(subj ? subj.subject_name : 'Subject')}
+                  </span>
+                  <p class="text-xs font-bold ${t.is_completed ? 'line-through text-slate-400' : 'text-slate-900'} truncate">${escapeHtml(t.topic_title)}</p>
                 </div>
-                <span class="text-[10px] font-extrabold px-2 py-1 rounded-lg shrink-0 ${t.is_completed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold shrink-0 ${t.is_completed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
                   ${t.is_completed ? 'Covered' : 'Pending'}
                 </span>
               </div>
@@ -2415,137 +2507,196 @@
           }).join('');
 
       // Render Tomorrow's Topics
-      const parTomorrowList = document.getElementById('parTomorrowTopicsList');
-      parTomorrowList.innerHTML = tomorrowTopics.length === 0
+      document.getElementById('parTomorrowCountPill').textContent = String(tomorrowTopics.length);
+      const tmrListEl = document.getElementById('parTomorrowTopicsList');
+      tmrListEl.innerHTML = tomorrowTopics.length === 0
         ? '<p class="text-xs text-slate-400 text-center py-6">Student hasn\'t queued topics for tomorrow yet.</p>'
         : tomorrowTopics.map(t => {
-            const subj = subjectMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#6366f1' };
+            const subj = subjectMap.get(t.subject_id);
             return `
-              <div class="flex items-center justify-between gap-2.5 p-3 rounded-2xl bg-indigo-50/40 border border-indigo-100">
+              <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
                 <div class="min-w-0">
-                  <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md text-white inline-block" style="background-color: ${escapeHtml(subj.color_hex)};">${escapeHtml(subj.subject_name)}</span>
-                  <p class="text-xs font-bold text-slate-900 mt-1 truncate">${escapeHtml(t.topic_title)}</p>
+                  <span class="text-[10px] font-extrabold uppercase block" style="color: ${escapeHtml(subj ? subj.color_hex : '#6366f1')};">
+                    ${escapeHtml(subj ? subj.subject_name : 'Subject')}
+                  </span>
+                  <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(t.topic_title)}</p>
                 </div>
-                <span class="text-[10px] font-bold text-indigo-700 bg-white px-2 py-1 rounded-lg border border-indigo-100 shrink-0">Tomorrow</span>
+                <span class="px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 text-[10px] font-bold shrink-0">Queued</span>
               </div>
             `;
           }).join('');
 
-      // Populate Past Records Date Dropdown & Render Past History
-      const pastTopics = monitoredTopics.filter(t => t.target_date < todayStr);
-      const uniquePastDates = [...new Set(pastTopics.map(t => t.target_date))].sort((a, b) => b.localeCompare(a));
-      const dateFilterEl = document.getElementById('parHistoryDateFilter');
-      if (dateFilterEl) {
-        const currentFilter = dateFilterEl.value;
-        dateFilterEl.innerHTML = '<option value="all">All Past Days (' + uniquePastDates.length + ')</option>';
-        uniquePastDates.forEach(dStr => {
-          const opt = document.createElement('option');
-          opt.value = dStr;
-          opt.textContent = dStr;
-          dateFilterEl.appendChild(opt);
-        });
-        if (currentFilter && (currentFilter === 'all' || uniquePastDates.includes(currentFilter))) {
-          dateFilterEl.value = currentFilter;
-        }
-      }
+      // Populate Past History Filter & Render Past Daily Records
+      populateParentPastDatesDropdown();
       renderParentPastHistory();
 
-      // Render Scheduled Tests & Score Reports
+      // Render Scheduled Tests
       const parTestsList = document.getElementById('parTestsList');
       parTestsList.innerHTML = monitoredTests.length === 0
         ? '<p class="text-xs text-slate-400 text-center py-8">No tests assigned to this student yet.</p>'
         : monitoredTests.map(test => {
-            const isCompleted = test.status === 'completed';
-            const scorePct = isCompleted && test.max_marks > 0 ? Math.round((test.marks_obtained / test.max_marks) * 100) : 0;
+            const isDone = test.status === 'completed';
+            const pct = isDone && test.max_marks > 0 ? Math.round((test.marks_obtained / test.max_marks) * 100) : null;
             return `
-              <div class="p-3.5 rounded-2xl border ${isCompleted ? 'bg-emerald-50/40 border-emerald-200' : 'bg-amber-50/40 border-amber-200'}">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-extrabold uppercase">${escapeHtml(test.subject_name)}</span>
-                  ${
-                    isCompleted
-                      ? `<span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-extrabold">Score: ${test.marks_obtained}/${test.max_marks} (${scorePct}%)</span>`
-                      : `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">Awaiting Completion</span>`
-                  }
+              <div class="p-3.5 rounded-2xl border ${isDone ? 'bg-emerald-50/40 border-emerald-200' : 'bg-white border-slate-200'} flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-extrabold uppercase">${escapeHtml(test.subject_name)}</span>
+                    <span class="font-mono-code text-[10px] font-bold text-slate-400">${formatDateTimeShort(test.scheduled_at)}</span>
+                  </div>
+                  <p class="text-xs font-extrabold text-slate-900 mt-1 truncate">${escapeHtml(test.topic_name)}</p>
+                  <p class="text-[10px] font-semibold text-slate-500">${test.question_count} Qs • ${test.duration_minutes} mins</p>
                 </div>
-                <h4 class="text-xs sm:text-sm font-extrabold text-slate-900 mt-1.5">${escapeHtml(test.topic_name)}</h4>
-                <div class="flex flex-wrap items-center gap-3 mt-1.5 text-[11px] text-slate-600 font-medium">
-                  <span><i class="fa-regular fa-clock mr-1 text-amber-600"></i>${formatDateTimeShort(test.scheduled_at)}</span>
-                  <span><i class="fa-solid fa-list-ol mr-1 text-indigo-600"></i>${test.question_count} Questions</span>
-                  <span><i class="fa-solid fa-stopwatch mr-1 text-emerald-600"></i>${test.duration_minutes} Mins</span>
+                <div class="text-right shrink-0">
+                  ${
+                    isDone
+                      ? `<span class="px-2.5 py-1 rounded-xl bg-emerald-600 text-white font-mono-code text-xs font-extrabold block">
+                          ${test.marks_obtained}/${test.max_marks} (${pct}%)
+                        </span>`
+                      : `<span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-800 text-[10px] font-extrabold block">Scheduled</span>`
+                  }
                 </div>
               </div>
             `;
           }).join('');
 
-      // Render Parent Notes with Read Receipts
+      // Render Parent Notes with Read Receipts & Sender Delete Button
       const parNotesList = document.getElementById('parNotesList');
       parNotesList.innerHTML = monitoredNotes.length === 0
         ? '<p class="text-xs text-slate-400 text-center py-6">No messages sent yet.</p>'
-        : monitoredNotes.map(note => `
-            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-              <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(note.message_text)}</p>
-              <div class="flex items-center justify-between text-[10px] font-bold">
-                <span class="text-slate-400">${formatRelativeTime(note.created_at)}</span>
-                ${
-                  note.is_seen
-                    ? `<span class="text-emerald-700 flex items-center gap-1"><i class="fa-solid fa-check-double"></i>Seen ${note.seen_at ? formatRelativeTime(note.seen_at) : ''}</span>`
-                    : `<span class="text-slate-400 flex items-center gap-1"><i class="fa-solid fa-check"></i>Delivered (Unseen)</span>`
-                }
+        : monitoredNotes.map(note => {
+            const isSentByMe = currentProfile && note.parent_id === currentProfile.id;
+            return `
+              <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                <div class="flex items-start justify-between gap-2">
+                  <p class="text-xs font-semibold text-slate-800 leading-relaxed break-words">${escapeHtml(note.message_text)}</p>
+                  ${
+                    isSentByMe
+                      ? `<button type="button" onclick="handleDeleteParentNote('${note.id}')" class="w-6 h-6 rounded-lg hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition shrink-0" title="Delete message">
+                          <i class="fa-solid fa-trash-can text-[10px]"></i>
+                        </button>`
+                      : ''
+                  }
+                </div>
+                <div class="flex items-center justify-between text-[10px] font-bold">
+                  <span class="text-slate-400">${formatRelativeTime(note.created_at)}</span>
+                  ${
+                    note.is_seen
+                      ? `<span class="text-emerald-700 flex items-center gap-1"><i class="fa-solid fa-check-double"></i>Seen ${note.seen_at ? formatRelativeTime(note.seen_at) : ''}</span>`
+                      : `<span class="text-slate-400 flex items-center gap-1"><i class="fa-solid fa-check"></i>Delivered (Unseen)</span>`
+                  }
+                </div>
               </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
+    }
+
+    async function handleDeleteParentNote(noteId) {
+      if (!noteId || !currentProfile) return;
+      try {
+        if (isLocalSandboxMode) {
+          const allNotes = getSandboxTable('parent_notes');
+          const target = allNotes.find(n => n.id === noteId);
+          if (!target || target.parent_id !== currentProfile.id) {
+            showToast('You can only delete messages sent by you.', 'error');
+            return;
+          }
+          saveSandboxTable('parent_notes', allNotes.filter(n => n.id !== noteId));
+        } else {
+          const { error } = await dbClient
+            .from('parent_notes')
+            .delete()
+            .eq('id', noteId)
+            .eq('parent_id', currentProfile.id);
+          if (error) throw error;
+        }
+        showToast('Message deleted.');
+        if (singleLinkedStudent) {
+          await loadMonitoredStudentWorkspace(singleLinkedStudent.id);
+        }
+      } catch (err) {
+        showToast('Could not delete message.', 'error');
+      }
+    }
+
+    function populateParentPastDatesDropdown() {
+      const selectEl = document.getElementById('parHistoryDateFilter');
+      if (!selectEl) return;
+      const todayStr = getTodayDateString();
+      const currentSelection = selectEl.value || 'all';
+
+      const uniquePastDates = [...new Set(
+        monitoredTopics
+          .filter(t => t.target_date < todayStr)
+          .map(t => t.target_date)
+      )].sort((a, b) => b.localeCompare(a));
+
+      selectEl.innerHTML = '<option value="all">All Past Days</option>' +
+        uniquePastDates.map(d => `<option value="${d}">${d}</option>`).join('');
+
+      if (uniquePastDates.includes(currentSelection)) {
+        selectEl.value = currentSelection;
+      } else {
+        selectEl.value = 'all';
+      }
     }
 
     function renderParentPastHistory() {
       const container = document.getElementById('parPastHistoryContainer');
-      const filterVal = document.getElementById('parHistoryDateFilter')?.value || 'all';
+      const filterEl = document.getElementById('parHistoryDateFilter');
       if (!container) return;
 
       const todayStr = getTodayDateString();
+      const selectedDate = filterEl ? filterEl.value : 'all';
       const subjectMap = new Map(monitoredSubjects.map(s => [s.id, s]));
-      const pastTopics = monitoredTopics.filter(t => t.target_date < todayStr && (filterVal === 'all' || t.target_date === filterVal));
+
+      let pastTopics = monitoredTopics.filter(t => t.target_date < todayStr);
+      if (selectedDate !== 'all') {
+        pastTopics = pastTopics.filter(t => t.target_date === selectedDate);
+      }
 
       if (pastTopics.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">No past daily study records found.</p>';
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">No past daily study records found before today.</p>';
         return;
       }
 
-      const grouped = {};
+      const groupedByDate = {};
       pastTopics.forEach(t => {
-        if (!grouped[t.target_date]) grouped[t.target_date] = [];
-        grouped[t.target_date].push(t);
+        if (!groupedByDate[t.target_date]) groupedByDate[t.target_date] = [];
+        groupedByDate[t.target_date].push(t);
       });
 
-      const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+      const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
+
       container.innerHTML = sortedDates.map(dateStr => {
-        const dayItems = grouped[dateStr];
+        const dayItems = groupedByDate[dateStr];
         const doneCount = dayItems.filter(i => i.is_completed).length;
         const pct = Math.round((doneCount / dayItems.length) * 100);
 
         return `
-          <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2.5">
-            <div class="flex items-center justify-between">
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-200/70 pb-2">
               <div class="flex items-center gap-2">
                 <span class="font-mono-code text-xs font-extrabold text-slate-900">${escapeHtml(dateStr)}</span>
-                <span class="text-[11px] font-bold text-slate-500">(${pct}% Completed)</span>
+                <span class="text-[11px] font-bold text-slate-500">(${doneCount}/${dayItems.length} Covered)</span>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${doneCount === dayItems.length ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                ${doneCount} / ${dayItems.length} Covered
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${pct === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                ${pct}% Completed
               </span>
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              ${dayItems.map(t => {
-                const subj = subjectMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#10b981' };
+              ${dayItems.map(item => {
+                const subj = subjectMap.get(item.subject_id);
                 return `
-                  <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white border border-slate-100">
-                    <div class="flex items-center gap-2 min-w-0">
-                      <i class="fa-solid ${t.is_completed ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-400'} text-xs shrink-0"></i>
-                      <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold text-white shrink-0" style="background-color: ${escapeHtml(subj.color_hex)};">${escapeHtml(subj.subject_name)}</span>
-                      <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(t.topic_title)}</span>
+                  <div class="p-2.5 rounded-xl bg-white border border-slate-200/70 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                      <span class="text-[9px] font-extrabold uppercase block" style="color: ${escapeHtml(subj ? subj.color_hex : '#64748b')};">
+                        ${escapeHtml(subj ? subj.subject_name : 'Subject')}
+                      </span>
+                      <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(item.topic_title)}</p>
                     </div>
-                    <span class="text-[10px] font-extrabold shrink-0 ${t.is_completed ? 'text-emerald-700' : 'text-rose-600'}">
-                      ${t.is_completed ? 'Covered' : 'Missed'}
+                    <span class="px-2 py-0.5 rounded text-[10px] font-extrabold shrink-0 ${item.is_completed ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">
+                      ${item.is_completed ? 'Done' : 'Missed'}
                     </span>
                   </div>
                 `;
@@ -2558,67 +2709,74 @@
 
     function openScheduleTestModal() {
       if (!singleLinkedStudent) return;
-      const nowPlus1h = new Date(Date.now() + 3600000);
-      const localIso = new Date(nowPlus1h.getTime() - nowPlus1h.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      document.getElementById('testDateTimeInput').value = localIso;
-      document.getElementById('testTopicInput').value = '';
-
       const selectEl = document.getElementById('testSubjectSelect');
       const hintEl = document.getElementById('testNoSubjectsHint');
-      selectEl.innerHTML = '<option value="">Select a student subject...</option>';
 
       if (monitoredSubjects.length === 0) {
-        if (hintEl) hintEl.classList.remove('hidden');
+        selectEl.innerHTML = '<option value="">No subjects created by student yet</option>';
+        hintEl.classList.remove('hidden');
       } else {
-        if (hintEl) hintEl.classList.add('hidden');
-        monitoredSubjects.forEach(s => {
-          const opt = document.createElement('option');
-          opt.value = s.subject_name;
-          opt.textContent = s.subject_name;
-          selectEl.appendChild(opt);
-        });
+        hintEl.classList.add('hidden');
+        selectEl.innerHTML = '<option value="">Select a student subject...</option>' +
+          monitoredSubjects.map(s => `<option value="${escapeHtml(s.subject_name)}">${escapeHtml(s.subject_name)}</option>`).join('');
       }
 
+      const defaultTime = new Date(Date.now() + 3600 * 1000);
+      const tzOffset = defaultTime.getTimezoneOffset() * 60000;
+      document.getElementById('testDateTimeInput').value = new Date(defaultTime - tzOffset).toISOString().slice(0, 16);
+      document.getElementById('testTopicInput').value = '';
       openModal('modalScheduleTest');
     }
 
     async function handleCreateScheduledTest(event) {
       event.preventDefault();
-      if (!singleLinkedStudent) return;
+      if (!singleLinkedStudent || !currentProfile) return;
 
-      const subject = document.getElementById('testSubjectSelect').value.trim();
-      if (!subject) {
-        showToast('Select one of the student\'s added subjects.', 'error');
+      const subjectName = document.getElementById('testSubjectSelect').value;
+      const topicName = (document.getElementById('testTopicInput').value || '').trim();
+      const dateTimeVal = document.getElementById('testDateTimeInput').value;
+      const qCount = parseInt(document.getElementById('testQuestionsInput').value, 10) || 25;
+      const durationMins = parseInt(document.getElementById('testDurationInput').value, 10) || 45;
+
+      if (!subjectName) {
+        showToast('Please select a subject added by the student.', 'error');
         return;
       }
 
-      const topic = document.getElementById('testTopicInput').value.trim();
-      const dtVal = document.getElementById('testDateTimeInput').value;
-      const qCount = parseInt(document.getElementById('testQuestionsInput').value, 10) || 20;
-      const durMins = parseInt(document.getElementById('testDurationInput').value, 10) || 30;
-
-      const payload = {
-        parent_id: currentProfile.id,
-        student_id: singleLinkedStudent.id,
-        subject_name: subject,
-        topic_name: topic,
-        scheduled_at: new Date(dtVal).toISOString(),
-        question_count: qCount,
-        duration_minutes: durMins,
-        status: 'scheduled'
-      };
-
       try {
         if (isLocalSandboxMode) {
-          const table = getSandboxTable('scheduled_tests');
-          table.push({ id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() });
-          saveSandboxTable('scheduled_tests', table);
+          const all = getSandboxTable('scheduled_tests');
+          all.push({
+            id: 'test_' + Date.now(),
+            parent_id: currentProfile.id,
+            student_id: singleLinkedStudent.id,
+            subject_name: subjectName,
+            topic_name: topicName,
+            scheduled_at: new Date(dateTimeVal).toISOString(),
+            question_count: qCount,
+            duration_minutes: durationMins,
+            status: 'scheduled',
+            marks_obtained: null,
+            max_marks: null,
+            created_at: new Date().toISOString()
+          });
+          saveSandboxTable('scheduled_tests', all);
         } else {
-          const { error } = await dbClient.from('scheduled_tests').insert([payload]);
+          const { error } = await dbClient.from('scheduled_tests').insert({
+            parent_id: currentProfile.id,
+            student_id: singleLinkedStudent.id,
+            subject_name: subjectName,
+            topic_name: topicName,
+            scheduled_at: new Date(dateTimeVal).toISOString(),
+            question_count: qCount,
+            duration_minutes: durationMins,
+            status: 'scheduled'
+          });
           if (error) throw error;
         }
+
         closeModal('modalScheduleTest');
-        showToast('Test scheduled & pinned to student dashboard!');
+        showToast(`Scheduled ${subjectName} test for ${singleLinkedStudent.name}!`);
         await loadMonitoredStudentWorkspace(singleLinkedStudent.id);
       } catch (err) {
         showToast('Could not schedule test.', 'error');
@@ -2627,29 +2785,36 @@
 
     async function handleSendParentNote(event) {
       event.preventDefault();
-      if (!singleLinkedStudent) return;
-      const input = document.getElementById('parentNoteInput');
-      const text = input.value.trim();
+      if (!singleLinkedStudent || !currentProfile) return;
+      const inputEl = document.getElementById('parentNoteInput');
+      const text = (inputEl.value || '').trim();
       if (!text) return;
-
-      const payload = {
-        parent_id: currentProfile.id,
-        student_id: singleLinkedStudent.id,
-        message_text: text,
-        is_seen: false
-      };
 
       try {
         if (isLocalSandboxMode) {
-          const table = getSandboxTable('parent_notes');
-          table.push({ id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() });
-          saveSandboxTable('parent_notes', table);
+          const all = getSandboxTable('parent_notes');
+          all.push({
+            id: 'note_' + Date.now(),
+            parent_id: currentProfile.id,
+            student_id: singleLinkedStudent.id,
+            message_text: text,
+            is_seen: false,
+            seen_at: null,
+            created_at: new Date().toISOString()
+          });
+          saveSandboxTable('parent_notes', all);
         } else {
-          const { error } = await dbClient.from('parent_notes').insert([payload]);
+          const { error } = await dbClient.from('parent_notes').insert({
+            parent_id: currentProfile.id,
+            student_id: singleLinkedStudent.id,
+            message_text: text,
+            is_seen: false
+          });
           if (error) throw error;
         }
-        input.value = '';
-        showToast('Note sent with read-receipt tracking.');
+
+        inputEl.value = '';
+        showToast('Message sent to student!');
         await loadMonitoredStudentWorkspace(singleLinkedStudent.id);
       } catch (err) {
         showToast('Could not send message.', 'error');
@@ -2658,68 +2823,186 @@
 
     function handleResetStudentDeviceLock() {
       if (!singleLinkedStudent) return;
-      const student = singleLinkedStudent;
-
       openConfirmModal(
-        'Reset Student Hardware Lock?',
-        `This allows ${student.name} (#${student.device_number_id}) to bind a new phone or laptop on their next visit.`,
+        'Reset Hardware Lock?',
+        `Allow ${singleLinkedStudent.name} to log in from a new laptop or phone? Their next sign-in will bind to that new hardware signature.`,
         async () => {
           try {
-            const newToken = generateCryptographicToken();
             if (isLocalSandboxMode) {
               const profiles = getSandboxTable('study_profiles');
-              const idx = profiles.findIndex(p => p.id === student.id);
+              const idx = profiles.findIndex(p => p.id === singleLinkedStudent.id);
               if (idx !== -1) {
-                profiles[idx].device_token = newToken;
+                profiles[idx].device_model = '';
                 saveSandboxTable('study_profiles', profiles);
               }
             } else {
               const { error } = await dbClient
                 .from('study_profiles')
-                .update({ device_token: newToken })
-                .eq('id', student.id);
+                .update({ device_model: '' })
+                .eq('id', singleLinkedStudent.id);
               if (error) throw error;
             }
-            showToast(`Hardware lock reset for ${student.name}.`);
+            showToast('Device lock cleared for student.');
+            await loadMonitoredStudentWorkspace(singleLinkedStudent.id);
           } catch (err) {
-            showToast('Failed to reset device lock.', 'error');
+            showToast('Could not reset device lock.', 'error');
           }
         }
       );
     }
 
+    function setupRealtimeAndBackgroundSync() {
+      if (isLocalSandboxMode || !dbClient) return;
+
+      const isRestrictedIframe = (() => {
+        try {
+          return window.self !== window.top;
+        } catch (e) {
+          return true;
+        }
+      })();
+
+      if (!isRestrictedIframe) {
+        try {
+          if (realtimeChannel) {
+            dbClient.removeChannel(realtimeChannel);
+          }
+          realtimeChannel = dbClient
+            .channel('studydomain-live-sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'study_profiles' }, () => triggerLiveRefresh())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'student_subjects' }, () => triggerLiveRefresh())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => triggerLiveRefresh())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'scheduled_tests' }, () => triggerLiveRefresh())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_notes' }, () => triggerLiveRefresh())
+            .subscribe();
+        } catch (e) {}
+      }
+
+      if (backgroundSyncTimer) clearInterval(backgroundSyncTimer);
+      backgroundSyncTimer = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          triggerLiveRefresh();
+        }
+      }, 2500);
+    }
+
+    let refreshDebounce = null;
+    function triggerLiveRefresh() {
+      if (!currentProfile) return;
+      if (refreshDebounce) clearTimeout(refreshDebounce);
+      refreshDebounce = setTimeout(() => {
+        if (currentProfile.role === 'parent') {
+          loadParentDashboardData(false);
+        } else if (getLinkedParentIdsArray(currentProfile).length > 0) {
+          loadStudentDashboardData(false);
+        } else {
+          refreshCurrentProfileState();
+        }
+      }, 250);
+    }
+
     // -----------------------------------------------------------------------
-    // 11. ACCOUNT SETTINGS & UNBONDING ENGINE
+    // 11. ACCOUNT SETTINGS (UP TO 2 PARENTS) & UNBONDING ENGINE
     // -----------------------------------------------------------------------
     async function openAccountSettingsModal() {
       if (!currentProfile) return;
 
       const isStudent = currentProfile.role === 'student';
-      const parentData = isStudent ? linkedParentProfile : currentProfile;
       const studentData = isStudent ? currentProfile : singleLinkedStudent;
 
-      // Populate Parent Section
-      const parStatusBadge = document.getElementById('settingsParentStatusBadge');
-      const parBody = document.getElementById('settingsParentCardBody');
-      if (parentData) {
-        parStatusBadge.textContent = isStudent ? 'Linked Parent' : 'You (Parent)';
-        parBody.classList.remove('hidden');
-        renderAvatarIntoElement(document.getElementById('settingsParentAvatar'), parentData.avatar_url, 'fa-user-tie');
-        document.getElementById('settingsParentName').textContent = parentData.name;
-        document.getElementById('settingsParentHardware').textContent = parentData.device_model || 'Hardware Verified';
-        document.getElementById('settingsParentDeviceId').textContent = parentData.device_number_id;
-        document.getElementById('settingsCopyParentIdBtn').onclick = () => copyTextToClipboard(parentData.device_number_id);
+      let parentsList = [];
+      if (isStudent) {
+        parentsList = [...linkedParentProfiles];
       } else {
-        parStatusBadge.textContent = 'Not Linked';
-        parBody.classList.add('hidden');
+        parentsList = [currentProfile];
+        if (studentData) {
+          const allParentIds = getLinkedParentIdsArray(studentData).filter(pid => pid !== currentProfile.id);
+          if (allParentIds.length > 0) {
+            if (isLocalSandboxMode) {
+              const coParents = getSandboxTable('study_profiles').filter(p => allParentIds.includes(p.id));
+              parentsList.push(...coParents);
+            } else {
+              const { data: coParentsData } = await dbClient
+                .from('study_profiles')
+                .select('*')
+                .in('id', allParentIds);
+              if (coParentsData) parentsList.push(...coParentsData);
+            }
+          }
+        }
       }
 
-      // Populate Student Section
+      const parStatusBadge = document.getElementById('settingsParentStatusBadge');
+      const parentsContainer = document.getElementById('settingsParentsListContainer');
+      const addSecondBox = document.getElementById('settingsAddSecondParentBox');
+
+      parStatusBadge.textContent = `${parentsList.length} / 2 Linked`;
+
+      if (parentsList.length === 0) {
+        parentsContainer.innerHTML = '<p class="text-xs text-slate-500">No parent linked yet.</p>';
+      } else {
+        parentsContainer.innerHTML = parentsList.map((pObj, idx) => {
+          const isMe = pObj.id === currentProfile.id;
+          const canUnbondThisParent = isStudent || isMe;
+          return `
+            <div class="p-3 rounded-xl bg-white border border-indigo-100 flex items-center justify-between gap-2.5">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm font-extrabold overflow-hidden shrink-0">
+                  ${
+                    pObj.avatar_url && pObj.avatar_url.startsWith('data:image')
+                      ? `<img src="${pObj.avatar_url}" alt="Avatar" class="w-full h-full object-cover" />`
+                      : `<i class="fa-solid ${escapeHtml(pObj.avatar_url && pObj.avatar_url.startsWith('fa-') ? pObj.avatar_url : 'fa-user-tie')}"></i>`
+                  }
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <p class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(pObj.name)}</p>
+                    <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[9px] font-extrabold shrink-0">${isMe ? 'You' : `Parent ${idx + 1}`}</span>
+                  </div>
+                  <p class="font-mono-code text-[10px] text-slate-500 truncate mt-0.5">${escapeHtml(pObj.device_model || 'Hardware Verified')}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onclick="copyTextToClipboard('${escapeHtml(pObj.device_number_id)}')"
+                  class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-mono-code text-[11px] font-extrabold transition"
+                  title="Copy Parent ID"
+                >
+                  #${escapeHtml(pObj.device_number_id)}
+                </button>
+                ${
+                  canUnbondThisParent && studentData
+                    ? `<button
+                        type="button"
+                        onclick="handleUnbondSpecificParent('${pObj.id}', '${escapeHtml(pObj.name)}')"
+                        class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-extrabold transition"
+                        title="Unbond"
+                      >
+                        Unbond
+                      </button>`
+                    : ''
+                }
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const secondInput = document.getElementById('settingsSecondParentInput');
+      if (secondInput) secondInput.value = '';
+      if (studentData && getLinkedParentIdsArray(studentData).length === 1) {
+        addSecondBox.classList.remove('hidden');
+      } else {
+        addSecondBox.classList.add('hidden');
+      }
+
       const stuStatusBadge = document.getElementById('settingsStudentStatusBadge');
       const stuBody = document.getElementById('settingsStudentCardBody');
       const noStuMsg = document.getElementById('settingsNoStudentMsg');
       if (studentData) {
-        stuStatusBadge.textContent = isStudent ? 'You (Student)' : '1:1 Linked';
+        stuStatusBadge.textContent = isStudent ? 'You (Student)' : 'Linked';
         stuBody.classList.remove('hidden');
         noStuMsg.classList.add('hidden');
         renderAvatarIntoElement(document.getElementById('settingsStudentAvatar'), studentData.avatar_url, 'fa-user-graduate');
@@ -2734,57 +3017,127 @@
         noStuMsg.classList.remove('hidden');
       }
 
-      // Configure Reset Hardware Lock & Unbond Buttons
       const resetLockBtn = document.getElementById('settingsResetLockBtn');
-      const unbondBtn = document.getElementById('settingsUnbondBtn');
-      const unbondText = document.getElementById('settingsUnbondBtnText');
-
       if (!isStudent && studentData) {
         resetLockBtn.classList.remove('hidden');
       } else {
         resetLockBtn.classList.add('hidden');
       }
 
-      if (isStudent && currentProfile.linked_parent_id) {
-        unbondBtn.classList.remove('hidden');
-        unbondText.textContent = 'Unbond from Parent';
-      } else if (!isStudent && studentData) {
-        unbondBtn.classList.remove('hidden');
-        unbondText.textContent = `Unbond Student (${studentData.name})`;
-      } else {
-        unbondBtn.classList.add('hidden');
-      }
-
       openModal('modalAccountSettings');
     }
 
-    function handleUnbondRelationship() {
+    async function handleAddSecondParentFromSettings() {
+      const inputEl = document.getElementById('settingsSecondParentInput');
+      const cleanId = (inputEl ? inputEl.value : '').replace(/\D/g, '').slice(0, 6);
+      if (cleanId.length !== 6) {
+        showToast('Enter a valid 6-digit Parent Device ID.', 'error');
+        return;
+      }
+
+      const isStudent = currentProfile.role === 'student';
+      const targetStudent = isStudent ? currentProfile : singleLinkedStudent;
+      if (!targetStudent) return;
+
+      const existingIds = getLinkedParentIdsArray(targetStudent);
+      if (existingIds.length >= 2) {
+        showToast('Maximum 2 parents already linked.', 'error');
+        return;
+      }
+
+      try {
+        let secondParent = null;
+        if (isLocalSandboxMode) {
+          secondParent = getSandboxTable('study_profiles').find(
+            p => p.device_number_id === cleanId && p.role === 'parent'
+          );
+        } else {
+          const { data, error } = await dbClient
+            .from('study_profiles')
+            .select('*')
+            .eq('device_number_id', cleanId)
+            .eq('role', 'parent')
+            .maybeSingle();
+          if (error) throw error;
+          secondParent = data;
+        }
+
+        if (!secondParent) {
+          showToast(`No Parent account found with ID #${cleanId}.`, 'error');
+          return;
+        }
+
+        if (existingIds.includes(secondParent.id)) {
+          showToast('This parent is already linked.', 'info');
+          return;
+        }
+
+        const updatedLinkedStr = formatLinkedParentIdsString([...existingIds, secondParent.id]);
+
+        if (isLocalSandboxMode) {
+          const profiles = getSandboxTable('study_profiles');
+          const idx = profiles.findIndex(p => p.id === targetStudent.id);
+          if (idx !== -1) {
+            profiles[idx].linked_parent_id = updatedLinkedStr;
+            saveSandboxTable('study_profiles', profiles);
+            if (isStudent) currentProfile = profiles[idx];
+            else singleLinkedStudent = profiles[idx];
+          }
+        } else {
+          const { data, error } = await dbClient
+            .from('study_profiles')
+            .update({ linked_parent_id: updatedLinkedStr })
+            .eq('id', targetStudent.id)
+            .select()
+            .single();
+          if (error) throw error;
+          if (isStudent) currentProfile = data;
+          else singleLinkedStudent = data;
+        }
+
+        showToast(`Second Parent (${secondParent.name}) added!`);
+        if (isStudent) {
+          await loadStudentDashboardData(false);
+        } else {
+          await loadParentDashboardData(false);
+        }
+        await openAccountSettingsModal();
+      } catch (err) {
+        console.error('Add second parent error:', err);
+        showToast('Could not add second parent.', 'error');
+      }
+    }
+
+    function handleUnbondSpecificParent(parentIdToRemove, parentName) {
       if (!currentProfile) return;
       const isStudent = currentProfile.role === 'student';
-      const targetStudentId = isStudent ? currentProfile.id : (singleLinkedStudent ? singleLinkedStudent.id : null);
-      if (!targetStudentId) return;
+      const targetStudent = isStudent ? currentProfile : singleLinkedStudent;
+      if (!targetStudent) return;
 
-      const title = isStudent ? 'Unbond from Parent?' : 'Unbond Student Account?';
+      const title = isStudent ? `Unbond ${parentName}?` : 'Unbond Student Account?';
       const desc = isStudent
-        ? 'You will be disconnected from your Parent and returned to the linking screen until you link a Parent ID again.'
-        : `This will disconnect ${singleLinkedStudent.name} from your Parent console. You can link a student again anytime.`;
+        ? `Disconnect ${parentName} from your account? If no parents remain linked, you will return to the Parent Linking screen.`
+        : `Disconnect ${targetStudent.name} from your Parent console?`;
 
       closeModal('modalAccountSettings');
       openConfirmModal(title, desc, async () => {
         try {
+          const remainingIds = getLinkedParentIdsArray(targetStudent).filter(id => id !== parentIdToRemove);
+          const nextLinkedStr = formatLinkedParentIdsString(remainingIds);
+
           if (isLocalSandboxMode) {
             const profiles = getSandboxTable('study_profiles');
-            const idx = profiles.findIndex(p => p.id === targetStudentId);
+            const idx = profiles.findIndex(p => p.id === targetStudent.id);
             if (idx !== -1) {
-              profiles[idx].linked_parent_id = null;
+              profiles[idx].linked_parent_id = nextLinkedStr;
               saveSandboxTable('study_profiles', profiles);
               if (isStudent) currentProfile = profiles[idx];
             }
           } else {
             const { data, error } = await dbClient
               .from('study_profiles')
-              .update({ linked_parent_id: null })
-              .eq('id', targetStudentId)
+              .update({ linked_parent_id: nextLinkedStr })
+              .eq('id', targetStudent.id)
               .select()
               .single();
             if (error) throw error;
@@ -2793,8 +3146,12 @@
 
           showToast('Unbonded successfully.');
           if (isStudent) {
-            linkedParentProfile = null;
-            await mountStudentLinkGate();
+            if (remainingIds.length === 0) {
+              linkedParentProfiles = [];
+              await mountStudentLinkGate();
+            } else {
+              await loadStudentDashboardData(false);
+            }
           } else {
             singleLinkedStudent = null;
             await loadParentDashboardData(false);
@@ -2807,33 +3164,162 @@
     }
 
     // -----------------------------------------------------------------------
-    // 12. MODAL & BOOT INITIALIZATION
+    // 12. DAILY / WEEKLY / MONTHLY ANALYTICS POPUP DASHBOARD
+    // -----------------------------------------------------------------------
+    function openAnalyticsPopupModal() {
+      if (!currentProfile) return;
+      if (currentProfile.role === 'parent' && !singleLinkedStudent) {
+        showToast('Link a student first to view their analytics dashboard.', 'info');
+        return;
+      }
+      openModal('modalAnalyticsPopup');
+      switchDashboardPeriod(activeDashboardPeriod || 'daily');
+    }
+
+    function switchDashboardPeriod(period) {
+      activeDashboardPeriod = period;
+      const dailyBtn = document.getElementById('dashPeriodDailyBtn');
+      const weeklyBtn = document.getElementById('dashPeriodWeeklyBtn');
+      const monthlyBtn = document.getElementById('dashPeriodMonthlyBtn');
+
+      const inactiveCls = 'px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition';
+      if (dailyBtn) dailyBtn.className = period === 'daily' ? 'px-3 py-1.5 rounded-lg bg-white text-emerald-700 shadow-2xs transition' : inactiveCls;
+      if (weeklyBtn) weeklyBtn.className = period === 'weekly' ? 'px-3 py-1.5 rounded-lg bg-white text-indigo-700 shadow-2xs transition' : inactiveCls;
+      if (monthlyBtn) monthlyBtn.className = period === 'monthly' ? 'px-3 py-1.5 rounded-lg bg-white text-amber-700 shadow-2xs transition' : inactiveCls;
+
+      renderAnalyticsPopupData();
+    }
+
+    function renderAnalyticsPopupData() {
+      const isStudent = currentProfile && currentProfile.role === 'student';
+      const subjects = isStudent ? studentSubjects : monitoredSubjects;
+      const topics = isStudent ? studentTopics : monitoredTopics;
+      const tests = isStudent ? studentTests : monitoredTests;
+
+      const todayStr = getTodayDateString();
+      let startDateStr = todayStr;
+      let periodLabel = 'Today';
+
+      if (activeDashboardPeriod === 'weekly') {
+        startDateStr = getLocalIsoDate(-6);
+        periodLabel = 'Last 7 Days';
+      } else if (activeDashboardPeriod === 'monthly') {
+        startDateStr = getLocalIsoDate(-29);
+        periodLabel = 'Last 30 Days';
+      }
+
+      const periodTopics = topics.filter(t => t.target_date >= startDateStr && t.target_date <= todayStr);
+      const coveredTopics = periodTopics.filter(t => t.is_completed);
+      const completionRate = periodTopics.length > 0 ? Math.round((coveredTopics.length / periodTopics.length) * 100) : 0;
+
+      const periodCompletedTests = tests.filter(t => {
+        if (t.status !== 'completed' || !t.max_marks || t.max_marks <= 0) return false;
+        const testDateStr = (t.scheduled_at || '').slice(0, 10);
+        return testDateStr >= startDateStr && testDateStr <= todayStr;
+      });
+
+      const testAvgPct = periodCompletedTests.length > 0
+        ? Math.round(periodCompletedTests.reduce((sum, t) => sum + (t.marks_obtained / t.max_marks) * 100, 0) / periodCompletedTests.length)
+        : null;
+
+      document.getElementById('dashStatCovered').textContent = `${coveredTopics.length} / ${periodTopics.length}`;
+      document.getElementById('dashStatPeriodLabel').textContent = periodLabel;
+      document.getElementById('dashStatRate').textContent = `${completionRate}%`;
+      document.getElementById('dashStatTestsCount').textContent = String(periodCompletedTests.length);
+      document.getElementById('dashStatTestAvg').textContent = testAvgPct !== null ? `${testAvgPct}%` : '—';
+      document.getElementById('dashSubjectTotalBadge').textContent = `${subjects.length} Subjects`;
+
+      const subjBarsEl = document.getElementById('dashSubjectBarsList');
+      if (subjects.length === 0) {
+        subjBarsEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No subjects added yet.</p>';
+      } else {
+        subjBarsEl.innerHTML = subjects.map(subj => {
+          const sTopics = periodTopics.filter(t => t.subject_id === subj.id);
+          const sDone = sTopics.filter(t => t.is_completed).length;
+          const sPct = sTopics.length > 0 ? Math.round((sDone / sTopics.length) * 100) : 0;
+          return `
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${escapeHtml(subj.color_hex || '#10b981')};"></span>
+                  <span class="font-bold text-slate-800 truncate">${escapeHtml(subj.subject_name)}</span>
+                </div>
+                <span class="font-mono-code text-[11px] font-extrabold text-slate-600 shrink-0">${sDone}/${sTopics.length} (${sPct}%)</span>
+              </div>
+              <div class="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-300" style="width: ${sPct}%; background-color: ${escapeHtml(subj.color_hex || '#10b981')};"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const trendEl = document.getElementById('dashDailyTrendList');
+      const byDate = {};
+      periodTopics.forEach(t => {
+        if (!byDate[t.target_date]) byDate[t.target_date] = { total: 0, done: 0 };
+        byDate[t.target_date].total += 1;
+        if (t.is_completed) byDate[t.target_date].done += 1;
+      });
+
+      const dateKeys = Object.keys(byDate).sort((a, b) => b.localeCompare(a));
+      if (dateKeys.length === 0) {
+        trendEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">No topics scheduled during ${periodLabel.toLowerCase()}.</p>`;
+      } else {
+        trendEl.innerHTML = dateKeys.map(dKey => {
+          const stats = byDate[dKey];
+          const dPct = Math.round((stats.done / stats.total) * 100);
+          return `
+            <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+              <span class="font-mono-code font-extrabold text-slate-800">${escapeHtml(dKey === todayStr ? `${dKey} (Today)` : dKey)}</span>
+              <div class="flex items-center gap-2.5">
+                <span class="text-[11px] font-bold text-slate-600">${stats.done} / ${stats.total} Covered</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${dPct === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                  ${dPct}%
+                </span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 13. MODAL & BOOT INITIALIZATION
     // -----------------------------------------------------------------------
     function openModal(id) {
       const el = document.getElementById(id);
-      if (el) {
-        el.classList.remove('hidden');
-        el.classList.add('flex');
-      }
+      if (!el) return;
+      el.classList.remove('hidden');
+      el.classList.add('flex');
     }
 
     function closeModal(id) {
       const el = document.getElementById(id);
-      if (el) {
-        el.classList.add('hidden');
-        el.classList.remove('flex');
-      }
+      if (!el) return;
+      el.classList.add('hidden');
+      el.classList.remove('flex');
     }
 
-    function openConfirmModal(title, desc, onConfirm) {
-      document.getElementById('confirmModalTitle').textContent = title;
-      document.getElementById('confirmModalDesc').textContent = desc;
-      const btn = document.getElementById('confirmModalProceedBtn');
-      btn.onclick = async () => {
-        closeModal('modalConfirmAction');
-        await onConfirm();
-      };
+    function openConfirmModal(title, desc, onConfirmCallback) {
+      const titleEl = document.getElementById('confirmModalTitle');
+      const descEl = document.getElementById('confirmModalDesc');
+      const proceedBtn = document.getElementById('confirmModalProceedBtn');
+      if (titleEl) titleEl.textContent = title;
+      if (descEl) descEl.textContent = desc;
+      if (proceedBtn) {
+        proceedBtn.onclick = async () => {
+          closeModal('modalConfirmAction');
+          if (typeof onConfirmCallback === 'function') {
+            await onConfirmCallback();
+          }
+        };
+      }
       openModal('modalConfirmAction');
+    }
+
+    function retryBootSequence() {
+      bootApplication();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
