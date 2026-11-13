@@ -1,0 +1,2795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyBridge — Student & Parent Accountability</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- FontAwesome 6.5.1 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Supabase JS v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card-surface {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.05);
+    }
+
+    .soft-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .soft-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .soft-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-in {
+      animation: fadeSlideUp 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+
+  <!-- Top Global Toast Notification -->
+  <div id="toastBanner" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none max-w-[92vw]">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastText">Notification</span>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 1: BOOT LOADING SCREEN                                           -->
+  <!-- ===================================================================== -->
+  <div id="viewLoading" class="flex-grow flex flex-col items-center justify-center p-6 text-center">
+    <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-emerald-600/20 mb-4">
+      <i class="fa-solid fa-graduation-cap"></i>
+    </div>
+    <h1 class="text-xl font-extrabold tracking-tight text-slate-900">StudyBridge</h1>
+    <p id="loadingSubtitle" class="text-xs font-medium text-slate-500 mt-1.5">Verifying device hardware lock & Supabase sync...</p>
+    <div class="mt-5 w-40 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+      <div class="h-full bg-emerald-600 rounded-full animate-pulse w-2/3"></div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 2: DEVICE LOCK SECURITY BLOCK SCREEN                             -->
+  <!-- ===================================================================== -->
+  <div id="viewDeviceLocked" class="hidden flex-grow flex items-center justify-center p-4 sm:p-6">
+    <div class="card-surface rounded-3xl max-w-md w-full p-6 sm:p-8 text-center animate-in">
+      <div class="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-600 mx-auto flex items-center justify-center text-2xl mb-4">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-[11px] font-bold uppercase tracking-wider">
+        Hardware Lock Active
+      </span>
+      <h2 class="text-xl font-extrabold text-slate-900 mt-3">Unauthorized Device Detected</h2>
+      <p id="deviceLockMessage" class="text-xs text-slate-600 mt-2 leading-relaxed">
+        Student accounts are strictly bound to their registered physical device. Logging in from another phone or laptop is blocked for accountability.
+      </p>
+
+      <div class="mt-5 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2 text-xs">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Current Device:</span>
+          <span id="lockCurrentDevice" class="font-bold text-slate-800">Unknown</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Registered Device:</span>
+          <span id="lockRegisteredDevice" class="font-bold text-emerald-700">Unknown</span>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-slate-500 mt-4">
+        Ask your linked Parent to click <strong>"Reset Student Device Lock"</strong> on their dashboard if you switched to a new phone.
+      </p>
+
+      <button type="button" onclick="retryBootSequence()" class="mt-6 w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>Re-Verify This Device</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 3: FIRST-TIME DEVICE ONBOARDING SCREEN                           -->
+  <!-- ===================================================================== -->
+  <div id="viewOnboarding" class="hidden flex-grow flex items-center justify-center p-4 sm:p-8">
+    <div class="card-surface rounded-3xl max-w-lg w-full p-6 sm:p-8 animate-in">
+      <!-- Top Brand & Detected Device Pill -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-5 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-600/20">
+            <i class="fa-solid fa-book-open-reader"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-extrabold text-slate-900 leading-tight">StudyBridge Setup</h1>
+            <p class="text-[11px] text-slate-500 font-medium">Bind this device to your profile</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Device ID</span>
+          <span id="onboardDeviceIdBadge" class="font-mono-code text-xs font-bold px-2.5 py-1 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 inline-block">
+            #000000
+          </span>
+        </div>
+      </div>
+
+      <!-- Detected Hardware Banner -->
+      <div class="mt-4 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-600 shrink-0">
+            <i class="fa-solid fa-mobile-screen-button text-xs"></i>
+          </div>
+          <div class="truncate">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Detected Device Model</span>
+            <span id="onboardDeviceModel" class="text-xs font-bold text-slate-800 truncate block">Detecting...</span>
+          </div>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
+          <i class="fa-solid fa-lock mr-1"></i>Device Bound
+        </span>
+      </div>
+
+      <!-- Registration Form -->
+      <form id="onboardingForm" onsubmit="handleRegisterProfile(event)" class="mt-5 space-y-5">
+        <!-- Avatar Picker + Photo Upload -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-2">Profile Picture or Avatar</label>
+          <div class="flex items-center gap-4">
+            <div id="onboardAvatarPreview" class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 border-2 border-emerald-300 flex items-center justify-center text-2xl font-extrabold overflow-hidden shrink-0 shadow-xs">
+              <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            <div class="flex-grow space-y-2">
+              <div class="flex flex-wrap gap-1.5" id="presetAvatarsRow">
+                <!-- Populated by JS -->
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)" />
+                <button type="button" onclick="document.getElementById('avatarFileInput').click()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-camera"></i>
+                  <span>Upload Photo</span>
+                </button>
+                <span class="text-[10px] text-slate-400">Auto-compressed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full Name -->
+        <div>
+          <label for="onboardNameInput" class="block text-xs font-bold text-slate-700 mb-1.5">Your Full Name</label>
+          <input
+            type="text"
+            id="onboardNameInput"
+            required
+            maxlength="40"
+            placeholder="e.g., Aarav Sharma or Mrs. Sharma"
+            class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition"
+          />
+        </div>
+
+        <!-- Role Selection -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-2">Select Account Role</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" id="roleBtnStudent" onclick="selectOnboardingRole('student')" class="p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 text-left transition relative">
+              <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm mb-2">
+                <i class="fa-solid fa-user-graduate"></i>
+              </div>
+              <div class="text-sm font-extrabold text-slate-900">Student</div>
+              <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Log topics, take tests & link to parent</p>
+            </button>
+
+            <button type="button" id="roleBtnParent" onclick="selectOnboardingRole('parent')" class="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative">
+              <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm mb-2">
+                <i class="fa-solid fa-user-shield"></i>
+              </div>
+              <div class="text-sm font-extrabold text-slate-900">Parent</div>
+              <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Track progress, schedule tests & notes</p>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="onboardSubmitBtn" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2">
+          <span>Continue to StudyBridge</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 4: STUDENT -> PARENT LINKING GATE                                -->
+  <!-- ===================================================================== -->
+  <div id="viewStudentLinkGate" class="hidden flex-grow flex items-center justify-center p-4 sm:p-8">
+    <div class="card-surface rounded-3xl max-w-md w-full p-6 sm:p-8 animate-in">
+      <div class="text-center">
+        <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 mx-auto flex items-center justify-center text-xl mb-3">
+          <i class="fa-solid fa-link"></i>
+        </div>
+        <h2 class="text-xl font-extrabold text-slate-900">Link to Your Parent</h2>
+        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+          Enter your Parent's 6-Digit Device ID below, or share your own Student Device ID so they can add you from their phone.
+        </p>
+      </div>
+
+      <!-- Student's Own Shareable Device ID Box -->
+      <div class="mt-5 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Your Student Device ID</span>
+          <span id="gateStudentOwnId" class="font-mono-code text-lg font-extrabold text-emerald-950 tracking-wider">000000</span>
+        </div>
+        <button type="button" onclick="copyTextToClipboard(currentProfile ? currentProfile.device_number_id : '')" class="px-3.5 py-2 rounded-xl bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition flex items-center gap-1.5">
+          <i class="fa-regular fa-copy"></i>
+          <span>Copy ID</span>
+        </button>
+      </div>
+
+      <!-- Search Parent by 6-Digit Device ID -->
+      <div class="mt-5">
+        <label for="parentSearchIdInput" class="block text-xs font-bold text-slate-700 mb-1.5">Enter Parent's 6-Digit Device ID</label>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            id="parentSearchIdInput"
+            maxlength="6"
+            inputmode="numeric"
+            placeholder="e.g. 849201"
+            oninput="handleLookupParentById(this.value)"
+            class="flex-grow px-4 py-3 rounded-2xl border border-slate-200 font-mono-code text-base font-bold tracking-widest text-center text-slate-900 focus:outline-none focus:border-indigo-500"
+          />
+          <button type="button" onclick="handleLookupParentById(document.getElementById('parentSearchIdInput').value)" class="px-4 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition">
+            Search
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Parent Lookup Preview Card -->
+      <div id="parentLookupPreview" class="hidden mt-4 p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200 animate-in">
+        <div class="flex items-center gap-3">
+          <div id="lookupParentAvatar" class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold overflow-hidden shrink-0"></div>
+          <div class="min-w-0 flex-grow">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block">Parent Account Found</span>
+            <div id="lookupParentName" class="text-sm font-extrabold text-slate-900 truncate">Parent Name</div>
+            <div id="lookupParentDevice" class="text-[11px] text-slate-500 truncate">Device Model</div>
+          </div>
+        </div>
+        <button type="button" id="confirmLinkParentBtn" onclick="confirmLinkToParent()" class="mt-3.5 w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Confirm & Link Account</span>
+        </button>
+      </div>
+
+      <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+        <span class="text-slate-400">Parent linked you from their phone?</span>
+        <button type="button" onclick="refreshCurrentProfileState()" class="font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>Check Status</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 5: STUDENT DASHBOARD                                             -->
+  <!-- ===================================================================== -->
+  <div id="viewStudentDashboard" class="hidden flex-grow flex flex-col max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 pb-20 space-y-5">
+    <!-- Top Student Header -->
+    <header class="card-surface rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div id="stuHeaderAvatar" class="w-13 h-13 w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 border border-emerald-200"></div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 id="stuHeaderName" class="text-base sm:text-lg font-extrabold text-slate-900">Student Name</h1>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase tracking-wider">Student</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500">
+            <span class="inline-flex items-center gap-1 font-medium">
+              <i class="fa-solid fa-mobile-screen text-slate-400"></i>
+              <span id="stuHeaderDevice">Device</span>
+            </span>
+            <span>•</span>
+            <span class="inline-flex items-center gap-1 text-indigo-600 font-bold">
+              <i class="fa-solid fa-link"></i>
+              <span id="stuLinkedParentLabel">Linked to Parent</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between sm:justify-end gap-2.5 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+        <button type="button" onclick="copyTextToClipboard(currentProfile ? currentProfile.device_number_id : '')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold font-mono-code flex items-center gap-1.5 transition" title="Copy Student Device ID">
+          <span class="text-slate-400 font-sans text-[10px] uppercase">ID:</span>
+          <span id="stuHeaderDeviceId">000000</span>
+          <i class="fa-regular fa-copy text-slate-400 text-[11px]"></i>
+        </button>
+
+        <button type="button" onclick="loadStudentDashboardData(true)" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center transition" title="Sync Now">
+          <i class="fa-solid fa-arrows-rotate text-xs" id="stuSyncIcon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Pinned Parent Messages Banner -->
+    <section id="stuMessagesSection" class="card-surface rounded-3xl p-4 sm:p-5 border-l-4 border-l-indigo-600">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-message"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-extrabold text-slate-900">Messages from Parent</h2>
+            <p class="text-[11px] text-slate-500">Viewing automatically sends a read receipt</p>
+          </div>
+        </div>
+        <span id="stuUnreadBadge" class="hidden px-2.5 py-1 rounded-full bg-indigo-600 text-white text-[10px] font-bold">0 New</span>
+      </div>
+      <div id="stuMessagesList" class="space-y-2.5 max-h-52 overflow-y-auto soft-scroll pr-1">
+        <p class="text-xs text-slate-400 py-2">No messages from your parent yet.</p>
+      </div>
+    </section>
+
+    <!-- Parent-Scheduled Tests Section -->
+    <section class="card-surface rounded-3xl p-4 sm:p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-file-pen"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">Parent-Scheduled Tests & Reports</h2>
+            <p class="text-[11px] text-slate-500">Complete scheduled tests and submit your marks</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="stuTestsList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div class="col-span-full text-center py-6 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+          No tests scheduled by your parent yet.
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid: Subject Manager + Today/Tomorrow Study Planner -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <!-- Left Column (4 cols): Subjects Manager -->
+      <section class="lg:col-span-4 card-surface rounded-3xl p-4 sm:p-5 flex flex-col">
+        <div class="flex items-center justify-between mb-3.5">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <h2 class="text-sm font-extrabold text-slate-900">My Subjects</h2>
+          </div>
+          <span id="stuSubjectCount" class="text-[11px] font-bold text-slate-400">0</span>
+        </div>
+
+        <!-- Add Subject Form -->
+        <form onsubmit="handleAddSubject(event)" class="space-y-2.5 pb-4 border-b border-slate-100">
+          <input
+            type="text"
+            id="newSubjectNameInput"
+            required
+            maxlength="30"
+            placeholder="Add subject (e.g. Physics)"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-emerald-500"
+          />
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5" id="subjectColorPicker">
+              <!-- Color dots populated by JS -->
+            </div>
+            <button type="submit" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+              <span>Add</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Subjects List -->
+        <div id="stuSubjectsList" class="mt-3.5 space-y-2 flex-grow max-h-80 overflow-y-auto soft-scroll pr-1">
+          <p class="text-xs text-slate-400 text-center py-4">Add your subjects above to begin planning.</p>
+        </div>
+      </section>
+
+      <!-- Right Column (8 cols): Today & Tomorrow Topic Planner -->
+      <section class="lg:col-span-8 card-surface rounded-3xl p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">Daily Study Topic Planner</h2>
+            <p class="text-[11px] text-slate-500 mt-0.5">Plan for Today or Tomorrow. Tomorrow's items roll over automatically.</p>
+          </div>
+
+          <!-- Today / Tomorrow Tab Switcher -->
+          <div class="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold self-start sm:self-auto">
+            <button type="button" id="stuTabTodayBtn" onclick="switchStudentPlanTab('today')" class="px-3.5 py-1.5 rounded-xl bg-white text-emerald-700 shadow-xs transition">
+              Today's Checklist
+            </button>
+            <button type="button" id="stuTabTomorrowBtn" onclick="switchStudentPlanTab('tomorrow')" class="px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition">
+              Tomorrow's Plan
+            </button>
+          </div>
+        </div>
+
+        <!-- Add Topic Form -->
+        <form onsubmit="handleAddStudyTopic(event)" class="mt-4 grid grid-cols-1 sm:grid-cols-12 gap-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+          <select id="topicSubjectSelect" required class="sm:col-span-4 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500">
+            <option value="">Select Subject...</option>
+          </select>
+
+          <input
+            type="text"
+            id="topicTitleInput"
+            required
+            maxlength="80"
+            placeholder="Topic to cover (e.g. Rotational Motion Ch. 7)"
+            class="sm:col-span-5 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:border-emerald-500"
+          />
+
+          <div class="sm:col-span-3 flex gap-2">
+            <select id="topicDaySelect" class="flex-grow px-2.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:outline-none">
+              <option value="today">Today</option>
+              <option value="tomorrow">Tomorrow</option>
+            </select>
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition shrink-0">
+              Add
+            </button>
+          </div>
+        </form>
+
+        <!-- Progress Bar for Today -->
+        <div id="stuTodayProgressWrap" class="mt-4">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-bold text-slate-600">Today's Coverage Progress</span>
+            <span id="stuProgressText" class="font-mono-code font-bold text-emerald-700">0 / 0 Covered</span>
+          </div>
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div id="stuProgressBar" class="h-full bg-emerald-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Topics Checklist Container -->
+        <div id="stuTopicsContainer" class="mt-4 space-y-2.5">
+          <p class="text-xs text-slate-400 text-center py-8">No topics added for this day yet.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 6: PARENT DASHBOARD                                              -->
+  <!-- ===================================================================== -->
+  <div id="viewParentDashboard" class="hidden flex-grow flex flex-col max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 pb-20 space-y-5">
+    <!-- Top Parent Header -->
+    <header class="card-surface rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div id="parHeaderAvatar" class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 border border-indigo-200"></div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 id="parHeaderName" class="text-base sm:text-lg font-extrabold text-slate-900">Parent Name</h1>
+            <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold uppercase tracking-wider">Parent Console</span>
+          </div>
+          <p id="parHeaderDevice" class="text-[11px] text-slate-500 mt-0.5">Registered Device</p>
+        </div>
+      </div>
+
+      <!-- Shareable Parent Device ID + Sync Button -->
+      <div class="flex flex-wrap items-center gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+        <div class="px-3.5 py-2 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center gap-2.5">
+          <div>
+            <span class="text-[9px] font-extrabold uppercase tracking-wider text-indigo-600 block">Your Parent Device ID</span>
+            <span id="parHeaderDeviceId" class="font-mono-code text-sm font-extrabold text-indigo-950 tracking-wider">000000</span>
+          </div>
+          <button type="button" onclick="copyTextToClipboard(currentProfile ? currentProfile.device_number_id : '')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] font-bold transition">
+            <i class="fa-regular fa-copy mr-1"></i>Copy
+          </button>
+        </div>
+
+        <button type="button" onclick="loadParentDashboardData(true)" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition" title="Refresh Live Data">
+          <i class="fa-solid fa-arrows-rotate text-xs" id="parSyncIcon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Student Selector & Link Student by 6-Digit Device ID Bar -->
+    <section class="card-surface rounded-3xl p-4 sm:p-5">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <!-- Linked Students Tabs -->
+        <div class="flex flex-wrap items-center gap-2" id="parLinkedStudentsBar">
+          <span class="text-xs font-bold text-slate-400">No students linked yet.</span>
+        </div>
+
+        <!-- Add/Search Student by 6-Digit Device ID -->
+        <form onsubmit="handleParentLinkStudent(event)" class="flex items-center gap-2">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input
+              type="text"
+              id="parSearchStudentIdInput"
+              maxlength="6"
+              inputmode="numeric"
+              placeholder="Student 6-Digit ID"
+              class="pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 font-mono-code text-xs font-bold text-slate-900 w-44 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition shrink-0">
+            + Link Student
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Empty State When No Student Is Linked -->
+    <div id="parNoStudentEmpty" class="card-surface rounded-3xl p-10 text-center">
+      <div class="w-16 h-16 rounded-3xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center text-2xl mb-3">
+        <i class="fa-solid fa-user-plus"></i>
+      </div>
+      <h2 class="text-lg font-extrabold text-slate-900">Link Your Child's Device to Begin</h2>
+      <p class="text-xs text-slate-500 max-w-md mx-auto mt-1.5 leading-relaxed">
+        Share your Parent Device ID (<strong id="emptyParIdCopy" class="font-mono-code text-indigo-700">000000</strong>) with your child when they register as a Student, or type their 6-digit Student Device ID in the search bar above.
+      </p>
+    </div>
+
+    <!-- Active Student Monitoring Workspace -->
+    <div id="parStudentWorkspace" class="hidden space-y-5">
+      <!-- Live Student Presence & Device Telemetry Card -->
+      <section class="card-surface rounded-3xl p-4 sm:p-6 bg-gradient-to-r from-white to-slate-50/80">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div id="monitoredStuAvatar" class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-extrabold overflow-hidden shrink-0 border-2 border-emerald-200"></div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 id="monitoredStuName" class="text-lg font-extrabold text-slate-900">Student Name</h2>
+                <span id="monitoredStuIdBadge" class="font-mono-code text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">#000000</span>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs">
+                <span class="inline-flex items-center gap-1.5 text-slate-600 font-medium">
+                  <i class="fa-solid fa-mobile-screen-button text-emerald-600"></i>
+                  <span>Device: <strong id="monitoredStuDevice" class="text-slate-900">Unknown</strong></span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 text-slate-600 font-medium">
+                  <i class="fa-regular fa-clock text-indigo-600"></i>
+                  <span>Last Visit: <strong id="monitoredStuLastVisit" class="text-slate-900">Just now</strong></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+            <button type="button" onclick="openScheduleTestModal()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold shadow-sm shadow-amber-500/20 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-calendar-plus"></i>
+              <span>Schedule Test</span>
+            </button>
+
+            <button type="button" onclick="handleResetStudentDeviceLock()" class="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition flex items-center gap-1.5" title="Allow student to re-bind on a new phone">
+              <i class="fa-solid fa-unlock-keyhole"></i>
+              <span>Reset Device Lock</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Today's Study Completion Progress Bar -->
+        <div class="mt-5 pt-4 border-t border-slate-100">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-bold text-slate-600">Today's Study Target Completion</span>
+            <span id="parTodayProgressLabel" class="font-mono-code font-extrabold text-emerald-700">0 / 0 Topics Covered (0%)</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div id="parTodayProgressBar" class="h-full bg-emerald-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2-Column Grid: Today's & Tomorrow's Topics (Read-Only) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Today's Topics -->
+        <section class="card-surface rounded-3xl p-4 sm:p-5">
+          <div class="flex items-center justify-between mb-3.5">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-list-check"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-extrabold text-slate-900">Today's Study Topics</h3>
+                <p class="text-[11px] text-slate-500">Live checklist ticked by student</p>
+              </div>
+            </div>
+            <span id="parTodayCountPill" class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">0</span>
+          </div>
+          <div id="parTodayTopicsList" class="space-y-2.5 max-h-80 overflow-y-auto soft-scroll pr-1">
+            <p class="text-xs text-slate-400 text-center py-6">No topics logged for today yet.</p>
+          </div>
+        </section>
+
+        <!-- Tomorrow's Planned Topics -->
+        <section class="card-surface rounded-3xl p-4 sm:p-5">
+          <div class="flex items-center justify-between mb-3.5">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-calendar-day"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-extrabold text-slate-900">Tomorrow's Planned Topics</h3>
+                <p class="text-[11px] text-slate-500">Queued ahead for tomorrow's checklist</p>
+              </div>
+            </div>
+            <span id="parTomorrowCountPill" class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-bold">0</span>
+          </div>
+          <div id="parTomorrowTopicsList" class="space-y-2.5 max-h-80 overflow-y-auto soft-scroll pr-1">
+            <p class="text-xs text-slate-400 text-center py-6">Student hasn't queued topics for tomorrow yet.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- 2-Column Grid: Scheduled Tests & Reports + Parent-to-Student Messages -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Tests & Reports (7 cols) -->
+        <section class="lg:col-span-7 card-surface rounded-3xl p-4 sm:p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-clipboard-check"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-extrabold text-slate-900">Scheduled Tests & Score Reports</h3>
+                <p class="text-[11px] text-slate-500">Assign tests & inspect submitted marks</p>
+              </div>
+            </div>
+            <button type="button" onclick="openScheduleTestModal()" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold transition">
+              + New Test
+            </button>
+          </div>
+
+          <div id="parTestsList" class="space-y-3 max-h-96 overflow-y-auto soft-scroll pr-1">
+            <p class="text-xs text-slate-400 text-center py-8">No tests assigned to this student yet.</p>
+          </div>
+        </section>
+
+        <!-- Parent-to-Student Message Box with Read Receipts (5 cols) -->
+        <section class="lg:col-span-5 card-surface rounded-3xl p-4 sm:p-5 flex flex-col">
+          <div class="flex items-center gap-2 mb-3.5">
+            <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-paper-plane"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-900">Send Note to Student</h3>
+              <p class="text-[11px] text-slate-500">Includes live Seen / Unseen read receipts</p>
+            </div>
+          </div>
+
+          <form onsubmit="handleSendParentNote(event)" class="flex gap-2 pb-3.5 border-b border-slate-100">
+            <input
+              type="text"
+              id="parentNoteInput"
+              required
+              maxlength="220"
+              placeholder="Write instructions or encouragement..."
+              class="flex-grow px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-500"
+            />
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition shrink-0">
+              Send
+            </button>
+          </form>
+
+          <div id="parNotesList" class="mt-3.5 space-y-2.5 flex-grow max-h-80 overflow-y-auto soft-scroll pr-1">
+            <p class="text-xs text-slate-400 text-center py-6">No messages sent yet.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: PARENT SCHEDULE TEST MODAL                                   -->
+  <!-- ===================================================================== -->
+  <div id="modalScheduleTest" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="card-surface rounded-3xl max-w-md w-full p-6 animate-in">
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-file-circle-plus"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Schedule a Test</h3>
+            <p class="text-[11px] text-slate-500">Assign topic, time, questions & duration</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('modalScheduleTest')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateScheduledTest(event)" class="mt-4 space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Subject</label>
+          <input type="text" id="testSubjectInput" required maxlength="40" placeholder="e.g., Physics" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-amber-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Topic to be Tested</label>
+          <input type="text" id="testTopicInput" required maxlength="80" placeholder="e.g., Electrostatics & Gauss Law" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-amber-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Test Date & Time</label>
+          <input type="datetime-local" id="testDateTimeInput" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-amber-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">No. of Questions</label>
+            <input type="number" id="testQuestionsInput" required min="1" max="500" value="25" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono-code text-xs font-bold focus:outline-none focus:border-amber-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Duration (Minutes)</label>
+            <input type="number" id="testDurationInput" required min="5" max="360" value="45" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono-code text-xs font-bold focus:outline-none focus:border-amber-500" />
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-2.5">
+          <button type="button" onclick="closeModal('modalScheduleTest')" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+            Cancel
+          </button>
+          <button type="submit" class="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-md shadow-amber-500/20 transition">
+            Assign Test
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: STUDENT SUBMIT TEST REPORT MODAL                             -->
+  <!-- ===================================================================== -->
+  <div id="modalSubmitTestReport" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="card-surface rounded-3xl max-w-sm w-full p-6 animate-in">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">Submit Test Score</h3>
+          <p id="submitReportTestTitle" class="text-[11px] text-slate-500 truncate max-w-[230px]">Subject - Topic</p>
+        </div>
+        <button type="button" onclick="closeModal('modalSubmitTestReport')" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleConfirmSubmitTestReport(event)" class="mt-4 space-y-3.5">
+        <input type="hidden" id="submitReportTestId" />
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Marks Obtained</label>
+            <input type="number" step="0.5" min="0" id="reportMarksObtainedInput" required placeholder="e.g. 22" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono-code text-sm font-bold focus:outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Total / Max Marks</label>
+            <input type="number" step="0.5" min="1" id="reportMaxMarksInput" required placeholder="e.g. 25" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono-code text-sm font-bold focus:outline-none focus:border-emerald-500" />
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 transition">
+          Save & Send Report to Parent
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: CONFIRM ACTION MODAL (REPLACES confirm())                    -->
+  <!-- ===================================================================== -->
+  <div id="modalConfirmAction" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="card-surface rounded-3xl max-w-sm w-full p-6 text-center animate-in">
+      <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center text-lg mb-3">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 id="confirmModalTitle" class="text-base font-extrabold text-slate-900">Confirm Action</h3>
+      <p id="confirmModalDesc" class="text-xs text-slate-500 mt-1.5 leading-relaxed">Are you sure?</p>
+      <div class="mt-5 flex gap-2.5">
+        <button type="button" onclick="closeModal('modalConfirmAction')" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+          Cancel
+        </button>
+        <button type="button" id="confirmModalProceedBtn" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs transition">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION JAVASCRIPT                                                -->
+  <!-- ===================================================================== -->
+  <script>
+    // -----------------------------------------------------------------------
+    // 1. SUPABASE CONFIGURATION & SAFE STORAGE LAYER
+    // -----------------------------------------------------------------------
+    const SUPABASE_URL = 'https://ujuotnduekxyuecvbued.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_OPHlLhgeWutPNcgrO-Q3hQ_u54Mvcxq';
+
+    // Track whether live Supabase network calls are reachable or if running in an isolated preview sandbox
+    let isLocalSandboxMode = false;
+    const LOCAL_DB_STORAGE_KEY = 'sb_studybridge_local_db_v1';
+
+    function getLocalDb() {
+      try {
+        const raw = safeStorage.getItem(LOCAL_DB_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return {
+        study_profiles: [],
+        student_subjects: [],
+        study_topics: [],
+        scheduled_tests: [],
+        parent_notes: []
+      };
+    }
+
+    function saveLocalDb(db) {
+      try {
+        safeStorage.setItem(LOCAL_DB_STORAGE_KEY, JSON.stringify(db));
+      } catch (e) {}
+    }
+
+    function generateLocalUuid() {
+      try {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+          return window.crypto.randomUUID();
+        }
+      } catch (e) {}
+      return 'loc_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function isNetworkFetchError(err) {
+      if (!err) return false;
+      const msg = String(err.message || err.details || err).toLowerCase();
+      return msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load failed');
+    }
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    });
+
+    // Safe storage wrapper with in-memory fallback for sandboxed iframes
+    const memoryStorageFallback = {};
+    const safeStorage = {
+      getItem(key) {
+        try {
+          return window.localStorage.getItem(key);
+        } catch (err) {
+          return Object.prototype.hasOwnProperty.call(memoryStorageFallback, key)
+            ? memoryStorageFallback[key]
+            : null;
+        }
+      },
+      setItem(key, value) {
+        memoryStorageFallback[key] = String(value);
+        try {
+          window.localStorage.setItem(key, String(value));
+        } catch (err) {
+          // Silently use memoryStorageFallback when iframe blocks storage
+        }
+      },
+      removeItem(key) {
+        delete memoryStorageFallback[key];
+        try {
+          window.localStorage.removeItem(key);
+        } catch (err) {}
+      }
+    };
+
+    // Safe classList helpers that sanitize tokens to prevent DOMTokenList errors
+    function safeAddClass(el, classString) {
+      if (!el || !classString) return;
+      String(classString)
+        .split(/\s+/)
+        .map(t => t.trim())
+        .filter(Boolean)
+        .forEach(token => {
+          try { el.classList.add(token); } catch (e) {}
+        });
+    }
+
+    function safeRemoveClass(el, classString) {
+      if (!el || !classString) return;
+      String(classString)
+        .split(/\s+/)
+        .map(t => t.trim())
+        .filter(Boolean)
+        .forEach(token => {
+          try { el.classList.remove(token); } catch (e) {}
+        });
+    }
+
+    // -----------------------------------------------------------------------
+    // 2. APPLICATION STATE
+    // -----------------------------------------------------------------------
+    const KEY_DEVICE_TOKEN = 'sb_studybridge_device_token';
+    const KEY_DEVICE_NUM_ID = 'sb_studybridge_device_num_id';
+
+    let localDeviceToken = '';
+    let localDeviceNumId = '';
+    let detectedDeviceModel = '';
+
+    let currentProfile = null;
+    let selectedOnboardingRole = 'student';
+    let selectedAvatarValue = 'icon:fa-user-graduate:#059669';
+    let foundParentForLink = null;
+
+    // Student state
+    let studentSubjects = [];
+    let selectedSubjectColor = '#059669';
+    let studentTopics = [];
+    let studentActivePlanTab = 'today';
+    let studentTests = [];
+    let studentMessages = [];
+
+    // Parent state
+    let linkedStudents = [];
+    let activeMonitoredStudentId = null;
+    let monitoredTopics = [];
+    let monitoredTests = [];
+    let monitoredNotes = [];
+    let realtimeSubscription = null;
+
+    const SUBJECT_COLORS = [
+      '#059669', // Emerald
+      '#4f46e5', // Indigo
+      '#d97706', // Amber
+      '#e11d48', // Rose
+      '#0284c7', // Sky
+      '#7c3aed'  // Violet
+    ];
+
+    const PRESET_AVATARS = [
+      { id: 'icon:fa-user-graduate:#059669', icon: 'fa-user-graduate', bg: '#d1fae5', fg: '#059669' },
+      { id: 'icon:fa-user-astronaut:#4f46e5', icon: 'fa-user-astronaut', bg: '#e0e7ff', fg: '#4f46e5' },
+      { id: 'icon:fa-user-ninja:#0284c7', icon: 'fa-user-ninja', bg: '#e0f2fe', fg: '#0284c7' },
+      { id: 'icon:fa-user-tie:#d97706', icon: 'fa-user-tie', bg: '#fef3c7', fg: '#d97706' },
+      { id: 'icon:fa-user-shield:#7c3aed', icon: 'fa-user-shield', bg: '#ede9fe', fg: '#7c3aed' }
+    ];
+
+    // -----------------------------------------------------------------------
+    // 3. DEVICE DETECTION & HARDWARE TOKEN ENGINE
+    // -----------------------------------------------------------------------
+    function detectDeviceHardwareModel() {
+      try {
+        const ua = navigator.userAgent || '';
+        let platform = 'Desktop';
+        let browser = 'Browser';
+
+        if (/Android/i.test(ua)) {
+          const match = ua.match(/Android\s+[\d.]+;\s*([^;)]+)/i);
+          platform = match && match[1] ? match[1].trim() : 'Android Device';
+        } else if (/iPhone/i.test(ua)) {
+          platform = 'Apple iPhone';
+        } else if (/iPad/i.test(ua)) {
+          platform = 'Apple iPad';
+        } else if (/Macintosh|Mac OS X/i.test(ua)) {
+          platform = 'MacBook / macOS';
+        } else if (/Windows NT/i.test(ua)) {
+          platform = 'Windows PC';
+        } else if (/Linux/i.test(ua)) {
+          platform = 'Linux PC';
+        }
+
+        if (/Edg\//i.test(ua)) browser = 'Edge';
+        else if (/Chrome\//i.test(ua) && !/Chromium/i.test(ua)) browser = 'Chrome';
+        else if (/Safari\//i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+        else if (/Firefox\//i.test(ua)) browser = 'Firefox';
+
+        return `${platform} (${browser})`;
+      } catch (e) {
+        return 'Web Device';
+      }
+    }
+
+    function generateCryptographicToken() {
+      try {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+          return 'dev_' + window.crypto.randomUUID();
+        }
+      } catch (e) {}
+      return 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 12);
+    }
+
+    function generateSixDigitId() {
+      return String(Math.floor(100000 + Math.random() * 900000));
+    }
+
+    function ensureLocalDeviceIdentity() {
+      detectedDeviceModel = detectDeviceHardwareModel();
+      localDeviceToken = safeStorage.getItem(KEY_DEVICE_TOKEN);
+      localDeviceNumId = safeStorage.getItem(KEY_DEVICE_NUM_ID);
+
+      if (!localDeviceToken) {
+        localDeviceToken = generateCryptographicToken();
+        safeStorage.setItem(KEY_DEVICE_TOKEN, localDeviceToken);
+      }
+      if (!localDeviceNumId || !/^\d{6}$/.test(localDeviceNumId)) {
+        localDeviceNumId = generateSixDigitId();
+        safeStorage.setItem(KEY_DEVICE_NUM_ID, localDeviceNumId);
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 4. DATE & FORMATTING HELPERS
+    // -----------------------------------------------------------------------
+    function getLocalDateString(offsetDays = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function formatRelativeAndExactTime(isoString) {
+      if (!isoString) return 'Never';
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) return 'Recently';
+
+      const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+      let rel = 'Just now';
+      if (diffSec >= 60 && diffSec < 3600) {
+        const mins = Math.floor(diffSec / 60);
+        rel = `${mins} min${mins === 1 ? '' : 's'} ago`;
+      } else if (diffSec >= 3600 && diffSec < 86400) {
+        const hrs = Math.floor(diffSec / 3600);
+        rel = `${hrs} hr${hrs === 1 ? '' : 's'} ago`;
+      } else if (diffSec >= 86400) {
+        const days = Math.floor(diffSec / 86400);
+        rel = `${days} day${days === 1 ? '' : 's'} ago`;
+      }
+
+      const exact = date.toLocaleString([], {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      return `${rel} • ${exact}`;
+    }
+
+    function formatScheduledDateTime(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      return date.toLocaleString([], {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // -----------------------------------------------------------------------
+    // 5. UI VIEW SWITCHING, TOASTS & MODALS
+    // -----------------------------------------------------------------------
+    const ALL_VIEWS = [
+      'viewLoading',
+      'viewDeviceLocked',
+      'viewOnboarding',
+      'viewStudentLinkGate',
+      'viewStudentDashboard',
+      'viewParentDashboard'
+    ];
+
+    function showView(viewId) {
+      ALL_VIEWS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === viewId) {
+          safeRemoveClass(el, 'hidden');
+          safeAddClass(el, 'flex');
+        } else {
+          safeAddClass(el, 'hidden');
+          safeRemoveClass(el, 'flex');
+        }
+      });
+    }
+
+    let toastTimeout = null;
+    function showToast(message, type = 'success') {
+      const banner = document.getElementById('toastBanner');
+      const icon = document.getElementById('toastIcon');
+      const text = document.getElementById('toastText');
+      if (!banner || !text) return;
+
+      text.textContent = message;
+      icon.className = type === 'error'
+        ? 'fa-solid fa-circle-exclamation text-rose-400'
+        : type === 'info'
+          ? 'fa-solid fa-circle-info text-indigo-400'
+          : 'fa-solid fa-circle-check text-emerald-400';
+
+      safeRemoveClass(banner, 'opacity-0 translate-y-4');
+      safeAddClass(banner, 'opacity-100 translate-y-0');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        safeRemoveClass(banner, 'opacity-100 translate-y-0');
+        safeAddClass(banner, 'opacity-0 translate-y-4');
+      }, 3200);
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      safeRemoveClass(el, 'hidden');
+      safeAddClass(el, 'flex');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      safeAddClass(el, 'hidden');
+      safeRemoveClass(el, 'flex');
+    }
+
+    function askConfirmation(title, description, onConfirmCallback) {
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalDesc').textContent = description;
+      const btn = document.getElementById('confirmModalProceedBtn');
+      btn.onclick = () => {
+        closeModal('modalConfirmAction');
+        onConfirmCallback();
+      };
+      openModal('modalConfirmAction');
+    }
+
+    function copyTextToClipboard(text) {
+      if (!text) return;
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      temp.style.position = 'fixed';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.select();
+      try {
+        document.execCommand('copy');
+        showToast(`Copied ID: ${text}`);
+      } catch (err) {
+        showToast('Could not copy ID', 'error');
+      }
+      document.body.removeChild(temp);
+    }
+
+    function renderAvatarIntoElement(el, avatarUrl, fallbackName = 'U') {
+      if (!el) return;
+      if (avatarUrl && avatarUrl.startsWith('data:image')) {
+        el.innerHTML = `<img src="${avatarUrl}" alt="Avatar" class="w-full h-full object-cover" />`;
+        return;
+      }
+      if (avatarUrl && avatarUrl.startsWith('icon:')) {
+        const parts = avatarUrl.split(':');
+        const iconClass = parts[1] || 'fa-user';
+        const colorHex = parts[2] || '#059669';
+        el.style.backgroundColor = colorHex + '18';
+        el.style.color = colorHex;
+        el.innerHTML = `<i class="fa-solid ${escapeHtml(iconClass)}"></i>`;
+        return;
+      }
+      const initial = (fallbackName || 'U').trim().charAt(0).toUpperCase();
+      el.textContent = initial;
+    }
+
+    // -----------------------------------------------------------------------
+    // 6. BOOT SEQUENCE & DEVICE LOCK VERIFICATION
+    // -----------------------------------------------------------------------
+    async function bootApplication() {
+      showView('viewLoading');
+      ensureLocalDeviceIdentity();
+      initOnboardingUI();
+
+      try {
+        // Query Supabase study_profiles matching this device's hardware token
+        const { data: profile, error } = await supabaseClient
+          .from('study_profiles')
+          .select('*')
+          .eq('device_token', localDeviceToken)
+          .maybeSingle();
+
+        if (error) {
+          if (isNetworkFetchError(error)) {
+            // Switch seamlessly to Local Preview Mode when sandboxed iframe blocks external network fetch
+            isLocalSandboxMode = true;
+            const localDb = getLocalDb();
+            const localProfile = localDb.study_profiles.find(p => p.device_token === localDeviceToken);
+            if (!localProfile) {
+              showToast('Preview Sandbox: Running in Local Sync Mode', 'info');
+              showView('viewOnboarding');
+              return;
+            }
+            localProfile.last_visit_at = new Date().toISOString();
+            localProfile.device_model = detectedDeviceModel;
+            saveLocalDb(localDb);
+            currentProfile = localProfile;
+            routeAuthenticatedProfile();
+            return;
+          }
+          showToast('Database check failed. Ready for setup.', 'error');
+          showView('viewOnboarding');
+          return;
+        }
+
+        if (!profile) {
+          // Device not registered yet -> show Onboarding
+          showView('viewOnboarding');
+          return;
+        }
+
+        // Strict Device Lock Verification
+        if (profile.device_token !== localDeviceToken) {
+          document.getElementById('lockCurrentDevice').textContent = detectedDeviceModel;
+          document.getElementById('lockRegisteredDevice').textContent = profile.device_model || 'Registered Hardware';
+          showView('viewDeviceLocked');
+          return;
+        }
+
+        // Update heartbeat last_visit_at and device_model
+        const nowIso = new Date().toISOString();
+        await supabaseClient
+          .from('study_profiles')
+          .update({
+            last_visit_at: nowIso,
+            device_model: detectedDeviceModel
+          })
+          .eq('id', profile.id);
+
+        profile.last_visit_at = nowIso;
+        profile.device_model = detectedDeviceModel;
+        currentProfile = profile;
+
+        routeAuthenticatedProfile();
+      } catch (err) {
+        if (isNetworkFetchError(err)) {
+          isLocalSandboxMode = true;
+        }
+        showView('viewOnboarding');
+      }
+    }
+
+    function retryBootSequence() {
+      bootApplication();
+    }
+
+    function routeAuthenticatedProfile() {
+      if (!currentProfile) {
+        showView('viewOnboarding');
+        return;
+      }
+
+      if (currentProfile.role === 'parent') {
+        mountParentDashboard();
+      } else {
+        // Student role: verify if linked to a parent
+        if (!currentProfile.linked_parent_id) {
+          document.getElementById('gateStudentOwnId').textContent = currentProfile.device_number_id;
+          showView('viewStudentLinkGate');
+        } else {
+          mountStudentDashboard();
+        }
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 7. ONBOARDING & AVATAR COMPRESSION
+    // -----------------------------------------------------------------------
+    function initOnboardingUI() {
+      document.getElementById('onboardDeviceIdBadge').textContent = `#${localDeviceNumId}`;
+      document.getElementById('onboardDeviceModel').textContent = detectedDeviceModel;
+
+      const presetsRow = document.getElementById('presetAvatarsRow');
+      presetsRow.innerHTML = '';
+      PRESET_AVATARS.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-8 h-8 rounded-xl flex items-center justify-center text-xs border transition';
+        btn.style.backgroundColor = item.bg;
+        btn.style.color = item.fg;
+        btn.style.borderColor = item.fg + '44';
+        btn.innerHTML = `<i class="fa-solid ${item.icon}"></i>`;
+        btn.onclick = () => {
+          selectedAvatarValue = item.id;
+          renderAvatarIntoElement(document.getElementById('onboardAvatarPreview'), selectedAvatarValue);
+        };
+        presetsRow.appendChild(btn);
+      });
+
+      renderAvatarIntoElement(document.getElementById('onboardAvatarPreview'), selectedAvatarValue);
+    }
+
+    function selectOnboardingRole(role) {
+      selectedOnboardingRole = role;
+      const stuBtn = document.getElementById('roleBtnStudent');
+      const parBtn = document.getElementById('roleBtnParent');
+
+      if (role === 'student') {
+        stuBtn.className = 'p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 text-left transition relative';
+        parBtn.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
+      } else {
+        parBtn.className = 'p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50/60 text-left transition relative';
+        stuBtn.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
+      }
+    }
+
+    function handleAvatarUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 140;
+          let w = img.width;
+          let h = img.height;
+          if (w > h) {
+            if (w > maxDim) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+          } else {
+            if (h > maxDim) { w = Math.round(w * (maxDim / h)); h = maxDim; }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          selectedAvatarValue = canvas.toDataURL('image/jpeg', 0.78);
+          renderAvatarIntoElement(document.getElementById('onboardAvatarPreview'), selectedAvatarValue);
+          showToast('Profile photo ready!');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function handleRegisterProfile(event) {
+      event.preventDefault();
+      const nameVal = document.getElementById('onboardNameInput').value.trim();
+      if (!nameVal) return;
+
+      const submitBtn = document.getElementById('onboardSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Binding Device...</span>';
+
+      try {
+        if (isLocalSandboxMode) {
+          const localDb = getLocalDb();
+          const createdLocal = {
+            id: generateLocalUuid(),
+            device_number_id: localDeviceNumId,
+            device_token: localDeviceToken,
+            device_model: detectedDeviceModel,
+            name: nameVal,
+            avatar_url: selectedAvatarValue,
+            role: selectedOnboardingRole,
+            linked_parent_id: null,
+            last_visit_at: new Date().toISOString(),
+            created_at: new Date().toISOString()
+          };
+          localDb.study_profiles.push(createdLocal);
+          saveLocalDb(localDb);
+          currentProfile = createdLocal;
+          showToast(`Welcome, ${createdLocal.name}! (Local Mode)`);
+          routeAuthenticatedProfile();
+          return;
+        }
+
+        // Ensure 6-digit device_number_id is unique in Supabase
+        let candidateId = localDeviceNumId;
+        const { data: existingId, error: checkErr } = await supabaseClient
+          .from('study_profiles')
+          .select('id')
+          .eq('device_number_id', candidateId)
+          .maybeSingle();
+
+        if (checkErr && isNetworkFetchError(checkErr)) {
+          isLocalSandboxMode = true;
+          return handleRegisterProfile(event);
+        }
+
+        if (existingId) {
+          candidateId = generateSixDigitId();
+          localDeviceNumId = candidateId;
+          safeStorage.setItem(KEY_DEVICE_NUM_ID, candidateId);
+        }
+
+        const payload = {
+          device_number_id: candidateId,
+          device_token: localDeviceToken,
+          device_model: detectedDeviceModel,
+          name: nameVal,
+          avatar_url: selectedAvatarValue,
+          role: selectedOnboardingRole,
+          linked_parent_id: null,
+          last_visit_at: new Date().toISOString()
+        };
+
+        const { data: created, error } = await supabaseClient
+          .from('study_profiles')
+          .insert([payload])
+          .select()
+          .single();
+
+        if (error) {
+          if (isNetworkFetchError(error)) {
+            isLocalSandboxMode = true;
+            return handleRegisterProfile(event);
+          }
+          throw error;
+        }
+
+        currentProfile = created;
+        showToast(`Welcome, ${created.name}!`);
+        routeAuthenticatedProfile();
+      } catch (err) {
+        showToast('Could not register device. Try again.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Continue to StudyBridge</span><i class="fa-solid fa-arrow-right"></i>';
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 8. STUDENT -> PARENT LINKING GATE LOGIC
+    // -----------------------------------------------------------------------
+    let lookupDebounce = null;
+    function handleLookupParentById(rawVal) {
+      const cleanId = (rawVal || '').replace(/\D/g, '').slice(0, 6);
+      const previewEl = document.getElementById('parentLookupPreview');
+      foundParentForLink = null;
+
+      if (cleanId.length !== 6) {
+        safeAddClass(previewEl, 'hidden');
+        return;
+      }
+
+      if (lookupDebounce) clearTimeout(lookupDebounce);
+      lookupDebounce = setTimeout(async () => {
+        if (isLocalSandboxMode) {
+          const localDb = getLocalDb();
+          const data = localDb.study_profiles.find(p => p.device_number_id === cleanId && p.role === 'parent');
+          if (!data) {
+            safeAddClass(previewEl, 'hidden');
+            showToast('No Parent found with that 6-digit ID', 'error');
+            return;
+          }
+          foundParentForLink = data;
+          renderAvatarIntoElement(document.getElementById('lookupParentAvatar'), data.avatar_url, data.name);
+          document.getElementById('lookupParentName').textContent = data.name;
+          document.getElementById('lookupParentDevice').textContent = `${data.device_model} • ID #${data.device_number_id}`;
+          safeRemoveClass(previewEl, 'hidden');
+          return;
+        }
+
+        const { data, error } = await supabaseClient
+          .from('study_profiles')
+          .select('*')
+          .eq('device_number_id', cleanId)
+          .eq('role', 'parent')
+          .maybeSingle();
+
+        if (error || !data) {
+          safeAddClass(previewEl, 'hidden');
+          showToast('No Parent found with that 6-digit ID', 'error');
+          return;
+        }
+
+        foundParentForLink = data;
+        renderAvatarIntoElement(document.getElementById('lookupParentAvatar'), data.avatar_url, data.name);
+        document.getElementById('lookupParentName').textContent = data.name;
+        document.getElementById('lookupParentDevice').textContent = `${data.device_model} • ID #${data.device_number_id}`;
+        safeRemoveClass(previewEl, 'hidden');
+      }, 250);
+    }
+
+    async function confirmLinkToParent() {
+      if (!currentProfile || !foundParentForLink) return;
+
+      const btn = document.getElementById('confirmLinkParentBtn');
+      btn.disabled = true;
+
+      try {
+        if (isLocalSandboxMode) {
+          const localDb = getLocalDb();
+          const target = localDb.study_profiles.find(p => p.id === currentProfile.id);
+          if (target) {
+            target.linked_parent_id = foundParentForLink.id;
+            target.last_visit_at = new Date().toISOString();
+            saveLocalDb(localDb);
+            currentProfile = target;
+          }
+          showToast(`Linked to Parent: ${foundParentForLink.name}`);
+          mountStudentDashboard();
+          return;
+        }
+
+        const { data, error } = await supabaseClient
+          .from('study_profiles')
+          .update({
+            linked_parent_id: foundParentForLink.id,
+            last_visit_at: new Date().toISOString()
+          })
+          .eq('id', currentProfile.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        currentProfile = data;
+        showToast(`Linked to Parent: ${foundParentForLink.name}`);
+        mountStudentDashboard();
+      } catch (err) {
+        showToast('Failed to link parent account', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function refreshCurrentProfileState() {
+      if (!currentProfile) return;
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        const data = localDb.study_profiles.find(p => p.id === currentProfile.id);
+        if (data && data.linked_parent_id) {
+          currentProfile = data;
+          showToast('Parent link confirmed!');
+          mountStudentDashboard();
+        } else {
+          showToast('Not linked yet. Ask your parent to add your ID.', 'info');
+        }
+        return;
+      }
+
+      const { data } = await supabaseClient
+        .from('study_profiles')
+        .select('*')
+        .eq('id', currentProfile.id)
+        .maybeSingle();
+
+      if (data) {
+        currentProfile = data;
+        if (currentProfile.linked_parent_id) {
+          showToast('Parent link confirmed!');
+          mountStudentDashboard();
+        } else {
+          showToast('Not linked yet. Ask your parent to add your ID.', 'info');
+        }
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 9. STUDENT DASHBOARD ENGINE
+    // -----------------------------------------------------------------------
+    async function mountStudentDashboard() {
+      showView('viewStudentDashboard');
+      renderAvatarIntoElement(document.getElementById('stuHeaderAvatar'), currentProfile.avatar_url, currentProfile.name);
+      document.getElementById('stuHeaderName').textContent = currentProfile.name;
+      document.getElementById('stuHeaderDevice').textContent = currentProfile.device_model;
+      document.getElementById('stuHeaderDeviceId').textContent = currentProfile.device_number_id;
+
+      // Build subject color dots
+      const colorContainer = document.getElementById('subjectColorPicker');
+      colorContainer.innerHTML = '';
+      SUBJECT_COLORS.forEach(hex => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'w-5 h-5 rounded-full border-2 transition transform hover:scale-110';
+        dot.style.backgroundColor = hex;
+        dot.style.borderColor = hex === selectedSubjectColor ? '#0f172a' : 'transparent';
+        dot.onclick = () => {
+          selectedSubjectColor = hex;
+          mountStudentColorDots();
+        };
+        colorContainer.appendChild(dot);
+      });
+
+      // Fetch linked parent name
+      if (currentProfile.linked_parent_id) {
+        if (isLocalSandboxMode) {
+          const par = getLocalDb().study_profiles.find(p => p.id === currentProfile.linked_parent_id);
+          if (par) {
+            document.getElementById('stuLinkedParentLabel').textContent = `Parent: ${par.name} (#${par.device_number_id})`;
+          }
+        } else {
+          const { data: par } = await supabaseClient
+            .from('study_profiles')
+            .select('name, device_number_id')
+            .eq('id', currentProfile.linked_parent_id)
+            .maybeSingle();
+          if (par) {
+            document.getElementById('stuLinkedParentLabel').textContent = `Parent: ${par.name} (#${par.device_number_id})`;
+          }
+        }
+      }
+
+      await loadStudentDashboardData(false);
+      if (!isLocalSandboxMode) setupRealtimeChannel();
+    }
+
+    function mountStudentColorDots() {
+      const colorContainer = document.getElementById('subjectColorPicker');
+      if (!colorContainer) return;
+      Array.from(colorContainer.children).forEach((btn, idx) => {
+        btn.style.borderColor = SUBJECT_COLORS[idx] === selectedSubjectColor ? '#0f172a' : 'transparent';
+      });
+    }
+
+    async function loadStudentDashboardData(showFeedback = false) {
+      if (!currentProfile) return;
+      const syncIcon = document.getElementById('stuSyncIcon');
+      if (syncIcon) safeAddClass(syncIcon, 'fa-spin');
+
+      try {
+        if (isLocalSandboxMode) {
+          const localDb = getLocalDb();
+          const me = localDb.study_profiles.find(p => p.id === currentProfile.id);
+          if (me) {
+            me.last_visit_at = new Date().toISOString();
+            saveLocalDb(localDb);
+          }
+          studentSubjects = localDb.student_subjects.filter(s => s.student_id === currentProfile.id);
+          studentTopics = localDb.study_topics.filter(t => t.student_id === currentProfile.id);
+          studentTests = localDb.scheduled_tests.filter(t => t.student_id === currentProfile.id);
+          studentMessages = localDb.parent_notes.filter(n => n.student_id === currentProfile.id);
+
+          renderStudentSubjects();
+          renderStudentTopics();
+          renderStudentTests();
+          await renderAndAcknowledgeStudentMessages();
+          if (showFeedback) showToast('Synced (Local Mode)');
+          return;
+        }
+
+        // Update student last_visit_at heartbeat
+        await supabaseClient
+          .from('study_profiles')
+          .update({ last_visit_at: new Date().toISOString() })
+          .eq('id', currentProfile.id);
+
+        // Fetch Subjects, Topics, Scheduled Tests, and Parent Notes in parallel
+        const [subRes, topRes, testRes, noteRes] = await Promise.all([
+          supabaseClient.from('student_subjects').select('*').eq('student_id', currentProfile.id).order('created_at', { ascending: true }),
+          supabaseClient.from('study_topics').select('*').eq('student_id', currentProfile.id).order('created_at', { ascending: true }),
+          supabaseClient.from('scheduled_tests').select('*').eq('student_id', currentProfile.id).order('scheduled_at', { ascending: true }),
+          supabaseClient.from('parent_notes').select('*').eq('student_id', currentProfile.id).order('created_at', { ascending: false })
+        ]);
+
+        studentSubjects = subRes.data || [];
+        studentTopics = topRes.data || [];
+        studentTests = testRes.data || [];
+        studentMessages = noteRes.data || [];
+
+        renderStudentSubjects();
+        renderStudentTopics();
+        renderStudentTests();
+        await renderAndAcknowledgeStudentMessages();
+
+        if (showFeedback) showToast('Synced with Supabase');
+      } catch (err) {
+        // Handled cleanly
+      } finally {
+        if (syncIcon) safeRemoveClass(syncIcon, 'fa-spin');
+      }
+    }
+
+    async function renderAndAcknowledgeStudentMessages() {
+      const listEl = document.getElementById('stuMessagesList');
+      const unreadBadge = document.getElementById('stuUnreadBadge');
+
+      if (!studentMessages.length) {
+        listEl.innerHTML = '<p class="text-xs text-slate-400 py-2">No messages from your parent yet.</p>';
+        safeAddClass(unreadBadge, 'hidden');
+        return;
+      }
+
+      const unreadNotes = studentMessages.filter(m => !m.is_seen);
+      if (unreadNotes.length > 0) {
+        unreadBadge.textContent = `${unreadNotes.length} New`;
+        safeRemoveClass(unreadBadge, 'hidden');
+
+        // Automatically mark unread notes as seen with timestamp
+        const nowIso = new Date().toISOString();
+        const unreadIds = unreadNotes.map(n => n.id);
+        if (isLocalSandboxMode) {
+          const localDb = getLocalDb();
+          localDb.parent_notes.forEach(n => {
+            if (unreadIds.includes(n.id)) {
+              n.is_seen = true;
+              n.seen_at = nowIso;
+            }
+          });
+          saveLocalDb(localDb);
+        } else {
+          await supabaseClient
+            .from('parent_notes')
+            .update({ is_seen: true, seen_at: nowIso })
+            .in('id', unreadIds);
+        }
+
+        studentMessages.forEach(m => {
+          if (unreadIds.includes(m.id)) {
+            m.is_seen = true;
+            m.seen_at = nowIso;
+          }
+        });
+      } else {
+        safeAddClass(unreadBadge, 'hidden');
+      }
+
+      listEl.innerHTML = studentMessages.map(msg => `
+        <div class="p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-start justify-between gap-3">
+          <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(msg.message_text)}</p>
+          <span class="text-[10px] font-medium text-indigo-600 shrink-0 whitespace-nowrap">
+            <i class="fa-solid fa-check-double mr-0.5"></i>${formatRelativeAndExactTime(msg.created_at).split('•')[0]}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function renderStudentSubjects() {
+      const listEl = document.getElementById('stuSubjectsList');
+      const selectEl = document.getElementById('topicSubjectSelect');
+      document.getElementById('stuSubjectCount').textContent = `${studentSubjects.length} subjects`;
+
+      const prevSelected = selectEl.value;
+      selectEl.innerHTML = '<option value="">Select Subject...</option>';
+      studentSubjects.forEach(sub => {
+        const opt = document.createElement('option');
+        opt.value = sub.id;
+        opt.textContent = sub.subject_name;
+        selectEl.appendChild(opt);
+      });
+      if (prevSelected) selectEl.value = prevSelected;
+
+      if (!studentSubjects.length) {
+        listEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Add your subjects above to begin planning.</p>';
+        return;
+      }
+
+      listEl.innerHTML = studentSubjects.map(sub => `
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${escapeHtml(sub.color_hex)}"></span>
+            <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(sub.subject_name)}</span>
+          </div>
+          <button type="button" onclick="handleDeleteSubject('${sub.id}', '${escapeHtml(sub.subject_name)}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition" title="Delete Subject">
+            <i class="fa-solid fa-trash-can text-[11px]"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function handleAddSubject(event) {
+      event.preventDefault();
+      const input = document.getElementById('newSubjectNameInput');
+      const name = input.value.trim();
+      if (!name || !currentProfile) return;
+
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        const created = {
+          id: generateLocalUuid(),
+          student_id: currentProfile.id,
+          subject_name: name,
+          color_hex: selectedSubjectColor,
+          created_at: new Date().toISOString()
+        };
+        localDb.student_subjects.push(created);
+        saveLocalDb(localDb);
+        studentSubjects.push(created);
+        input.value = '';
+        renderStudentSubjects();
+        showToast(`Added subject: ${name}`);
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('student_subjects')
+        .insert([{
+          student_id: currentProfile.id,
+          subject_name: name,
+          color_hex: selectedSubjectColor
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        showToast('Failed to add subject', 'error');
+        return;
+      }
+
+      studentSubjects.push(data);
+      input.value = '';
+      renderStudentSubjects();
+      showToast(`Added subject: ${name}`);
+    }
+
+    function handleDeleteSubject(subjectId, subjectName) {
+      askConfirmation(
+        `Delete ${subjectName}?`,
+        'This will also remove any study topics tagged under this subject.',
+        async () => {
+          if (isLocalSandboxMode) {
+            const localDb = getLocalDb();
+            localDb.student_subjects = localDb.student_subjects.filter(s => s.id !== subjectId);
+            localDb.study_topics = localDb.study_topics.filter(t => t.subject_id !== subjectId);
+            saveLocalDb(localDb);
+            studentSubjects = studentSubjects.filter(s => s.id !== subjectId);
+            studentTopics = studentTopics.filter(t => t.subject_id !== subjectId);
+            renderStudentSubjects();
+            renderStudentTopics();
+            showToast('Subject deleted');
+            return;
+          }
+
+          const { error } = await supabaseClient
+            .from('student_subjects')
+            .delete()
+            .eq('id', subjectId);
+
+          if (error) {
+            showToast('Could not delete subject', 'error');
+            return;
+          }
+          studentSubjects = studentSubjects.filter(s => s.id !== subjectId);
+          studentTopics = studentTopics.filter(t => t.subject_id !== subjectId);
+          renderStudentSubjects();
+          renderStudentTopics();
+          showToast('Subject deleted');
+        }
+      );
+    }
+
+    function switchStudentPlanTab(tab) {
+      studentActivePlanTab = tab;
+      const todayBtn = document.getElementById('stuTabTodayBtn');
+      const tmrBtn = document.getElementById('stuTabTomorrowBtn');
+
+      if (tab === 'today') {
+        todayBtn.className = 'px-3.5 py-1.5 rounded-xl bg-white text-emerald-700 shadow-xs transition';
+        tmrBtn.className = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
+        document.getElementById('topicDaySelect').value = 'today';
+      } else {
+        tmrBtn.className = 'px-3.5 py-1.5 rounded-xl bg-white text-indigo-700 shadow-xs transition';
+        todayBtn.className = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
+        document.getElementById('topicDaySelect').value = 'tomorrow';
+      }
+      renderStudentTopics();
+    }
+
+    async function handleAddStudyTopic(event) {
+      event.preventDefault();
+      const subjectId = document.getElementById('topicSubjectSelect').value;
+      const titleInput = document.getElementById('topicTitleInput');
+      const dayChoice = document.getElementById('topicDaySelect').value;
+      const title = titleInput.value.trim();
+
+      if (!subjectId) {
+        showToast('Please select a subject first', 'error');
+        return;
+      }
+      if (!title || !currentProfile) return;
+
+      const targetDate = dayChoice === 'tomorrow' ? getLocalDateString(1) : getLocalDateString(0);
+
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        const created = {
+          id: generateLocalUuid(),
+          student_id: currentProfile.id,
+          subject_id: subjectId,
+          topic_title: title,
+          target_date: targetDate,
+          is_completed: false,
+          completed_at: null,
+          created_at: new Date().toISOString()
+        };
+        localDb.study_topics.push(created);
+        saveLocalDb(localDb);
+        studentTopics.push(created);
+        titleInput.value = '';
+        switchStudentPlanTab(dayChoice);
+        showToast(`Topic added to ${dayChoice === 'tomorrow' ? "Tomorrow's Plan" : "Today's Checklist"}`);
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('study_topics')
+        .insert([{
+          student_id: currentProfile.id,
+          subject_id: subjectId,
+          topic_title: title,
+          target_date: targetDate,
+          is_completed: false
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        showToast('Failed to add study topic', 'error');
+        return;
+      }
+
+      studentTopics.push(data);
+      titleInput.value = '';
+      switchStudentPlanTab(dayChoice);
+      showToast(`Topic added to ${dayChoice === 'tomorrow' ? "Tomorrow's Plan" : "Today's Checklist"}`);
+    }
+
+    function renderStudentTopics() {
+      const container = document.getElementById('stuTopicsContainer');
+      const todayStr = getLocalDateString(0);
+      const tmrStr = getLocalDateString(1);
+
+      // Automatic rollover: anything with target_date <= todayStr appears in Today's Checklist
+      const todaysTopics = studentTopics.filter(t => t.target_date <= todayStr);
+      const tmrsTopics = studentTopics.filter(t => t.target_date === tmrStr);
+
+      // Update Today's Progress Bar
+      const coveredCount = todaysTopics.filter(t => t.is_completed).length;
+      const totalToday = todaysTopics.length;
+      const pct = totalToday > 0 ? Math.round((coveredCount / totalToday) * 100) : 0;
+      document.getElementById('stuProgressText').textContent = `${coveredCount} / ${totalToday} Covered (${pct}%)`;
+      document.getElementById('stuProgressBar').style.width = `${pct}%`;
+
+      const listToShow = studentActivePlanTab === 'today' ? todaysTopics : tmrsTopics;
+      const subjectMap = new Map(studentSubjects.map(s => [s.id, s]));
+
+      if (!listToShow.length) {
+        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No topics planned for ${studentActivePlanTab === 'today' ? 'today' : 'tomorrow'} yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = listToShow.map(topic => {
+        const subj = subjectMap.get(topic.subject_id) || { subject_name: 'General', color_hex: '#64748b' };
+        const isTodayView = studentActivePlanTab === 'today';
+
+        return `
+          <div class="flex items-center justify-between gap-3 p-3.5 rounded-2xl border transition ${
+            topic.is_completed
+              ? 'bg-emerald-50/50 border-emerald-200'
+              : 'bg-white border-slate-200 hover:border-slate-300'
+          }">
+            <div class="flex items-center gap-3 min-w-0">
+              ${isTodayView ? `
+                <button type="button" onclick="toggleTopicCompletion('${topic.id}', ${!topic.is_completed})" class="w-6 h-6 rounded-lg flex items-center justify-center border-2 transition shrink-0 ${
+                  topic.is_completed
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'border-slate-300 hover:border-emerald-500 bg-white'
+                }">
+                  ${topic.is_completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                </button>
+              ` : `
+                <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                  <i class="fa-regular fa-clock"></i>
+                </span>
+              `}
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 mb-0.5">
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold text-white" style="background-color: ${escapeHtml(subj.color_hex)}">
+                    ${escapeHtml(subj.subject_name)}
+                  </span>
+                  ${topic.is_completed && topic.completed_at ? `
+                    <span class="text-[10px] font-semibold text-emerald-700">
+                      Covered ${new Date(topic.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  ` : ''}
+                </div>
+                <p class="text-xs sm:text-sm font-bold truncate ${topic.is_completed ? 'line-through text-slate-400' : 'text-slate-900'}">
+                  ${escapeHtml(topic.topic_title)}
+                </p>
+              </div>
+            </div>
+
+            <button type="button" onclick="handleDeleteTopic('${topic.id}')" class="w-8 h-8 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition shrink-0" title="Remove Topic">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function toggleTopicCompletion(topicId, nextState) {
+      const completedAt = nextState ? new Date().toISOString() : null;
+
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        const item = localDb.study_topics.find(t => t.id === topicId);
+        if (item) {
+          item.is_completed = nextState;
+          item.completed_at = completedAt;
+          saveLocalDb(localDb);
+        }
+        const target = studentTopics.find(t => t.id === topicId);
+        if (target) {
+          target.is_completed = nextState;
+          target.completed_at = completedAt;
+        }
+        renderStudentTopics();
+        showToast(nextState ? 'Marked as Covered!' : 'Marked as Pending');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('study_topics')
+        .update({
+          is_completed: nextState,
+          completed_at: completedAt
+        })
+        .eq('id', topicId);
+
+      if (error) {
+        showToast('Could not update topic status', 'error');
+        return;
+      }
+
+      const target = studentTopics.find(t => t.id === topicId);
+      if (target) {
+        target.is_completed = nextState;
+        target.completed_at = completedAt;
+      }
+      renderStudentTopics();
+      showToast(nextState ? 'Marked as Covered!' : 'Marked as Pending');
+    }
+
+    async function handleDeleteTopic(topicId) {
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        localDb.study_topics = localDb.study_topics.filter(t => t.id !== topicId);
+        saveLocalDb(localDb);
+        studentTopics = studentTopics.filter(t => t.id !== topicId);
+        renderStudentTopics();
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('study_topics')
+        .delete()
+        .eq('id', topicId);
+
+      if (error) {
+        showToast('Failed to delete topic', 'error');
+        return;
+      }
+      studentTopics = studentTopics.filter(t => t.id !== topicId);
+      renderStudentTopics();
+    }
+
+    function renderStudentTests() {
+      const container = document.getElementById('stuTestsList');
+      if (!studentTests.length) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-6 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            No tests scheduled by your parent yet.
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = studentTests.map(test => {
+        const isDone = test.status === 'completed';
+        const pct = isDone && test.max_marks > 0
+          ? Math.round((Number(test.marks_obtained) / Number(test.max_marks)) * 100)
+          : null;
+
+        return `
+          <div class="p-4 rounded-2xl border ${isDone ? 'bg-emerald-50/40 border-emerald-200' : 'bg-amber-50/40 border-amber-200'} flex flex-col justify-between gap-3">
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
+                  isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                }">
+                  ${escapeHtml(test.subject_name)}
+                </span>
+                <span class="text-[11px] font-bold ${isDone ? 'text-emerald-700' : 'text-amber-700'}">
+                  ${isDone ? 'Report Submitted' : 'Scheduled'}
+                </span>
+              </div>
+              <h3 class="text-sm font-extrabold text-slate-900 mt-2">${escapeHtml(test.topic_name)}</h3>
+              <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-600 font-medium">
+                <span><i class="fa-regular fa-calendar mr-1 text-slate-400"></i>${formatScheduledDateTime(test.scheduled_at)}</span>
+                <span><i class="fa-solid fa-list-ol mr-1 text-slate-400"></i>${test.question_count} Qs</span>
+                <span><i class="fa-regular fa-hourglass-half mr-1 text-slate-400"></i>${test.duration_minutes} mins</span>
+              </div>
+            </div>
+
+            ${isDone ? `
+              <div class="pt-2.5 border-t border-emerald-200/70 flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-700">Score: <strong class="font-mono-code text-emerald-800">${test.marks_obtained} / ${test.max_marks}</strong></span>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono-code text-[11px] font-bold">${pct}%</span>
+              </div>
+            ` : `
+              <button type="button" onclick="openSubmitTestReportModal('${test.id}', '${escapeHtml(test.subject_name)} - ${escapeHtml(test.topic_name)}', ${test.question_count})" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-upload"></i>
+                <span>Submit Test Report</span>
+              </button>
+            `}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openSubmitTestReportModal(testId, title, defaultMaxMarks) {
+      document.getElementById('submitReportTestId').value = testId;
+      document.getElementById('submitReportTestTitle').textContent = title;
+      document.getElementById('reportMarksObtainedInput').value = '';
+      document.getElementById('reportMaxMarksInput').value = defaultMaxMarks || 25;
+      openModal('modalSubmitTestReport');
+    }
+
+    async function handleConfirmSubmitTestReport(event) {
+      event.preventDefault();
+      const testId = document.getElementById('submitReportTestId').value;
+      const obtained = parseFloat(document.getElementById('reportMarksObtainedInput').value);
+      const maxMarks = parseFloat(document.getElementById('reportMaxMarksInput').value);
+
+      if (isNaN(obtained) || isNaN(maxMarks) || obtained > maxMarks) {
+        showToast('Marks obtained cannot exceed max marks', 'error');
+        return;
+      }
+
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        const item = localDb.scheduled_tests.find(t => t.id === testId);
+        if (item) {
+          item.status = 'completed';
+          item.marks_obtained = obtained;
+          item.max_marks = maxMarks;
+          saveLocalDb(localDb);
+          const idx = studentTests.findIndex(t => t.id === testId);
+          if (idx !== -1) studentTests[idx] = item;
+        }
+        closeModal('modalSubmitTestReport');
+        renderStudentTests();
+        showToast('Test report submitted!');
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('scheduled_tests')
+        .update({
+          status: 'completed',
+          marks_obtained: obtained,
+          max_marks: maxMarks
+        })
+        .eq('id', testId)
+        .select()
+        .single();
+
+      if (error) {
+        showToast('Failed to submit test report', 'error');
+        return;
+      }
+
+      const idx = studentTests.findIndex(t => t.id === testId);
+      if (idx !== -1) studentTests[idx] = data;
+
+      closeModal('modalSubmitTestReport');
+      renderStudentTests();
+      showToast('Test report submitted to your parent!');
+    }
+
+    // -----------------------------------------------------------------------
+    // 10. PARENT DASHBOARD ENGINE
+    // -----------------------------------------------------------------------
+    async function mountParentDashboard() {
+      showView('viewParentDashboard');
+      renderAvatarIntoElement(document.getElementById('parHeaderAvatar'), currentProfile.avatar_url, currentProfile.name);
+      document.getElementById('parHeaderName').textContent = currentProfile.name;
+      document.getElementById('parHeaderDevice').textContent = currentProfile.device_model;
+      document.getElementById('parHeaderDeviceId').textContent = currentProfile.device_number_id;
+      document.getElementById('emptyParIdCopy').textContent = currentProfile.device_number_id;
+
+      await loadParentDashboardData(false);
+      if (!isLocalSandboxMode) setupRealtimeChannel();
+    }
+
+    async function loadParentDashboardData(showFeedback = false) {
+      if (!currentProfile) return;
+      const syncIcon = document.getElementById('parSyncIcon');
+      if (syncIcon) safeAddClass(syncIcon, 'fa-spin');
+
+      try {
+        if (isLocalSandboxMode) {
+          const localDb = getLocalDb();
+          linkedStudents = localDb.study_profiles.filter(p => p.linked_parent_id === currentProfile.id && p.role === 'student');
+          renderParentLinkedStudentsBar();
+
+          if (!linkedStudents.length) {
+            safeRemoveClass(document.getElementById('parNoStudentEmpty'), 'hidden');
+            safeAddClass(document.getElementById('parStudentWorkspace'), 'hidden');
+            return;
+          }
+
+          safeAddClass(document.getElementById('parNoStudentEmpty'), 'hidden');
+          safeRemoveClass(document.getElementById('parStudentWorkspace'), 'hidden');
+
+          if (!activeMonitoredStudentId || !linkedStudents.some(s => s.id === activeMonitoredStudentId)) {
+            activeMonitoredStudentId = linkedStudents[0].id;
+          }
+
+          await loadMonitoredStudentDetails();
+          if (showFeedback) showToast('Student progress refreshed');
+          return;
+        }
+
+        // Fetch all students linked to this parent
+        const { data: students, error } = await supabaseClient
+          .from('study_profiles')
+          .select('*')
+          .eq('linked_parent_id', currentProfile.id)
+          .eq('role', 'student')
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        linkedStudents = students || [];
+        renderParentLinkedStudentsBar();
+
+        if (!linkedStudents.length) {
+          safeRemoveClass(document.getElementById('parNoStudentEmpty'), 'hidden');
+          safeAddClass(document.getElementById('parStudentWorkspace'), 'hidden');
+          return;
+        }
+
+        safeAddClass(document.getElementById('parNoStudentEmpty'), 'hidden');
+        safeRemoveClass(document.getElementById('parStudentWorkspace'), 'hidden');
+
+        if (!activeMonitoredStudentId || !linkedStudents.some(s => s.id === activeMonitoredStudentId)) {
+          activeMonitoredStudentId = linkedStudents[0].id;
+        }
+
+        await loadMonitoredStudentDetails();
+        if (showFeedback) showToast('Student progress refreshed');
+      } catch (err) {
+        // Handled cleanly
+      } finally {
+        if (syncIcon) safeRemoveClass(syncIcon, 'fa-spin');
+      }
+    }
+
+    function renderParentLinkedStudentsBar() {
+      const bar = document.getElementById('parLinkedStudentsBar');
+      if (!linkedStudents.length) {
+        bar.innerHTML = '<span class="text-xs font-bold text-slate-400">No students linked yet.</span>';
+        return;
+      }
+
+      bar.innerHTML = linkedStudents.map(stu => {
+        const isSelected = stu.id === activeMonitoredStudentId;
+        return `
+          <button type="button" onclick="selectMonitoredStudent('${stu.id}')" class="px-3.5 py-2 rounded-2xl text-xs font-extrabold transition flex items-center gap-2 border ${
+            isSelected
+              ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+          }">
+            <i class="fa-solid fa-user-graduate text-[11px]"></i>
+            <span>${escapeHtml(stu.name)}</span>
+            <span class="font-mono-code text-[10px] opacity-80">#${stu.device_number_id}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    async function selectMonitoredStudent(studentId) {
+      activeMonitoredStudentId = studentId;
+      renderParentLinkedStudentsBar();
+      await loadMonitoredStudentDetails();
+    }
+
+    async function handleParentLinkStudent(event) {
+      event.preventDefault();
+      const input = document.getElementById('parSearchStudentIdInput');
+      const targetId = (input.value || '').replace(/\D/g, '').trim();
+
+      if (targetId.length !== 6) {
+        showToast('Enter a valid 6-digit Student Device ID', 'error');
+        return;
+      }
+
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        const student = localDb.study_profiles.find(p => p.device_number_id === targetId && p.role === 'student');
+        if (!student) {
+          showToast('No Student account found with that ID', 'error');
+          return;
+        }
+        student.linked_parent_id = currentProfile.id;
+        saveLocalDb(localDb);
+        input.value = '';
+        activeMonitoredStudentId = student.id;
+        showToast(`Linked student: ${student.name}`);
+        await loadParentDashboardData(false);
+        return;
+      }
+
+      const { data: student, error } = await supabaseClient
+        .from('study_profiles')
+        .select('*')
+        .eq('device_number_id', targetId)
+        .eq('role', 'student')
+        .maybeSingle();
+
+      if (error || !student) {
+        showToast('No Student account found with that ID', 'error');
+        return;
+      }
+
+      const { error: updateErr } = await supabaseClient
+        .from('study_profiles')
+        .update({ linked_parent_id: currentProfile.id })
+        .eq('id', student.id);
+
+      if (updateErr) {
+        showToast('Failed to link student', 'error');
+        return;
+      }
+
+      input.value = '';
+      activeMonitoredStudentId = student.id;
+      showToast(`Linked student: ${student.name}`);
+      await loadParentDashboardData(false);
+    }
+
+    async function loadMonitoredStudentDetails() {
+      const student = linkedStudents.find(s => s.id === activeMonitoredStudentId);
+      if (!student) return;
+
+      renderAvatarIntoElement(document.getElementById('monitoredStuAvatar'), student.avatar_url, student.name);
+      document.getElementById('monitoredStuName').textContent = student.name;
+      document.getElementById('monitoredStuIdBadge').textContent = `#${student.device_number_id}`;
+      document.getElementById('monitoredStuDevice').textContent = student.device_model || 'Registered Device';
+      document.getElementById('monitoredStuLastVisit').textContent = formatRelativeAndExactTime(student.last_visit_at);
+
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        const subjectsMap = new Map(localDb.student_subjects.filter(s => s.student_id === student.id).map(s => [s.id, s]));
+        monitoredTopics = localDb.study_topics.filter(t => t.student_id === student.id);
+        monitoredTests = localDb.scheduled_tests.filter(t => t.student_id === student.id);
+        monitoredNotes = localDb.parent_notes.filter(n => n.student_id === student.id);
+
+        renderParentTopicsView(subjectsMap);
+        renderParentTestsView();
+        renderParentNotesView();
+        return;
+      }
+
+      const [subRes, topRes, testRes, noteRes] = await Promise.all([
+        supabaseClient.from('student_subjects').select('*').eq('student_id', student.id),
+        supabaseClient.from('study_topics').select('*').eq('student_id', student.id).order('created_at', { ascending: true }),
+        supabaseClient.from('scheduled_tests').select('*').eq('student_id', student.id).order('scheduled_at', { ascending: false }),
+        supabaseClient.from('parent_notes').select('*').eq('student_id', student.id).order('created_at', { ascending: false })
+      ]);
+
+      const subjectsMap = new Map((subRes.data || []).map(s => [s.id, s]));
+      monitoredTopics = topRes.data || [];
+      monitoredTests = testRes.data || [];
+      monitoredNotes = noteRes.data || [];
+
+      renderParentTopicsView(subjectsMap);
+      renderParentTestsView();
+      renderParentNotesView();
+    }
+
+    function renderParentTopicsView(subjectsMap) {
+      const todayStr = getLocalDateString(0);
+      const tmrStr = getLocalDateString(1);
+
+      const todayList = monitoredTopics.filter(t => t.target_date <= todayStr);
+      const tmrList = monitoredTopics.filter(t => t.target_date === tmrStr);
+
+      const covered = todayList.filter(t => t.is_completed).length;
+      const total = todayList.length;
+      const pct = total > 0 ? Math.round((covered / total) * 100) : 0;
+
+      document.getElementById('parTodayProgressLabel').textContent = `${covered} / ${total} Topics Covered (${pct}%)`;
+      document.getElementById('parTodayProgressBar').style.width = `${pct}%`;
+      document.getElementById('parTodayCountPill').textContent = `${covered}/${total}`;
+      document.getElementById('parTomorrowCountPill').textContent = `${tmrList.length}`;
+
+      const todayEl = document.getElementById('parTodayTopicsList');
+      if (!todayList.length) {
+        todayEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">No topics logged for today yet.</p>';
+      } else {
+        todayEl.innerHTML = todayList.map(t => {
+          const subj = subjectsMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#64748b' };
+          return `
+            <div class="p-3 rounded-2xl border flex items-center justify-between gap-2.5 ${
+              t.is_completed ? 'bg-emerald-50/60 border-emerald-200' : 'bg-slate-50 border-slate-200'
+            }">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs shrink-0 ${
+                  t.is_completed ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-300 text-slate-400'
+                }">
+                  <i class="fa-solid ${t.is_completed ? 'fa-check' : 'fa-hourglass-start'}"></i>
+                </span>
+                <div class="min-w-0">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-extrabold text-white inline-block mb-0.5" style="background-color: ${escapeHtml(subj.color_hex)}">
+                    ${escapeHtml(subj.subject_name)}
+                  </span>
+                  <p class="text-xs font-bold text-slate-900 truncate">${escapeHtml(t.topic_title)}</p>
+                </div>
+              </div>
+              <span class="text-[10px] font-extrabold px-2 py-1 rounded-lg shrink-0 ${
+                t.is_completed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+              }">
+                ${t.is_completed ? 'Covered' : 'Pending'}
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const tmrEl = document.getElementById('parTomorrowTopicsList');
+      if (!tmrList.length) {
+        tmrEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">Student has not queued topics for tomorrow yet.</p>';
+      } else {
+        tmrEl.innerHTML = tmrList.map(t => {
+          const subj = subjectsMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#64748b' };
+          return `
+            <div class="p-3 rounded-2xl bg-indigo-50/40 border border-indigo-100 flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs shrink-0">
+                <i class="fa-regular fa-calendar"></i>
+              </span>
+              <div class="min-w-0">
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold text-white inline-block mb-0.5" style="background-color: ${escapeHtml(subj.color_hex)}">
+                  ${escapeHtml(subj.subject_name)}
+                </span>
+                <p class="text-xs font-bold text-slate-900 truncate">${escapeHtml(t.topic_title)}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function openScheduleTestModal() {
+      if (!activeMonitoredStudentId) return;
+      const defaultTime = new Date(Date.now() + 2 * 3600 * 1000);
+      const localIso = new Date(defaultTime.getTime() - defaultTime.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      document.getElementById('testDateTimeInput').value = localIso;
+      document.getElementById('testSubjectInput').value = '';
+      document.getElementById('testTopicInput').value = '';
+      openModal('modalScheduleTest');
+    }
+
+    async function handleCreateScheduledTest(event) {
+      event.preventDefault();
+      if (!currentProfile || !activeMonitoredStudentId) return;
+
+      const subject = document.getElementById('testSubjectInput').value.trim();
+      const topic = document.getElementById('testTopicInput').value.trim();
+      const dateTimeVal = document.getElementById('testDateTimeInput').value;
+      const qCount = parseInt(document.getElementById('testQuestionsInput').value, 10);
+      const duration = parseInt(document.getElementById('testDurationInput').value, 10);
+
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        const created = {
+          id: generateLocalUuid(),
+          parent_id: currentProfile.id,
+          student_id: activeMonitoredStudentId,
+          subject_name: subject,
+          topic_name: topic,
+          scheduled_at: new Date(dateTimeVal).toISOString(),
+          question_count: qCount,
+          duration_minutes: duration,
+          status: 'scheduled',
+          marks_obtained: null,
+          max_marks: null,
+          created_at: new Date().toISOString()
+        };
+        localDb.scheduled_tests.unshift(created);
+        saveLocalDb(localDb);
+        monitoredTests.unshift(created);
+        closeModal('modalScheduleTest');
+        renderParentTestsView();
+        showToast('Test scheduled!');
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('scheduled_tests')
+        .insert([{
+          parent_id: currentProfile.id,
+          student_id: activeMonitoredStudentId,
+          subject_name: subject,
+          topic_name: topic,
+          scheduled_at: new Date(dateTimeVal).toISOString(),
+          question_count: qCount,
+          duration_minutes: duration,
+          status: 'scheduled'
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        showToast('Could not schedule test', 'error');
+        return;
+      }
+
+      monitoredTests.unshift(data);
+      closeModal('modalScheduleTest');
+      renderParentTestsView();
+      showToast('Test scheduled & sent to student!');
+    }
+
+    function renderParentTestsView() {
+      const container = document.getElementById('parTestsList');
+      if (!monitoredTests.length) {
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-8">No tests assigned to this student yet.</p>';
+        return;
+      }
+
+      container.innerHTML = monitoredTests.map(test => {
+        const isDone = test.status === 'completed';
+        const pct = isDone && test.max_marks > 0
+          ? Math.round((Number(test.marks_obtained) / Number(test.max_marks)) * 100)
+          : null;
+
+        return `
+          <div class="p-3.5 rounded-2xl border ${isDone ? 'bg-emerald-50/40 border-emerald-200' : 'bg-white border-slate-200'}">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-bold">${escapeHtml(test.subject_name)}</span>
+                <span class="text-xs font-extrabold text-slate-900">${escapeHtml(test.topic_name)}</span>
+              </div>
+              <button type="button" onclick="handleDeleteScheduledTest('${test.id}')" class="text-slate-400 hover:text-rose-600 text-xs p-1" title="Delete Test">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+
+            <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+              <span>${formatScheduledDateTime(test.scheduled_at)} • ${test.question_count} Qs • ${test.duration_minutes}m</span>
+              ${isDone ? `
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono-code font-bold text-[11px]">
+                  Score: ${test.marks_obtained}/${test.max_marks} (${pct}%)
+                </span>
+              ` : `
+                <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px]">
+                  Awaiting Report
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleDeleteScheduledTest(testId) {
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        localDb.scheduled_tests = localDb.scheduled_tests.filter(t => t.id !== testId);
+        saveLocalDb(localDb);
+        monitoredTests = monitoredTests.filter(t => t.id !== testId);
+        renderParentTestsView();
+        showToast('Test removed');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('scheduled_tests')
+        .delete()
+        .eq('id', testId);
+
+      if (!error) {
+        monitoredTests = monitoredTests.filter(t => t.id !== testId);
+        renderParentTestsView();
+        showToast('Test removed');
+      }
+    }
+
+    async function handleSendParentNote(event) {
+      event.preventDefault();
+      const input = document.getElementById('parentNoteInput');
+      const text = input.value.trim();
+      if (!text || !currentProfile || !activeMonitoredStudentId) return;
+
+      if (isLocalSandboxMode) {
+        const localDb = getLocalDb();
+        const created = {
+          id: generateLocalUuid(),
+          parent_id: currentProfile.id,
+          student_id: activeMonitoredStudentId,
+          message_text: text,
+          is_seen: false,
+          seen_at: null,
+          created_at: new Date().toISOString()
+        };
+        localDb.parent_notes.unshift(created);
+        saveLocalDb(localDb);
+        monitoredNotes.unshift(created);
+        input.value = '';
+        renderParentNotesView();
+        showToast('Note sent to student');
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('parent_notes')
+        .insert([{
+          parent_id: currentProfile.id,
+          student_id: activeMonitoredStudentId,
+          message_text: text,
+          is_seen: false
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        showToast('Failed to send note', 'error');
+        return;
+      }
+
+      monitoredNotes.unshift(data);
+      input.value = '';
+      renderParentNotesView();
+      showToast('Note sent to student');
+    }
+
+    function renderParentNotesView() {
+      const listEl = document.getElementById('parNotesList');
+      if (!monitoredNotes.length) {
+        listEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">No messages sent yet.</p>';
+        return;
+      }
+
+      listEl.innerHTML = monitoredNotes.map(note => `
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+          <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(note.message_text)}</p>
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="text-slate-400">${formatRelativeAndExactTime(note.created_at).split('•')[1] || ''}</span>
+            ${note.is_seen ? `
+              <span class="font-bold text-indigo-600 flex items-center gap-1">
+                <i class="fa-solid fa-check-double"></i>
+                <span>Seen ${note.seen_at ? new Date(note.seen_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+              </span>
+            ` : `
+              <span class="font-semibold text-slate-400 flex items-center gap-1">
+                <i class="fa-solid fa-check"></i>
+                <span>Delivered (Unseen)</span>
+              </span>
+            `}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handleResetStudentDeviceLock() {
+      const student = linkedStudents.find(s => s.id === activeMonitoredStudentId);
+      if (!student) return;
+
+      askConfirmation(
+        `Reset Device Lock for ${student.name}?`,
+        'This generates a fresh hardware token lock so the student can log in and re-bind from a new phone.',
+        async () => {
+          const resetToken = 'reset_' + generateCryptographicToken();
+          if (isLocalSandboxMode) {
+            const localDb = getLocalDb();
+            const target = localDb.study_profiles.find(p => p.id === student.id);
+            if (target) {
+              target.device_token = resetToken;
+              target.device_model = 'Awaiting New Device Binding';
+              saveLocalDb(localDb);
+            }
+            showToast(`Device lock cleared for ${student.name}`);
+            await loadParentDashboardData(false);
+            return;
+          }
+
+          const { error } = await supabaseClient
+            .from('study_profiles')
+            .update({
+              device_token: resetToken,
+              device_model: 'Awaiting New Device Binding'
+            })
+            .eq('id', student.id);
+
+          if (error) {
+            showToast('Failed to reset device lock', 'error');
+            return;
+          }
+          showToast(`Device lock cleared for ${student.name}`);
+          await loadParentDashboardData(false);
+        }
+      );
+    }
+
+    // -----------------------------------------------------------------------
+    // 11. SUPABASE REALTIME CHANNEL SUBSCRIPTION
+    // -----------------------------------------------------------------------
+    function setupRealtimeChannel() {
+      if (realtimeSubscription) {
+        try { supabaseClient.removeChannel(realtimeSubscription); } catch (e) {}
+      }
+
+      realtimeSubscription = supabaseClient
+        .channel('studybridge-live-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
+          if (currentProfile && currentProfile.role === 'parent') loadMonitoredStudentDetails();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'scheduled_tests' }, () => {
+          if (!currentProfile) return;
+          if (currentProfile.role === 'parent') loadMonitoredStudentDetails();
+          else loadStudentDashboardData(false);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_notes' }, () => {
+          if (!currentProfile) return;
+          if (currentProfile.role === 'parent') loadMonitoredStudentDetails();
+          else loadStudentDashboardData(false);
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'study_profiles' }, () => {
+          if (currentProfile && currentProfile.role === 'parent') loadParentDashboardData(false);
+        })
+        .subscribe();
+    }
+
+    // -----------------------------------------------------------------------
+    // 12. INITIALIZE ON DOM READY
+    // -----------------------------------------------------------------------
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootApplication);
+    } else {
+      bootApplication();
+    }
+  </script>
+</body>
+</html>
