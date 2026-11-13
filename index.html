@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#059669" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Study Domain" />
+  <link id="pwaManifestLink" rel="manifest" href="" />
+  <link id="appleTouchIconLink" rel="apple-touch-icon" href="" />
   <title>Study Domain — Student & Parent Accountability</title>
 
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
@@ -45,6 +51,14 @@
       background-attachment: fixed;
       color: #0f172a;
       -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+    @media (max-width: 640px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
     }
 
     .font-mono-code {
@@ -127,32 +141,44 @@
   <!-- ===================================================================== -->
   <!-- GLOBAL TOP BRAND HEADER                                               -->
   <!-- ===================================================================== -->
-  <nav id="globalAppTopBar" class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 px-4 sm:px-6 py-3">
-    <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+  <nav id="globalAppTopBar" class="sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-slate-200/70 px-3 sm:px-6 py-2.5 sm:py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
       <!-- Left: Web Logo & Brand Name -->
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 text-white flex items-center justify-center shadow-md shadow-emerald-600/25 shrink-0">
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 text-white flex items-center justify-center shadow-md shadow-emerald-600/25 shrink-0">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
             <path d="M6 12v5c3 3 9 3 12 0v-5" />
           </svg>
         </div>
         <div class="min-w-0">
-          <div class="flex items-center gap-2">
-            <span class="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 block leading-none">Study Domain</span>
-            <span id="topRolePill" class="hidden px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Student</span>
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="text-sm sm:text-lg font-extrabold tracking-tight text-slate-900 truncate leading-none">Study Domain</span>
+            <span id="topRolePill" class="hidden px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">Student</span>
           </div>
-          <span class="text-[10px] font-semibold text-slate-400 block mt-0.5 truncate">Academic Accountability & Sync Ecosystem</span>
+          <span class="text-[10px] font-semibold text-slate-400 block mt-0.5 truncate">Student & Parent Sync</span>
         </div>
       </div>
 
-      <!-- Right: Quick Sync Button -->
-      <div class="flex items-center gap-2 shrink-0">
+      <!-- Right: PWA Install + Quick Sync Button -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button
+          type="button"
+          id="pwaInstallBtn"
+          onclick="triggerPwaInstall()"
+          class="px-2.5 sm:px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs font-extrabold transition flex items-center gap-1.5 shadow-sm shadow-emerald-600/20"
+          title="Install Study Domain App"
+        >
+          <i class="fa-solid fa-download text-[11px]"></i>
+          <span>Install App</span>
+        </button>
+
         <button
           type="button"
           id="topQuickSyncBtn"
           onclick="triggerManualGlobalSync()"
-          class="hidden px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-extrabold transition flex items-center gap-2 border border-slate-200/90 shadow-2xs"
+          class="hidden px-2.5 sm:px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-extrabold transition flex items-center gap-1.5 border border-slate-200/90 shadow-2xs"
+          title="Sync Now"
         >
           <i id="globalSyncSpinner" class="fa-solid fa-arrows-rotate text-emerald-600"></i>
           <span class="hidden sm:inline">Sync Now</span>
@@ -162,9 +188,206 @@
   </nav>
 
   <!-- ===================================================================== -->
+  <!-- VIEW 1: BOOT & HARDWARE VERIFICATION LOADING SCREEN                   -->
+  <!-- ===================================================================== -->
+  <div id="viewLoading" class="flex-grow flex items-center justify-center p-4">
+    <div class="card-surface rounded-3xl p-7 max-w-sm w-full text-center space-y-4 animate-in">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white mx-auto flex items-center justify-center text-xl shadow-lg shadow-emerald-600/25">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+      </div>
+      <div>
+        <h2 class="text-base font-extrabold text-slate-900">Verifying Device Signature</h2>
+        <p class="text-xs text-slate-500 mt-1">Connecting to Study Domain & checking hardware lock...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 2: HARDWARE DEVICE LOCKED ALERT                                  -->
+  <!-- ===================================================================== -->
+  <div id="viewDeviceLocked" class="hidden flex-grow flex items-center justify-center p-4">
+    <div class="card-surface rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-4 animate-in">
+      <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 mx-auto flex items-center justify-center text-2xl">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h2 class="text-lg font-extrabold text-slate-900">Device Hardware Lock Active</h2>
+      <p class="text-xs text-slate-500 leading-relaxed">
+        This student profile is bound to another device. Ask your linked Parent to tap <strong>Reset Student Device Hardware Lock</strong> in Settings.
+      </p>
+      <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-[11px] space-y-1">
+        <div class="flex justify-between gap-2">
+          <span class="text-slate-400 font-bold">This Device:</span>
+          <span id="lockCurrentDevice" class="font-mono-code font-bold text-slate-800 truncate">—</span>
+        </div>
+        <div class="flex justify-between gap-2">
+          <span class="text-slate-400 font-bold">Bound Device:</span>
+          <span id="lockRegisteredDevice" class="font-mono-code font-bold text-rose-600 truncate">—</span>
+        </div>
+      </div>
+      <button type="button" onclick="retryBootSequence()" class="w-full py-3 rounded-2xl bg-slate-900 hover:bg-black text-white text-xs font-extrabold transition">
+        Retry Verification
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 3: FIRST-TIME DEVICE ONBOARDING & ROLE SELECTION                 -->
+  <!-- ===================================================================== -->
+  <div id="viewOnboarding" class="hidden flex-grow flex items-center justify-center px-3.5 py-5 sm:p-6">
+    <div class="card-surface rounded-3xl max-w-md w-full p-5 sm:p-7 space-y-5 animate-in">
+      <div class="flex items-center justify-between gap-2 pb-3.5 border-b border-slate-100">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 block">One-Time Device Setup</span>
+          <h1 class="text-lg sm:text-xl font-extrabold text-slate-900">Welcome to Study Domain</h1>
+        </div>
+        <div class="text-right shrink-0">
+          <span class="text-[9px] font-bold uppercase text-slate-400 block">Device Code</span>
+          <span id="onboardDeviceIdBadge" class="font-mono-code text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-lg inline-block mt-0.5">#000000</span>
+        </div>
+      </div>
+
+      <!-- Unique Hardware Key Pill -->
+      <div class="px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 text-[11px]">
+        <span class="font-bold text-slate-500 shrink-0"><i class="fa-solid fa-microchip mr-1.5 text-emerald-600"></i>Hardware Key:</span>
+        <span id="onboardDeviceModel" class="font-mono-code font-bold text-slate-800 truncate">HW-0000</span>
+      </div>
+
+      <form onsubmit="handleRegisterProfile(event)" class="space-y-4">
+        <!-- Role Selector -->
+        <div>
+          <label class="block text-xs font-extrabold text-slate-700 mb-2">1. Select Your Role on This Device</label>
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" id="roleBtnStudent" onclick="selectOnboardingRole('student')" class="p-3.5 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 text-left transition relative">
+              <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs mb-2">
+                <i class="fa-solid fa-user-graduate"></i>
+              </div>
+              <p class="text-xs font-extrabold text-slate-900">I am a Student</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Plan topics & log test scores</p>
+            </button>
+
+            <button type="button" id="roleBtnParent" onclick="selectOnboardingRole('parent')" class="p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative">
+              <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs mb-2">
+                <i class="fa-solid fa-user-tie"></i>
+              </div>
+              <p class="text-xs font-extrabold text-slate-900">I am a Parent</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Track study & assign tests</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- Avatar Picker -->
+        <div>
+          <label class="block text-xs font-extrabold text-slate-700 mb-2">2. Choose Avatar or Photo</label>
+          <div class="flex items-center gap-3">
+            <div id="onboardAvatarPreview" class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0">
+              <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            <div class="flex-grow min-w-0 space-y-2">
+              <div id="presetAvatarsRow" class="flex flex-wrap items-center gap-1.5"></div>
+              <label class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-emerald-700 hover:underline cursor-pointer">
+                <i class="fa-solid fa-camera"></i>
+                <span>Upload Custom Photo</span>
+                <input type="file" accept="image/*" onchange="handleAvatarUpload(event)" class="hidden" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full Name -->
+        <div>
+          <label class="block text-xs font-extrabold text-slate-700 mb-1.5">3. Your Full Name</label>
+          <input
+            type="text"
+            id="onboardNameInput"
+            required
+            maxlength="40"
+            placeholder="Enter your name..."
+            class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-white text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
+          />
+        </div>
+
+        <button
+          type="submit"
+          id="onboardSubmitBtn"
+          class="w-full py-3.5 rounded-2xl bg-slate-900 hover:bg-black text-white text-xs font-extrabold shadow-lg transition flex items-center justify-center gap-2"
+        >
+          <span>Continue to Study Domain</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 4: STUDENT -> PARENT LINKING GATE                                -->
+  <!-- ===================================================================== -->
+  <div id="viewStudentLinkGate" class="hidden flex-grow flex items-center justify-center px-3.5 py-5 sm:p-6">
+    <div class="card-surface rounded-3xl max-w-md w-full p-5 sm:p-7 space-y-5 text-center animate-in">
+      <div class="w-14 h-14 rounded-3xl bg-emerald-50 text-emerald-600 border border-emerald-200 mx-auto flex items-center justify-center text-xl">
+        <i class="fa-solid fa-link"></i>
+      </div>
+      <div>
+        <h2 class="text-lg font-extrabold text-slate-900">Link to Your Parent's Account</h2>
+        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+          Enter your Parent's 6-digit Device ID below, or give your Student ID (<strong id="gateStudentOwnId" class="font-mono-code text-emerald-700">000000</strong>) to your parent.
+        </p>
+      </div>
+
+      <div class="space-y-3 text-left">
+        <label class="block text-xs font-extrabold text-slate-700">Enter Parent's 6-Digit Device ID</label>
+        <input
+          type="text"
+          id="parentSearchIdInput"
+          maxlength="6"
+          inputmode="numeric"
+          oninput="handleLookupParentById(this.value)"
+          placeholder="e.g. 482910"
+          class="w-full px-4 py-3 rounded-2xl border border-slate-200 font-mono-code text-base font-extrabold text-center tracking-widest text-slate-900 focus:outline-none focus:border-emerald-600"
+        />
+
+        <!-- Live Parent Lookup Preview -->
+        <div id="parentLookupPreview" class="hidden p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200 space-y-3">
+          <div class="flex items-center gap-3">
+            <div id="lookupParentAvatar" class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm font-extrabold overflow-hidden shrink-0"></div>
+            <div class="min-w-0">
+              <p id="lookupParentName" class="text-xs font-extrabold text-slate-900 truncate">Parent Name</p>
+              <p id="lookupParentDevice" class="font-mono-code text-[10px] text-indigo-700 truncate">HW-0000</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="confirmLinkParentBtn"
+            onclick="confirmLinkToParent()"
+            class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition shadow-sm"
+          >
+            Confirm & Unlock Workspace
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onclick="copyTextToClipboard(document.getElementById('gateStudentOwnId').textContent)"
+          class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
+        >
+          <i class="fa-regular fa-copy mr-1"></i>Copy My Student ID
+        </button>
+        <button
+          type="button"
+          onclick="refreshCurrentProfileState()"
+          class="flex-1 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-extrabold transition"
+        >
+          <i class="fa-solid fa-rotate mr-1"></i>Check Link Status
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
   <!-- VIEW 5: STUDENT STUDY & TEST DASHBOARD (HOME TAB)                     -->
   <!-- ===================================================================== -->
-  <div id="viewStudentDashboard" class="hidden flex-grow flex flex-col max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 pb-28 space-y-5 animate-in">
+  <div id="viewStudentDashboard" class="hidden flex-grow flex flex-col max-w-6xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-5 pb-28 space-y-4 sm:space-y-5 animate-in">
     <!-- Stunning Gradient Hero Banner -->
     <div class="hero-banner-stu rounded-3xl p-5 sm:p-7 text-white relative overflow-hidden">
       <div class="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
@@ -533,7 +756,7 @@
   <!-- FLOATING 4-TAB BOTTOM NAVIGATION DOCK                                 -->
   <!-- (1: Home | 2: Chat + Red Dot | 3: Settings | 4: Dashboard)            -->
   <!-- ===================================================================== -->
-  <div id="bottomAppNav" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-md bottom-dock-glass rounded-3xl p-1.5">
+  <div id="bottomAppNav" class="hidden fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-md bottom-dock-glass rounded-3xl p-1.5" style="padding-bottom: calc(0.375rem + env(safe-area-inset-bottom, 0px));">
     <div class="grid grid-cols-4 gap-1">
       <!-- Tab 1: Home -->
       <button
@@ -3593,7 +3816,179 @@
       bootApplication();
     }
 
+    // -----------------------------------------------------------------------
+    // 14. PWA INSTALLABILITY (MANIFEST, ICON, SERVICE WORKER & PROMPT)
+    // -----------------------------------------------------------------------
+    let deferredPwaPrompt = null;
+
+    function generatePwaAppIconDataUrl(size = 512) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        const grad = ctx.createLinearGradient(0, 0, size, size);
+        grad.addColorStop(0, '#059669');
+        grad.addColorStop(0.55, '#0d9488');
+        grad.addColorStop(1, '#4f46e5');
+
+        const r = Math.round(size * 0.22);
+        ctx.beginPath();
+        ctx.moveTo(r, 0);
+        ctx.lineTo(size - r, 0);
+        ctx.quadraticCurveTo(size, 0, size, r);
+        ctx.lineTo(size, size - r);
+        ctx.quadraticCurveTo(size, size, size - r, size);
+        ctx.lineTo(r, size);
+        ctx.quadraticCurveTo(0, size, 0, size - r);
+        ctx.lineTo(0, r);
+        ctx.quadraticCurveTo(0, 0, r, 0);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = Math.max(8, Math.round(size * 0.045));
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        const cx = size / 2;
+        const cy = size * 0.44;
+        const w = size * 0.34;
+        const h = size * 0.17;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - h);
+        ctx.lineTo(cx + w, cy);
+        ctx.lineTo(cx, cy + h);
+        ctx.lineTo(cx - w, cy);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx - w * 0.62, cy + h * 0.55);
+        ctx.lineTo(cx - w * 0.62, cy + h * 1.45);
+        ctx.quadraticCurveTo(cx, cy + h * 2.15, cx + w * 0.62, cy + h * 1.45);
+        ctx.lineTo(cx + w * 0.62, cy + h * 0.55);
+        ctx.stroke();
+
+        return canvas.toDataURL('image/png');
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function setupPwaSupport() {
+      try {
+        const icon192 = generatePwaAppIconDataUrl(192);
+        const icon512 = generatePwaAppIconDataUrl(512);
+
+        const appleIcon = document.getElementById('appleTouchIconLink');
+        if (appleIcon && icon192) appleIcon.href = icon192;
+
+        const manifestObj = {
+          id: 'study-domain-accountability-app',
+          name: 'Study Domain — Student & Parent Sync',
+          short_name: 'Study Domain',
+          description: 'Real-time Student & Parent academic planner, test reports, and instant chat.',
+          start_url: window.location.href.split('#')[0],
+          scope: './',
+          display: 'standalone',
+          orientation: 'portrait',
+          background_color: '#f8fafc',
+          theme_color: '#059669',
+          icons: [
+            {
+              src: icon192,
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'any maskable'
+            },
+            {
+              src: icon512,
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable'
+            }
+          ]
+        };
+
+        const manifestStr = encodeURIComponent(JSON.stringify(manifestObj));
+        const manifestLink = document.getElementById('pwaManifestLink');
+        if (manifestLink) {
+          manifestLink.setAttribute('href', `data:application/manifest+json;charset=utf-8,${manifestStr}`);
+        }
+
+        if ('serviceWorker' in navigator) {
+          const swCode = `
+            self.addEventListener('install', event => self.skipWaiting());
+            self.addEventListener('activate', event => event.waitUntil(clients.claim()));
+            self.addEventListener('fetch', event => {
+              event.respondWith(
+                fetch(event.request).catch(() => new Response('Study Domain Offline Ready', {
+                  status: 200,
+                  headers: { 'Content-Type': 'text/plain' }
+                }))
+              );
+            });
+          `;
+          const swDataUrl = 'data:application/javascript;base64,' + btoa(swCode);
+          navigator.serviceWorker.register(swDataUrl, { scope: './' }).catch(() => {});
+        }
+      } catch (e) {
+        console.warn('PWA setup notice:', e);
+      }
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPwaPrompt = e;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) btn.classList.remove('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPwaPrompt = null;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) btn.classList.add('hidden');
+      showToast('Study Domain installed on your device!');
+    });
+
+    async function triggerPwaInstall() {
+      if (deferredPwaPrompt) {
+        deferredPwaPrompt.prompt();
+        const choice = await deferredPwaPrompt.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          deferredPwaPrompt = null;
+        }
+        return;
+      }
+
+      const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+      if (isIos) {
+        showToast('On iPhone/iPad: Tap Share (↑) in Safari, then tap "Add to Home Screen".', 'info');
+      } else {
+        showToast('Tap your browser menu (⋮) and select "Install app" or "Add to Home screen".', 'info');
+      }
+    }
+
+    // Mobile wake / app-switch instant reconciliation
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted && currentProfile) {
+        triggerLiveRefresh();
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && currentProfile) {
+        triggerLiveRefresh();
+      }
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
+      setupPwaSupport();
       bootApplication();
     });
   </script>
