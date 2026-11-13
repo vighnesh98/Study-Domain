@@ -85,90 +85,60 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 1: BOOT LOADING SCREEN                                           -->
+  <!-- VIEW 1: LOADING / HARDWARE BOOT SCREEN                                -->
   <!-- ===================================================================== -->
   <div id="viewLoading" class="flex-grow flex flex-col items-center justify-center p-6 text-center">
-    <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-emerald-600/20 mb-4">
-      <i class="fa-solid fa-graduation-cap"></i>
+    <div class="w-14 h-14 rounded-3xl bg-emerald-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-emerald-600/20 mb-4">
+      <i class="fa-solid fa-shield-halved animate-pulse"></i>
     </div>
-    <h1 class="text-xl font-extrabold tracking-tight text-slate-900">StudyBridge</h1>
-    <p id="loadingSubtitle" class="text-xs font-medium text-slate-500 mt-1.5">Verifying device hardware lock & Supabase sync...</p>
-    <div class="mt-5 w-40 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-      <div class="h-full bg-emerald-600 rounded-full animate-pulse w-2/3"></div>
-    </div>
+    <h2 class="text-base font-extrabold text-slate-900">Verifying Device Hardware & Syncing...</h2>
+    <p class="text-xs text-slate-500 mt-1">Connecting securely to StudyBridge</p>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 2: DEVICE LOCK SECURITY BLOCK SCREEN                             -->
+  <!-- VIEW 2: HARDWARE DEVICE LOCK SCREEN                                   -->
   <!-- ===================================================================== -->
-  <div id="viewDeviceLocked" class="hidden flex-grow flex items-center justify-center p-4 sm:p-6">
-    <div class="card-surface rounded-3xl max-w-md w-full p-6 sm:p-8 text-center animate-in">
-      <div class="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-600 mx-auto flex items-center justify-center text-2xl mb-4">
-        <i class="fa-solid fa-shield-halved"></i>
+  <div id="viewDeviceLocked" class="hidden flex-grow flex items-center justify-center p-5">
+    <div class="card-surface rounded-3xl max-w-md w-full p-7 text-center space-y-4 animate-in">
+      <div class="w-16 h-16 rounded-3xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center text-2xl">
+        <i class="fa-solid fa-lock"></i>
       </div>
-      <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-[11px] font-bold uppercase tracking-wider">
-        Hardware Lock Active
-      </span>
-      <h2 class="text-xl font-extrabold text-slate-900 mt-3">Unauthorized Device Detected</h2>
-      <p id="deviceLockMessage" class="text-xs text-slate-600 mt-2 leading-relaxed">
-        Student accounts are strictly bound to their registered physical device. Logging in from another phone or laptop is blocked for accountability.
-      </p>
-
-      <div class="mt-5 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2 text-xs">
+      <div>
+        <span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-extrabold uppercase tracking-wider">Hardware Lock Active</span>
+        <h2 class="text-lg font-extrabold text-slate-900 mt-2">Unauthorized Device Detected</h2>
+        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+          This student profile is strictly locked to its registered laptop or phone. Ask your linked Parent to tap <strong>Reset Device Lock</strong> on their console to authorize this device.
+        </p>
+      </div>
+      <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-1.5 font-mono-code text-[11px]">
         <div class="flex justify-between">
-          <span class="text-slate-500">Current Device:</span>
-          <span id="lockCurrentDevice" class="font-bold text-slate-800">Unknown</span>
+          <span class="text-slate-400">Current Hardware:</span>
+          <span id="lockCurrentDevice" class="font-bold text-rose-600">HW-0000</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-slate-500">Registered Device:</span>
-          <span id="lockRegisteredDevice" class="font-bold text-emerald-700">Unknown</span>
+          <span class="text-slate-400">Registered Hardware:</span>
+          <span id="lockRegisteredDevice" class="font-bold text-slate-800">HW-0000</span>
         </div>
       </div>
-
-      <p class="text-[11px] text-slate-500 mt-4">
-        Ask your linked Parent to click <strong>"Reset Student Device Lock"</strong> on their dashboard if you switched to a new phone.
-      </p>
-
-      <button type="button" onclick="retryBootSequence()" class="mt-6 w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center justify-center gap-2">
-        <i class="fa-solid fa-rotate-right"></i>
-        <span>Re-Verify This Device</span>
+      <button type="button" onclick="retryBootSequence()" class="w-full py-3 rounded-2xl bg-slate-900 hover:bg-black text-white text-xs font-extrabold transition">
+        Re-Check Device Authorization
       </button>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 3: FIRST-TIME DEVICE ONBOARDING SCREEN                           -->
+  <!-- VIEW 3: FIRST-TIME DEVICE ONBOARDING                                  -->
   <!-- ===================================================================== -->
-  <div id="viewOnboarding" class="hidden flex-grow flex items-center justify-center p-4 sm:p-8">
-    <div class="card-surface rounded-3xl max-w-lg w-full p-6 sm:p-8 animate-in">
-      <!-- Top Brand & Detected Device Pill -->
-      <div class="flex flex-wrap items-center justify-between gap-2 pb-5 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-600/20">
-            <i class="fa-solid fa-book-open-reader"></i>
+  <div id="viewOnboarding" class="hidden flex-grow flex items-center justify-center p-4 sm:p-6">
+    <div class="card-surface rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 animate-in">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-base shadow-md shadow-emerald-600/20">
+            <i class="fa-solid fa-graduation-cap"></i>
           </div>
           <div>
-            <h1 class="text-lg font-extrabold text-slate-900 leading-tight">StudyBridge Setup</h1>
-            <p class="text-[11px] text-slate-500 font-medium">Bind this physical hardware to your profile</p>
-          </div>
-        </div>
-        <div class="text-right">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Searchable ID</span>
-          <span id="onboardDeviceIdBadge" class="font-mono-code text-xs font-bold px-2.5 py-1 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 inline-block">
-            #000000
-          </span>
-        </div>
-      </div>
-
-      <!-- Unique Hardware Fingerprint Banner -->
-      <div class="mt-4 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-indigo-600 shrink-0">
-            <i class="fa-solid fa-microchip text-xs"></i>
-          </div>
-          <div class="truncate">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Unique Hardware Signature</span>
-            <span id="onboardDeviceModel" class="font-mono-code text-xs font-bold text-slate-800 truncate block">Computing SHA-256...</span>
+            <h1 class="text-lg font-extrabold text-slate-900 leading-none">StudyBridge</h1>
+            <p class="text-[11px] text-slate-500 mt-1">1:1 Student–Parent Accountability</p>
           </div>
         </div>
         <span id="dbConnectionPill" class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
@@ -176,67 +146,61 @@
         </span>
       </div>
 
-      <!-- Registration Form -->
-      <form id="onboardingForm" onsubmit="handleRegisterProfile(event)" class="mt-5 space-y-5">
-        <!-- Avatar Picker + Photo Upload -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-2">Profile Picture or Avatar</label>
-          <div class="flex items-center gap-4">
-            <div id="onboardAvatarPreview" class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 border-2 border-emerald-300 flex items-center justify-center text-2xl font-extrabold overflow-hidden shrink-0 shadow-xs">
-              <i class="fa-solid fa-user-graduate"></i>
-            </div>
-            <div class="flex-grow space-y-2">
-              <div class="flex flex-wrap gap-1.5" id="presetAvatarsRow">
-                <!-- Populated by JS -->
-              </div>
-              <div class="flex items-center gap-2">
-                <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)" />
-                <button type="button" onclick="document.getElementById('avatarFileInput').click()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition flex items-center gap-1.5">
-                  <i class="fa-solid fa-camera"></i>
-                  <span>Upload Photo</span>
-                </button>
-                <span class="text-[10px] text-slate-400">Auto-compressed</span>
-              </div>
-            </div>
-          </div>
+      <!-- Unique Hardware Signature Banner -->
+      <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">Unique Device Hardware Key</span>
+          <p id="onboardDeviceModel" class="font-mono-code text-xs font-extrabold text-slate-800 truncate mt-0.5">Computing SHA-256...</p>
         </div>
-
-        <!-- Full Name -->
-        <div>
-          <label for="onboardNameInput" class="block text-xs font-bold text-slate-700 mb-1.5">Your Full Name</label>
-          <input
-            type="text"
-            id="onboardNameInput"
-            required
-            maxlength="40"
-            placeholder="e.g., Aarav Sharma or Mrs. Sharma"
-            class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition"
-          />
+        <div class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-right shrink-0">
+          <span class="text-[9px] font-bold uppercase text-slate-400 block">Device ID</span>
+          <span id="onboardDeviceIdBadge" class="font-mono-code text-xs font-extrabold text-emerald-700">#000000</span>
         </div>
+      </div>
 
+      <form onsubmit="handleRegisterProfile(event)" class="space-y-5">
         <!-- Role Selection -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-2">Select Account Role</label>
+          <label class="block text-xs font-extrabold text-slate-700 mb-2">1. Select Account Role</label>
           <div class="grid grid-cols-2 gap-3">
             <button type="button" id="roleBtnStudent" onclick="selectOnboardingRole('student')" class="p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 text-left transition relative">
-              <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm mb-2">
+              <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs mb-2">
                 <i class="fa-solid fa-user-graduate"></i>
               </div>
-              <div class="text-sm font-extrabold text-slate-900">Student</div>
-              <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Log topics, take tests & link to parent</p>
+              <div class="text-xs font-extrabold text-slate-900">Student</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">Plan topics & take tests</div>
             </button>
 
             <button type="button" id="roleBtnParent" onclick="selectOnboardingRole('parent')" class="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative">
-              <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm mb-2">
-                <i class="fa-solid fa-user-shield"></i>
+              <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs mb-2">
+                <i class="fa-solid fa-user-tie"></i>
               </div>
-              <div class="text-sm font-extrabold text-slate-900">Parent</div>
-              <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Track progress, schedule tests & notes</p>
+              <div class="text-xs font-extrabold text-slate-900">Parent</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">Track progress & assign tests</div>
             </button>
           </div>
         </div>
 
-        <button type="submit" id="onboardSubmitBtn" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2">
+        <!-- Name & Avatar -->
+        <div class="space-y-3">
+          <label class="block text-xs font-extrabold text-slate-700">2. Your Name & Profile Icon</label>
+          <div class="flex items-center gap-3">
+            <div id="onboardAvatarPreview" class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 border border-emerald-200">
+              <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            <input type="text" id="onboardNameInput" required maxlength="40" placeholder="Enter your full name..." class="flex-grow px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-emerald-600" />
+          </div>
+
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <div id="presetAvatarsRow" class="flex items-center gap-1.5 flex-wrap"></div>
+            <label class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold cursor-pointer transition shrink-0">
+              <i class="fa-solid fa-camera mr-1"></i>Photo
+              <input type="file" accept="image/*" onchange="handleAvatarUpload(event)" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" id="onboardSubmitBtn" class="w-full py-3.5 rounded-2xl bg-slate-900 hover:bg-black text-white text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg transition">
           <span>Continue to StudyBridge</span>
           <i class="fa-solid fa-arrow-right"></i>
         </button>
@@ -247,262 +211,194 @@
   <!-- ===================================================================== -->
   <!-- VIEW 4: STUDENT -> PARENT LINKING GATE                                -->
   <!-- ===================================================================== -->
-  <div id="viewStudentLinkGate" class="hidden flex-grow flex items-center justify-center p-4 sm:p-8">
-    <div class="card-surface rounded-3xl max-w-md w-full p-6 sm:p-8 animate-in">
-      <div class="text-center">
-        <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 mx-auto flex items-center justify-center text-xl mb-3">
-          <i class="fa-solid fa-link"></i>
-        </div>
-        <h2 class="text-xl font-extrabold text-slate-900">Link to Your Parent</h2>
-        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-          Enter your Parent's 6-Digit Device ID below, or share your own Student Device ID so they can add you from their phone.
+  <div id="viewStudentLinkGate" class="hidden flex-grow flex items-center justify-center p-4 sm:p-6">
+    <div class="card-surface rounded-3xl max-w-md w-full p-6 sm:p-8 text-center space-y-5 animate-in">
+      <div class="w-14 h-14 rounded-3xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center text-xl">
+        <i class="fa-solid fa-link"></i>
+      </div>
+      <div>
+        <h2 class="text-lg font-extrabold text-slate-900">Link Your Parent's Account</h2>
+        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+          Enter your Parent's 6-digit Device ID below, or share your Student ID (<strong id="gateStudentOwnId" class="font-mono-code text-emerald-700">000000</strong>) with them.
         </p>
       </div>
 
-      <!-- Student's Own Shareable Device ID Box -->
-      <div class="mt-5 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
-        <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Your Student Device ID</span>
-          <span id="gateStudentOwnId" class="font-mono-code text-lg font-extrabold text-emerald-950 tracking-wider">000000</span>
-        </div>
-        <button type="button" onclick="copyTextToClipboard(currentProfile ? currentProfile.device_number_id : '')" class="px-3.5 py-2 rounded-xl bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition flex items-center gap-1.5">
-          <i class="fa-regular fa-copy"></i>
-          <span>Copy ID</span>
-        </button>
-      </div>
+      <div class="space-y-3 text-left">
+        <label class="block text-xs font-bold text-slate-700">Parent 6-Digit Device ID</label>
+        <input
+          type="text"
+          id="parentSearchIdInput"
+          maxlength="6"
+          inputmode="numeric"
+          oninput="handleLookupParentById(this.value)"
+          placeholder="e.g. 849201"
+          class="w-full px-4 py-3 rounded-2xl border border-slate-200 font-mono-code text-base font-extrabold text-center tracking-widest text-slate-900 focus:outline-none focus:border-emerald-600"
+        />
 
-      <!-- Search Parent by 6-Digit Device ID -->
-      <div class="mt-5">
-        <label for="parentSearchIdInput" class="block text-xs font-bold text-slate-700 mb-1.5">Enter Parent's 6-Digit Device ID</label>
-        <div class="flex gap-2">
-          <input
-            type="text"
-            id="parentSearchIdInput"
-            maxlength="6"
-            inputmode="numeric"
-            placeholder="e.g. 849201"
-            oninput="handleLookupParentById(this.value)"
-            class="flex-grow px-4 py-3 rounded-2xl border border-slate-200 font-mono-code text-base font-bold tracking-widest text-center text-slate-900 focus:outline-none focus:border-indigo-500"
-          />
-          <button type="button" onclick="handleLookupParentById(document.getElementById('parentSearchIdInput').value)" class="px-4 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition">
-            Search
+        <!-- Live Found Parent Preview -->
+        <div id="parentLookupPreview" class="hidden p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="lookupParentAvatar" class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm font-bold overflow-hidden shrink-0"></div>
+            <div class="min-w-0">
+              <div id="lookupParentName" class="text-xs font-extrabold text-slate-900 truncate">Parent Name</div>
+              <div id="lookupParentDevice" class="font-mono-code text-[10px] text-indigo-700 truncate">HW-0000</div>
+            </div>
+          </div>
+          <button type="button" id="confirmLinkParentBtn" onclick="confirmLinkToParent()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shrink-0 transition">
+            Link Now
           </button>
         </div>
       </div>
 
-      <!-- Live Parent Lookup Preview Card -->
-      <div id="parentLookupPreview" class="hidden mt-4 p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200 animate-in">
-        <div class="flex items-center gap-3">
-          <div id="lookupParentAvatar" class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold overflow-hidden shrink-0"></div>
-          <div class="min-w-0 flex-grow">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block">Parent Account Found</span>
-            <div id="lookupParentName" class="text-sm font-extrabold text-slate-900 truncate">Parent Name</div>
-            <div id="lookupParentDevice" class="text-[11px] text-slate-500 truncate">Device Model</div>
-          </div>
-        </div>
-        <button type="button" id="confirmLinkParentBtn" onclick="confirmLinkToParent()" class="mt-3.5 w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-2">
-          <i class="fa-solid fa-circle-check"></i>
-          <span>Confirm & Link Account</span>
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+        <button type="button" onclick="copyTextToClipboard(currentProfile ? currentProfile.device_number_id : '')" class="text-slate-600 hover:text-slate-900 font-bold">
+          <i class="fa-regular fa-copy mr-1"></i>Copy My Student ID
         </button>
-      </div>
-
-      <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-        <span class="text-slate-400">Parent linked you from their phone?</span>
-        <button type="button" onclick="refreshCurrentProfileState()" class="font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-          <i class="fa-solid fa-arrows-rotate"></i>
-          <span>Check Status</span>
+        <button type="button" onclick="refreshCurrentProfileState()" class="text-emerald-700 hover:text-emerald-800 font-extrabold">
+          <i class="fa-solid fa-arrows-rotate mr-1"></i>Check Link Status
         </button>
       </div>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 5: STUDENT DASHBOARD                                             -->
+  <!-- VIEW 5: STUDENT STUDY & TEST DASHBOARD                                -->
   <!-- ===================================================================== -->
-  <div id="viewStudentDashboard" class="hidden flex-grow flex flex-col max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 pb-20 space-y-5">
+  <div id="viewStudentDashboard" class="hidden flex-grow flex flex-col max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 pb-20 space-y-5">
     <!-- Top Student Header -->
-    <header class="card-surface rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <header class="card-surface rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-3.5">
-        <div id="stuHeaderAvatar" class="w-13 h-13 w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 border border-emerald-200"></div>
+        <div id="stuHeaderAvatar" class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 border border-emerald-200"></div>
         <div>
           <div class="flex flex-wrap items-center gap-2">
             <h1 id="stuHeaderName" class="text-base sm:text-lg font-extrabold text-slate-900">Student Name</h1>
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase tracking-wider">Student</span>
+            <span id="stuLinkedParentLabel" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Linked to Parent</span>
           </div>
-          <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500">
-            <span class="inline-flex items-center gap-1 font-mono-code font-semibold text-slate-700">
-              <i class="fa-solid fa-microchip text-emerald-600"></i>
-              <span id="stuHeaderDevice">HW-0000-0000</span>
-            </span>
-            <span>•</span>
-            <span class="inline-flex items-center gap-1 text-indigo-600 font-bold">
-              <i class="fa-solid fa-link"></i>
-              <span id="stuLinkedParentLabel">Linked to Parent</span>
-            </span>
-          </div>
+          <p id="stuHeaderDevice" class="font-mono-code text-[11px] text-slate-500 mt-0.5">HW-0000-0000</p>
         </div>
       </div>
 
-      <div class="flex items-center justify-between sm:justify-end gap-2.5 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-        <button type="button" onclick="copyTextToClipboard(currentProfile ? currentProfile.device_number_id : '')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold font-mono-code flex items-center gap-1.5 transition" title="Copy Student Device ID">
-          <span class="text-slate-400 font-sans text-[10px] uppercase">ID:</span>
-          <span id="stuHeaderDeviceId">000000</span>
-          <i class="fa-regular fa-copy text-slate-400 text-[11px]"></i>
-        </button>
+      <div class="flex flex-wrap items-center gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+        <div class="px-3.5 py-2 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-2">
+          <div>
+            <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 block">Student ID</span>
+            <span id="stuHeaderDeviceId" class="font-mono-code text-xs font-extrabold text-slate-900">000000</span>
+          </div>
+          <button type="button" onclick="copyTextToClipboard(currentProfile ? currentProfile.device_number_id : '')" class="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-700">
+            Copy
+          </button>
+        </div>
 
-        <button type="button" onclick="loadStudentDashboardData(true)" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center transition" title="Sync Now">
+        <button type="button" onclick="loadStudentDashboardData(true)" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition" title="Sync Now">
           <i class="fa-solid fa-arrows-rotate text-xs" id="stuSyncIcon"></i>
         </button>
       </div>
     </header>
 
-    <!-- Pinned Parent Messages Banner -->
-    <section id="stuMessagesSection" class="card-surface rounded-3xl p-4 sm:p-5 border-l-4 border-l-indigo-600">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
-            <i class="fa-solid fa-message"></i>
-          </div>
-          <div>
-            <h2 class="text-sm font-extrabold text-slate-900">Messages from Parent</h2>
-            <p class="text-[11px] text-slate-500">Viewing automatically sends a read receipt</p>
-          </div>
+    <!-- Parent Notes Banner -->
+    <section class="card-surface rounded-3xl p-4 sm:p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-7 h-7 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-envelope-open-text"></i>
         </div>
-        <span id="stuUnreadBadge" class="hidden px-2.5 py-1 rounded-full bg-indigo-600 text-white text-[10px] font-bold">0 New</span>
+        <h2 class="text-sm font-extrabold text-slate-900">Messages from Parent</h2>
       </div>
-      <div id="stuMessagesList" class="space-y-2.5 max-h-52 overflow-y-auto soft-scroll pr-1">
+      <div id="stuMessagesList" class="space-y-2 max-h-40 overflow-y-auto soft-scroll">
         <p class="text-xs text-slate-400 py-2">No messages from your parent yet.</p>
       </div>
     </section>
 
-    <!-- Parent-Scheduled Tests Section -->
-    <section class="card-surface rounded-3xl p-4 sm:p-6">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center text-sm">
-            <i class="fa-solid fa-file-pen"></i>
-          </div>
-          <div>
-            <h2 class="text-base font-extrabold text-slate-900">Parent-Scheduled Tests & Reports</h2>
-            <p class="text-[11px] text-slate-500">Complete scheduled tests and submit your marks</p>
-          </div>
+    <!-- Scheduled Tests Section -->
+    <section class="card-surface rounded-3xl p-4 sm:p-5">
+      <div class="flex items-center gap-2 mb-3.5">
+        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-file-pen"></i>
+        </div>
+        <div>
+          <h2 class="text-sm font-extrabold text-slate-900">Scheduled Tests & Reports</h2>
+          <p class="text-[11px] text-slate-500">Tests assigned by your parent</p>
         </div>
       </div>
-
-      <div id="stuTestsList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        <div class="col-span-full text-center py-6 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-          No tests scheduled by your parent yet.
-        </div>
-      </div>
+      <div id="stuTestsList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
     </section>
 
-    <!-- Main Grid: Subject Manager + Today/Tomorrow Study Planner -->
+    <!-- Main Study Workspace: Subjects (Left) + Daily Topics Planner (Right) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      <!-- Left Column (4 cols): Subjects Manager -->
-      <section class="lg:col-span-4 card-surface rounded-3xl p-4 sm:p-5 flex flex-col">
-        <div class="flex items-center justify-between mb-3.5">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-              <i class="fa-solid fa-layer-group"></i>
-            </div>
-            <h2 class="text-sm font-extrabold text-slate-900">My Subjects</h2>
-          </div>
-          <span id="stuSubjectCount" class="text-[11px] font-bold text-slate-400">0</span>
+      <!-- Subjects Manager (4 cols) -->
+      <section class="lg:col-span-4 card-surface rounded-3xl p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-extrabold text-slate-900">My Subjects</h2>
+          <span id="stuSubjectCount" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-extrabold">0 Total</span>
         </div>
 
-        <!-- Add Subject Form -->
-        <form onsubmit="handleAddSubject(event)" class="space-y-2.5 pb-4 border-b border-slate-100">
-          <input
-            type="text"
-            id="newSubjectNameInput"
-            required
-            maxlength="30"
-            placeholder="Add subject (e.g. Physics)"
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-emerald-500"
-          />
-          <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-1.5" id="subjectColorPicker">
-              <!-- Color dots populated by JS -->
-            </div>
-            <button type="submit" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1">
-              <i class="fa-solid fa-plus text-[10px]"></i>
-              <span>Add</span>
-            </button>
-          </div>
-        </form>
-
-        <!-- Subjects List -->
-        <div id="stuSubjectsList" class="mt-3.5 space-y-2 flex-grow max-h-80 overflow-y-auto soft-scroll pr-1">
-          <p class="text-xs text-slate-400 text-center py-4">Add your subjects above to begin planning.</p>
-        </div>
-      </section>
-
-      <!-- Right Column (8 cols): Today & Tomorrow Topic Planner -->
-      <section class="lg:col-span-8 card-surface rounded-3xl p-4 sm:p-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-          <div>
-            <h2 class="text-base font-extrabold text-slate-900">Daily Study Topic Planner</h2>
-            <p class="text-[11px] text-slate-500 mt-0.5">Plan for Today or Tomorrow. Tomorrow's items roll over automatically.</p>
-          </div>
-
-          <!-- Today / Tomorrow Tab Switcher -->
-          <div class="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold self-start sm:self-auto">
-            <button type="button" id="stuTabTodayBtn" onclick="switchStudentPlanTab('today')" class="px-3.5 py-1.5 rounded-xl bg-white text-emerald-700 shadow-xs transition">
-              Today's Checklist
-            </button>
-            <button type="button" id="stuTabTomorrowBtn" onclick="switchStudentPlanTab('tomorrow')" class="px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition">
-              Tomorrow's Plan
-            </button>
-          </div>
-        </div>
-
-        <!-- Add Topic Form -->
-        <form onsubmit="handleAddStudyTopic(event)" class="mt-4 grid grid-cols-1 sm:grid-cols-12 gap-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-          <select id="topicSubjectSelect" required class="sm:col-span-4 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500">
-            <option value="">Select Subject...</option>
-          </select>
-
-          <input
-            type="text"
-            id="topicTitleInput"
-            required
-            maxlength="80"
-            placeholder="Topic to cover (e.g. Rotational Motion Ch. 7)"
-            class="sm:col-span-5 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:border-emerald-500"
-          />
-
-          <div class="sm:col-span-3 flex gap-2">
-            <select id="topicDaySelect" class="flex-grow px-2.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:outline-none">
-              <option value="today">Today</option>
-              <option value="tomorrow">Tomorrow</option>
-            </select>
-            <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition shrink-0">
+        <form onsubmit="handleAddSubject(event)" class="space-y-2.5">
+          <div class="flex gap-2">
+            <input type="text" id="newSubjectNameInput" required maxlength="35" placeholder="e.g. Physics, Calculus" class="flex-grow px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-600" />
+            <button type="submit" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition shrink-0">
               Add
             </button>
           </div>
+          <div id="subjectColorPicker" class="flex items-center gap-2 pt-0.5"></div>
         </form>
 
-        <!-- Progress Bar for Today -->
-        <div id="stuTodayProgressWrap" class="mt-4">
-          <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="font-bold text-slate-600">Today's Coverage Progress</span>
-            <span id="stuProgressText" class="font-mono-code font-bold text-emerald-700">0 / 0 Covered</span>
+        <div id="stuSubjectsList" class="space-y-2 max-h-80 overflow-y-auto soft-scroll pr-1"></div>
+      </section>
+
+      <!-- Daily Topics Planner (8 cols) -->
+      <section class="lg:col-span-8 card-surface rounded-3xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900">Study Topic Planner</h2>
+            <p class="text-[11px] text-slate-500">Plan Today & Tomorrow, then tick off as you complete</p>
           </div>
-          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+
+          <!-- Planner Tabs -->
+          <div class="inline-flex p-1 rounded-2xl bg-slate-100 text-xs font-extrabold self-start">
+            <button type="button" id="stuTabTodayBtn" onclick="switchStudentPlanTab('today')" class="px-3.5 py-1.5 rounded-xl bg-white text-emerald-700 shadow-xs transition">
+              Today
+            </button>
+            <button type="button" id="stuTabTomorrowBtn" onclick="switchStudentPlanTab('tomorrow')" class="px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition">
+              Tomorrow
+            </button>
+            <button type="button" id="stuTabHistoryBtn" onclick="switchStudentPlanTab('history')" class="px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition">
+              Past Records
+            </button>
+          </div>
+        </div>
+
+        <!-- Today's Progress Bar -->
+        <div id="stuTodayProgressWrap" class="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-extrabold text-emerald-900">
+            <span>Today's Completion</span>
+            <span id="stuProgressText" class="font-mono-code">0 / 0 Covered (0%)</span>
+          </div>
+          <div class="w-full h-2 bg-emerald-200/70 rounded-full overflow-hidden">
             <div id="stuProgressBar" class="h-full bg-emerald-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
           </div>
         </div>
 
-        <!-- Topics Checklist Container -->
-        <div id="stuTopicsContainer" class="mt-4 space-y-2.5">
-          <p class="text-xs text-slate-400 text-center py-8">No topics added for this day yet.</p>
-        </div>
+        <!-- Add Topic Form -->
+        <form onsubmit="handleAddTopic(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <select id="topicSubjectSelect" required class="sm:col-span-4 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-600">
+            <option value="">Select Subject...</option>
+          </select>
+          <input type="text" id="topicTitleInput" required maxlength="90" placeholder="Chapter or topic to cover..." class="sm:col-span-5 px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-emerald-600" />
+          <select id="topicDaySelect" class="sm:col-span-2 px-2.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:outline-none focus:border-emerald-600">
+            <option value="today">Today</option>
+            <option value="tomorrow">Tomorrow</option>
+          </select>
+          <button type="submit" class="sm:col-span-1 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-extrabold transition flex items-center justify-center">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </form>
+
+        <div id="stuTopicsContainer" class="space-y-2.5 max-h-96 overflow-y-auto soft-scroll pr-1"></div>
       </section>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 6: PARENT DASHBOARD                                              -->
+  <!-- VIEW 6: PARENT DASHBOARD (DEDICATED 1-STUDENT CONSOLE)                -->
   <!-- ===================================================================== -->
   <div id="viewParentDashboard" class="hidden flex-grow flex flex-col max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 pb-20 space-y-5">
     <!-- Top Parent Header -->
@@ -513,6 +409,10 @@
           <div class="flex flex-wrap items-center gap-2">
             <h1 id="parHeaderName" class="text-base sm:text-lg font-extrabold text-slate-900">Parent Name</h1>
             <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold uppercase tracking-wider">Parent Console</span>
+            <span id="parRealtimePill" class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Live Sync</span>
+            </span>
           </div>
           <p id="parHeaderDevice" class="font-mono-code text-[11px] text-slate-500 mt-0.5">HW-0000-0000</p>
         </div>
@@ -536,46 +436,35 @@
       </div>
     </header>
 
-    <!-- Student Selector & Link Student by 6-Digit Device ID Bar -->
-    <section class="card-surface rounded-3xl p-4 sm:p-5">
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <!-- Linked Students Tabs -->
-        <div class="flex flex-wrap items-center gap-2" id="parLinkedStudentsBar">
-          <span class="text-xs font-bold text-slate-400">No students linked yet.</span>
-        </div>
-
-        <!-- Add/Search Student by 6-Digit Device ID -->
-        <form onsubmit="handleParentLinkStudent(event)" class="flex items-center gap-2">
-          <div class="relative">
-            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-            <input
-              type="text"
-              id="parSearchStudentIdInput"
-              maxlength="6"
-              inputmode="numeric"
-              placeholder="Student 6-Digit ID"
-              class="pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 font-mono-code text-xs font-bold text-slate-900 w-44 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition shrink-0">
-            + Link Student
-          </button>
-        </form>
-      </div>
-    </section>
-
-    <!-- Empty State When No Student Is Linked -->
-    <div id="parNoStudentEmpty" class="card-surface rounded-3xl p-10 text-center">
+    <!-- Single-Student Link Gate (Shown ONLY when no student is linked yet) -->
+    <section id="parLinkStudentGateCard" class="card-surface rounded-3xl p-6 sm:p-10 text-center">
       <div class="w-16 h-16 rounded-3xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center text-2xl mb-3">
         <i class="fa-solid fa-user-plus"></i>
       </div>
-      <h2 class="text-lg font-extrabold text-slate-900">Link Your Child's Device to Begin</h2>
+      <h2 class="text-lg font-extrabold text-slate-900">Link Your Student's Device</h2>
       <p class="text-xs text-slate-500 max-w-md mx-auto mt-1.5 leading-relaxed">
-        Share your Parent Device ID (<strong id="emptyParIdCopy" class="font-mono-code text-indigo-700">000000</strong>) with your child when they register as a Student, or type their 6-digit Student Device ID in the search bar above.
+        Share your Parent Device ID (<strong id="emptyParIdCopy" class="font-mono-code text-indigo-700">000000</strong>) with your student, or enter their 6-digit Student Device ID below to bind your 1-on-1 dashboard.
       </p>
-    </div>
 
-    <!-- Active Student Monitoring Workspace -->
+      <form onsubmit="handleParentLinkStudent(event)" class="mt-5 max-w-sm mx-auto flex items-center gap-2">
+        <div class="relative flex-grow">
+          <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input
+            type="text"
+            id="parSearchStudentIdInput"
+            maxlength="6"
+            inputmode="numeric"
+            placeholder="Student 6-Digit ID"
+            class="w-full pl-9 pr-3 py-3 rounded-2xl border border-slate-200 font-mono-code text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+        <button type="submit" class="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition shrink-0 shadow-md shadow-indigo-600/20">
+          Link Student
+        </button>
+      </form>
+    </section>
+
+    <!-- Active Single-Student Monitoring Workspace -->
     <div id="parStudentWorkspace" class="hidden space-y-5">
       <!-- Live Student Presence & Device Telemetry Card -->
       <section class="card-surface rounded-3xl p-4 sm:p-6 bg-gradient-to-r from-white to-slate-50/80">
@@ -586,6 +475,7 @@
               <div class="flex flex-wrap items-center gap-2">
                 <h2 id="monitoredStuName" class="text-lg font-extrabold text-slate-900">Student Name</h2>
                 <span id="monitoredStuIdBadge" class="font-mono-code text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">#000000</span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">1:1 Linked</span>
               </div>
 
               <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs">
@@ -614,14 +504,44 @@
           </div>
         </div>
 
-        <!-- Today's Study Completion Progress Bar -->
-        <div class="mt-5 pt-4 border-t border-slate-100">
-          <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="font-bold text-slate-600">Today's Study Target Completion</span>
-            <span id="parTodayProgressLabel" class="font-mono-code font-extrabold text-emerald-700">0 / 0 Topics Covered (0%)</span>
+        <!-- 4-Card KPI Performance Overview Dashboard -->
+        <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block">Today's Coverage</span>
+            <div class="flex items-baseline justify-between mt-1">
+              <span id="kpiTodayPct" class="font-mono-code text-xl font-extrabold text-emerald-950">0%</span>
+              <span id="kpiTodayRatio" class="text-[11px] font-bold text-emerald-700">0/0 Topics</span>
+            </div>
+            <div class="w-full h-1.5 bg-emerald-200/70 rounded-full overflow-hidden mt-2">
+              <div id="parTodayProgressBar" class="h-full bg-emerald-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
+            </div>
           </div>
-          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-            <div id="parTodayProgressBar" class="h-full bg-emerald-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
+
+          <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200/80">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 block">7-Day Consistency</span>
+            <div class="flex items-baseline justify-between mt-1">
+              <span id="kpi7DayCovered" class="font-mono-code text-xl font-extrabold text-indigo-950">0</span>
+              <span id="kpi7DayTotal" class="text-[11px] font-bold text-indigo-700">Topics Done</span>
+            </div>
+            <p class="text-[10px] text-indigo-600/90 mt-1.5 font-semibold">Last 7 days completed</p>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 block">Test Avg Score</span>
+            <div class="flex items-baseline justify-between mt-1">
+              <span id="kpiTestAvg" class="font-mono-code text-xl font-extrabold text-amber-950">—</span>
+              <span id="kpiTestCount" class="text-[11px] font-bold text-amber-700">0 Tests</span>
+            </div>
+            <p class="text-[10px] text-amber-700/90 mt-1.5 font-semibold">Across completed exams</p>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-100/80 border border-slate-200">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600 block">Active Subjects</span>
+            <div class="flex items-baseline justify-between mt-1">
+              <span id="kpiSubjectCount" class="font-mono-code text-xl font-extrabold text-slate-900">0</span>
+              <span class="text-[11px] font-bold text-slate-500">Enrolled</span>
+            </div>
+            <p id="kpiSubjectNames" class="text-[10px] text-slate-500 mt-1.5 font-semibold truncate">None added yet</p>
           </div>
         </div>
       </section>
@@ -666,6 +586,31 @@
           </div>
         </section>
       </div>
+
+      <!-- Past Daily Records & History Section (Parent View) -->
+      <section class="card-surface rounded-3xl p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div>
+              <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Past Daily Study Records</h3>
+              <p class="text-[11px] text-slate-500">Inspect what was planned vs. actually covered on previous days</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <select id="parHistoryDateFilter" onchange="renderParentPastHistory()" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500">
+              <option value="all">All Past Days</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="parPastHistoryContainer" class="mt-4 space-y-3 max-h-96 overflow-y-auto soft-scroll pr-1">
+          <p class="text-xs text-slate-400 text-center py-6">No past study history recorded yet.</p>
+        </div>
+      </section>
 
       <!-- 2-Column Grid: Scheduled Tests & Reports + Parent-to-Student Messages -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -726,7 +671,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL 1: PARENT SCHEDULE TEST MODAL                                   -->
+  <!-- MODAL 1: PARENT SCHEDULE TEST MODAL (STUDENT SUBJECTS ONLY)           -->
   <!-- ===================================================================== -->
   <div id="modalScheduleTest" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
     <div class="card-surface rounded-3xl max-w-md w-full p-6 animate-in">
@@ -737,7 +682,7 @@
           </div>
           <div>
             <h3 class="text-base font-extrabold text-slate-900">Schedule a Test</h3>
-            <p class="text-[11px] text-slate-500">Assign topic, time, questions & duration</p>
+            <p class="text-[11px] text-slate-500">Select from student's enrolled subjects</p>
           </div>
         </div>
         <button type="button" onclick="closeModal('modalScheduleTest')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs">
@@ -747,8 +692,13 @@
 
       <form onsubmit="handleCreateScheduledTest(event)" class="mt-4 space-y-3.5">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Subject</label>
-          <input type="text" id="testSubjectInput" required maxlength="40" placeholder="e.g., Physics" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-amber-500" />
+          <label class="block text-xs font-bold text-slate-700 mb-1">Subject (Added by Student)</label>
+          <select id="testSubjectSelect" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+            <option value="">Select a student subject...</option>
+          </select>
+          <p id="testNoSubjectsHint" class="hidden text-[11px] font-semibold text-rose-600 mt-1">
+            Student hasn't added any subjects yet. Ask them to add subjects first.
+          </p>
         </div>
 
         <div>
@@ -935,9 +885,14 @@
     let studentTests = [];
     let studentNotes = [];
 
-    // Parent state
-    let linkedStudents = [];
-    let selectedStudentId = null;
+    // Single-Student Parent state
+    let singleLinkedStudent = null;
+    let monitoredSubjects = [];
+    let monitoredTopics = [];
+    let monitoredTests = [];
+    let monitoredNotes = [];
+    let activeRealtimeChannel = null;
+    let backgroundPollTimer = null;
 
     // -----------------------------------------------------------------------
     // 3. DEVICE DETECTION & HARDWARE TOKEN ENGINE
@@ -1567,17 +1522,6 @@
     // -----------------------------------------------------------------------
     // 9. STUDENT DASHBOARD LOGIC
     // -----------------------------------------------------------------------
-    async function mountStudentDashboard() {
-      showView('viewStudentDashboard');
-      renderAvatarIntoElement(document.getElementById('stuHeaderAvatar'), currentProfile.avatar_url, 'fa-user-graduate');
-      document.getElementById('stuHeaderName').textContent = currentProfile.name;
-      document.getElementById('stuHeaderDevice').textContent = currentProfile.device_model || detectedDeviceModel;
-      document.getElementById('stuHeaderDeviceId').textContent = currentProfile.device_number_id;
-
-      mountStudentColorDots();
-      await loadStudentDashboardData(false);
-    }
-
     async function loadStudentDashboardData(manualRefresh = false) {
       const syncIcon = document.getElementById('stuSyncIcon');
       if (syncIcon) syncIcon.classList.add('fa-spin');
@@ -1769,7 +1713,25 @@
       renderStudentTopics();
     }
 
-    async function handleAddStudyTopic(event) {
+    function switchStudentPlanTab(tab) {
+      studentPlanTab = tab;
+      const todayBtn = document.getElementById('stuTabTodayBtn');
+      const tmrBtn = document.getElementById('stuTabTomorrowBtn');
+      const historyBtn = document.getElementById('stuTabHistoryBtn');
+      const daySelect = document.getElementById('topicDaySelect');
+
+      const inactiveCls = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
+      if (todayBtn) todayBtn.className = tab === 'today' ? 'px-3.5 py-1.5 rounded-xl bg-white text-emerald-700 shadow-xs transition' : inactiveCls;
+      if (tmrBtn) tmrBtn.className = tab === 'tomorrow' ? 'px-3.5 py-1.5 rounded-xl bg-white text-indigo-700 shadow-xs transition' : inactiveCls;
+      if (historyBtn) historyBtn.className = tab === 'history' ? 'px-3.5 py-1.5 rounded-xl bg-white text-slate-900 shadow-xs transition' : inactiveCls;
+
+      if (daySelect && (tab === 'today' || tab === 'tomorrow')) {
+        daySelect.value = tab;
+      }
+      renderStudentTopics();
+    }
+
+    async function handleAddTopic(event) {
       event.preventDefault();
       const subjectId = document.getElementById('topicSubjectSelect').value;
       const titleInput = document.getElementById('topicTitleInput');
@@ -1777,7 +1739,7 @@
       const title = titleInput.value.trim();
 
       if (!subjectId) {
-        showToast('Select a subject first.', 'error');
+        showToast('Please select or add a subject first.', 'error');
         return;
       }
       if (!title) return;
@@ -1825,6 +1787,52 @@
         progressWrap.classList.toggle('hidden', studentPlanTab !== 'today');
       }
 
+      const subjectMap = new Map(studentSubjects.map(s => [s.id, s]));
+
+      if (studentPlanTab === 'history') {
+        const pastTopics = studentTopics.filter(t => t.target_date < todayStr);
+        if (pastTopics.length === 0) {
+          container.innerHTML = '<p class="text-xs text-slate-400 text-center py-8">No past study records yet. Completed & past days appear here automatically.</p>';
+          return;
+        }
+        const grouped = {};
+        pastTopics.forEach(t => {
+          if (!grouped[t.target_date]) grouped[t.target_date] = [];
+          grouped[t.target_date].push(t);
+        });
+        const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+        container.innerHTML = sortedDates.map(dateKey => {
+          const items = grouped[dateKey];
+          const done = items.filter(i => i.is_completed).length;
+          return `
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-mono-code text-xs font-extrabold text-slate-800">${escapeHtml(dateKey)}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${done === items.length ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                  ${done} / ${items.length} Covered
+                </span>
+              </div>
+              <div class="space-y-1.5">
+                ${items.map(item => {
+                  const subj = subjectMap.get(item.subject_id) || { subject_name: 'General', color_hex: '#10b981' };
+                  return `
+                    <div class="flex items-center justify-between gap-2 text-xs bg-white px-3 py-2 rounded-xl border border-slate-100">
+                      <div class="flex items-center gap-2 min-w-0">
+                        <i class="fa-solid ${item.is_completed ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-400'} shrink-0"></i>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold text-white shrink-0" style="background-color: ${escapeHtml(subj.color_hex)};">${escapeHtml(subj.subject_name)}</span>
+                        <span class="font-bold text-slate-800 truncate">${escapeHtml(item.topic_title)}</span>
+                      </div>
+                      <span class="text-[10px] font-bold shrink-0 ${item.is_completed ? 'text-emerald-700' : 'text-rose-600'}">${item.is_completed ? 'Done' : 'Missed'}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+        return;
+      }
+
       const activeList = studentPlanTab === 'today'
         ? todayTopics
         : studentTopics.filter(t => t.target_date === tomorrowStr);
@@ -1833,8 +1841,6 @@
         container.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No topics scheduled for ${studentPlanTab === 'today' ? 'Today' : 'Tomorrow'} yet.</p>`;
         return;
       }
-
-      const subjectMap = new Map(studentSubjects.map(s => [s.id, s]));
 
       container.innerHTML = activeList
         .map(topic => {
@@ -2048,8 +2054,82 @@
     }
 
     // -----------------------------------------------------------------------
-    // 10. PARENT DASHBOARD LOGIC
+    // 10. DEDICATED 1-STUDENT PARENT DASHBOARD & REALTIME SYNC ENGINE
     // -----------------------------------------------------------------------
+    function startRealtimeSyncEngine() {
+      if (isLocalSandboxMode || !currentProfile) return;
+
+      if (activeRealtimeChannel) {
+        try {
+          dbClient.removeChannel(activeRealtimeChannel);
+        } catch (e) {}
+      }
+
+      // Subscribe to live postgres_changes across all 5 tables for instantaneous sync
+      activeRealtimeChannel = dbClient
+        .channel('studybridge-live-' + currentProfile.id)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_profiles' }, () => {
+          if (currentProfile.role === 'parent') loadParentDashboardData(false);
+          else loadStudentDashboardData(false);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'student_subjects' }, () => {
+          if (currentProfile.role === 'parent') loadParentDashboardData(false);
+          else loadStudentDashboardData(false);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
+          if (currentProfile.role === 'parent') loadParentDashboardData(false);
+          else loadStudentDashboardData(false);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'scheduled_tests' }, () => {
+          if (currentProfile.role === 'parent') loadParentDashboardData(false);
+          else loadStudentDashboardData(false);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_notes' }, () => {
+          if (currentProfile.role === 'parent') loadParentDashboardData(false);
+          else loadStudentDashboardData(false);
+        })
+        .subscribe();
+
+      // Fast 6-second fallback sync + instant tab-focus refresh
+      if (backgroundPollTimer) clearInterval(backgroundPollTimer);
+      backgroundPollTimer = setInterval(() => {
+        if (document.hidden) return;
+        if (currentProfile.role === 'parent') loadParentDashboardData(false);
+        else loadStudentDashboardData(false);
+      }, 6000);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && currentProfile) {
+        if (currentProfile.role === 'parent') loadParentDashboardData(false);
+        else loadStudentDashboardData(false);
+      }
+    });
+
+    async function mountStudentDashboard() {
+      showView('viewStudentDashboard');
+      renderAvatarIntoElement(document.getElementById('stuHeaderAvatar'), currentProfile.avatar_url, 'fa-user-graduate');
+      document.getElementById('stuHeaderName').textContent = currentProfile.name;
+      document.getElementById('stuHeaderDevice').textContent = currentProfile.device_model || detectedDeviceModel;
+      document.getElementById('stuHeaderDeviceId').textContent = currentProfile.device_number_id;
+
+      // Inject "Past Records" tab button into student planner if not already present
+      const tabBar = document.getElementById('stuTabTomorrowBtn')?.parentElement;
+      if (tabBar && !document.getElementById('stuTabHistoryBtn')) {
+        const histBtn = document.createElement('button');
+        histBtn.type = 'button';
+        histBtn.id = 'stuTabHistoryBtn';
+        histBtn.onclick = () => switchStudentPlanTab('history');
+        histBtn.className = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
+        histBtn.textContent = 'Past Records';
+        tabBar.appendChild(histBtn);
+      }
+
+      mountStudentColorDots();
+      await loadStudentDashboardData(false);
+      startRealtimeSyncEngine();
+    }
+
     async function mountParentDashboard() {
       showView('viewParentDashboard');
       renderAvatarIntoElement(document.getElementById('parHeaderAvatar'), currentProfile.avatar_url, 'fa-user-tie');
@@ -2059,15 +2139,17 @@
       document.getElementById('emptyParIdCopy').textContent = currentProfile.device_number_id;
 
       await loadParentDashboardData(false);
+      startRealtimeSyncEngine();
     }
 
     async function loadParentDashboardData(manualRefresh = false) {
       const syncIcon = document.getElementById('parSyncIcon');
-      if (syncIcon) syncIcon.classList.add('fa-spin');
+      if (syncIcon && manualRefresh) syncIcon.classList.add('fa-spin');
 
       try {
+        let linkedList = [];
         if (isLocalSandboxMode) {
-          linkedStudents = getSandboxTable('study_profiles').filter(
+          linkedList = getSandboxTable('study_profiles').filter(
             p => p.role === 'student' && p.linked_parent_id === currentProfile.id
           );
         } else {
@@ -2076,71 +2158,40 @@
             .select('*')
             .eq('role', 'student')
             .eq('linked_parent_id', currentProfile.id)
-            .order('created_at', { ascending: true });
+            .order('created_at', { ascending: true })
+            .limit(1);
 
           if (error) throw error;
-          linkedStudents = data || [];
+          linkedList = data || [];
         }
 
-        renderParentLinkedStudentsBar();
+        singleLinkedStudent = linkedList.length > 0 ? linkedList[0] : null;
 
-        if (linkedStudents.length === 0) {
-          selectedStudentId = null;
-          document.getElementById('parNoStudentEmpty').classList.remove('hidden');
+        if (!singleLinkedStudent) {
+          document.getElementById('parLinkStudentGateCard').classList.remove('hidden');
           document.getElementById('parStudentWorkspace').classList.add('hidden');
         } else {
-          if (!selectedStudentId || !linkedStudents.some(s => s.id === selectedStudentId)) {
-            selectedStudentId = linkedStudents[0].id;
-          }
-          document.getElementById('parNoStudentEmpty').classList.add('hidden');
+          document.getElementById('parLinkStudentGateCard').classList.add('hidden');
           document.getElementById('parStudentWorkspace').classList.remove('hidden');
-          await loadMonitoredStudentWorkspace(selectedStudentId);
+          await loadMonitoredStudentWorkspace(singleLinkedStudent.id);
         }
 
-        if (manualRefresh) showToast('Parent console refreshed.');
+        if (manualRefresh) showToast('Parent console synced.');
       } catch (err) {
         console.error('Parent load error:', err);
-        showToast('Failed to load linked students.', 'error');
+        if (manualRefresh) showToast('Failed to refresh student data.', 'error');
       } finally {
         if (syncIcon) syncIcon.classList.remove('fa-spin');
       }
     }
 
-    function renderParentLinkedStudentsBar() {
-      const bar = document.getElementById('parLinkedStudentsBar');
-      if (!bar) return;
-
-      if (linkedStudents.length === 0) {
-        bar.innerHTML = '<span class="text-xs font-bold text-slate-400">No students linked yet.</span>';
+    async function handleParentLinkStudent(event) {
+      event.preventDefault();
+      if (singleLinkedStudent) {
+        showToast('Only 1 student can be linked to this Parent account.', 'error');
         return;
       }
 
-      bar.innerHTML = linkedStudents
-        .map(stu => {
-          const isActive = stu.id === selectedStudentId;
-          return `
-            <button type="button" onclick="selectMonitoredStudent('${stu.id}')" class="px-3.5 py-2 rounded-2xl text-xs font-extrabold transition flex items-center gap-2 border ${
-              isActive
-                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-            }">
-              <i class="fa-solid fa-user-graduate text-[11px]"></i>
-              <span>${escapeHtml(stu.name)}</span>
-              <span class="font-mono-code text-[10px] opacity-80">#${escapeHtml(stu.device_number_id)}</span>
-            </button>
-          `;
-        })
-        .join('');
-    }
-
-    async function selectMonitoredStudent(studentId) {
-      selectedStudentId = studentId;
-      renderParentLinkedStudentsBar();
-      await loadMonitoredStudentWorkspace(studentId);
-    }
-
-    async function handleParentLinkStudent(event) {
-      event.preventDefault();
       const inputEl = document.getElementById('parSearchStudentIdInput');
       const cleanId = (inputEl.value || '').replace(/\D/g, '').slice(0, 6);
 
@@ -2172,6 +2223,11 @@
           return;
         }
 
+        if (studentProfile.linked_parent_id && studentProfile.linked_parent_id !== currentProfile.id) {
+          showToast('This student is already linked to another parent account.', 'error');
+          return;
+        }
+
         if (isLocalSandboxMode) {
           const profiles = getSandboxTable('study_profiles');
           const idx = profiles.findIndex(p => p.id === studentProfile.id);
@@ -2188,8 +2244,7 @@
         }
 
         inputEl.value = '';
-        selectedStudentId = studentProfile.id;
-        showToast(`Linked Student: ${studentProfile.name}!`);
+        showToast(`Linked 1:1 with Student ${studentProfile.name}!`);
         await loadParentDashboardData(false);
       } catch (err) {
         console.error('Link student error:', err);
@@ -2198,51 +2253,70 @@
     }
 
     async function loadMonitoredStudentWorkspace(studentId) {
-      const student = linkedStudents.find(s => s.id === studentId);
-      if (!student) return;
+      if (!singleLinkedStudent || singleLinkedStudent.id !== studentId) return;
 
-      renderAvatarIntoElement(document.getElementById('monitoredStuAvatar'), student.avatar_url, 'fa-user-graduate');
-      document.getElementById('monitoredStuName').textContent = student.name;
-      document.getElementById('monitoredStuIdBadge').textContent = `#${student.device_number_id}`;
-      document.getElementById('monitoredStuDevice').textContent = student.device_model || 'Hardware Verified';
-      document.getElementById('monitoredStuLastVisit').textContent = formatRelativeTime(student.last_visit_at);
-
-      let subjects = [];
-      let topics = [];
-      let tests = [];
-      let notes = [];
+      renderAvatarIntoElement(document.getElementById('monitoredStuAvatar'), singleLinkedStudent.avatar_url, 'fa-user-graduate');
+      document.getElementById('monitoredStuName').textContent = singleLinkedStudent.name;
+      document.getElementById('monitoredStuIdBadge').textContent = `#${singleLinkedStudent.device_number_id}`;
+      document.getElementById('monitoredStuDevice').textContent = singleLinkedStudent.device_model || 'Hardware Verified';
+      document.getElementById('monitoredStuLastVisit').textContent = formatRelativeTime(singleLinkedStudent.last_visit_at);
 
       if (isLocalSandboxMode) {
-        subjects = getSandboxTable('student_subjects').filter(s => s.student_id === studentId);
-        topics = getSandboxTable('study_topics').filter(t => t.student_id === studentId);
-        tests = getSandboxTable('scheduled_tests').filter(t => t.student_id === studentId);
-        notes = getSandboxTable('parent_notes').filter(n => n.student_id === studentId);
+        monitoredSubjects = getSandboxTable('student_subjects').filter(s => s.student_id === studentId);
+        monitoredTopics = getSandboxTable('study_topics').filter(t => t.student_id === studentId);
+        monitoredTests = getSandboxTable('scheduled_tests').filter(t => t.student_id === studentId);
+        monitoredNotes = getSandboxTable('parent_notes').filter(n => n.student_id === studentId);
       } else {
         const [subjRes, topicsRes, testsRes, notesRes] = await Promise.all([
-          dbClient.from('student_subjects').select('*').eq('student_id', studentId),
+          dbClient.from('student_subjects').select('*').eq('student_id', studentId).order('created_at', { ascending: true }),
           dbClient.from('study_topics').select('*').eq('student_id', studentId).order('created_at', { ascending: true }),
           dbClient.from('scheduled_tests').select('*').eq('student_id', studentId).order('scheduled_at', { ascending: false }),
           dbClient.from('parent_notes').select('*').eq('student_id', studentId).order('created_at', { ascending: false })
         ]);
 
-        subjects = subjRes.data || [];
-        topics = topicsRes.data || [];
-        tests = testsRes.data || [];
-        notes = notesRes.data || [];
+        monitoredSubjects = subjRes.data || [];
+        monitoredTopics = topicsRes.data || [];
+        monitoredTests = testsRes.data || [];
+        monitoredNotes = notesRes.data || [];
       }
 
-      const subjectMap = new Map(subjects.map(s => [s.id, s]));
+      const subjectMap = new Map(monitoredSubjects.map(s => [s.id, s]));
       const todayStr = getTodayDateString();
       const tomorrowStr = getTomorrowDateString();
+      const sevenDaysAgoStr = getLocalIsoDate(-7);
 
-      const todayTopics = topics.filter(t => t.target_date === todayStr);
-      const tomorrowTopics = topics.filter(t => t.target_date === tomorrowStr);
+      const todayTopics = monitoredTopics.filter(t => t.target_date === todayStr);
+      const tomorrowTopics = monitoredTopics.filter(t => t.target_date === tomorrowStr);
+      const last7DaysTopics = monitoredTopics.filter(t => t.target_date >= sevenDaysAgoStr && t.target_date <= todayStr);
 
-      const coveredCount = todayTopics.filter(t => t.is_completed).length;
-      const pct = todayTopics.length > 0 ? Math.round((coveredCount / todayTopics.length) * 100) : 0;
+      // Update 4-Card KPI Dashboard
+      const coveredToday = todayTopics.filter(t => t.is_completed).length;
+      const pctToday = todayTopics.length > 0 ? Math.round((coveredToday / todayTopics.length) * 100) : 0;
+      document.getElementById('kpiTodayPct').textContent = `${pctToday}%`;
+      document.getElementById('kpiTodayRatio').textContent = `${coveredToday}/${todayTopics.length} Topics`;
+      document.getElementById('parTodayProgressBar').style.width = `${pctToday}%`;
 
-      document.getElementById('parTodayProgressLabel').textContent = `${coveredCount} / ${todayTopics.length} Topics Covered (${pct}%)`;
-      document.getElementById('parTodayProgressBar').style.width = `${pct}%`;
+      const covered7Days = last7DaysTopics.filter(t => t.is_completed).length;
+      document.getElementById('kpi7DayCovered').textContent = String(covered7Days);
+      document.getElementById('kpi7DayTotal').textContent = `of ${last7DaysTopics.length} Planned`;
+
+      const completedTests = monitoredTests.filter(t => t.status === 'completed' && t.max_marks > 0);
+      if (completedTests.length > 0) {
+        const avgPct = Math.round(
+          completedTests.reduce((acc, t) => acc + (t.marks_obtained / t.max_marks) * 100, 0) / completedTests.length
+        );
+        document.getElementById('kpiTestAvg').textContent = `${avgPct}%`;
+      } else {
+        document.getElementById('kpiTestAvg').textContent = '—';
+      }
+      document.getElementById('kpiTestCount').textContent = `${completedTests.length} Completed`;
+
+      document.getElementById('kpiSubjectCount').textContent = String(monitoredSubjects.length);
+      document.getElementById('kpiSubjectNames').textContent =
+        monitoredSubjects.length > 0
+          ? monitoredSubjects.map(s => s.subject_name).join(', ')
+          : 'None added yet';
+
       document.getElementById('parTodayCountPill').textContent = String(todayTopics.length);
       document.getElementById('parTomorrowCountPill').textContent = String(tomorrowTopics.length);
 
@@ -2285,11 +2359,30 @@
             `;
           }).join('');
 
+      // Populate Past Records Date Dropdown & Render Past History
+      const pastTopics = monitoredTopics.filter(t => t.target_date < todayStr);
+      const uniquePastDates = [...new Set(pastTopics.map(t => t.target_date))].sort((a, b) => b.localeCompare(a));
+      const dateFilterEl = document.getElementById('parHistoryDateFilter');
+      if (dateFilterEl) {
+        const currentFilter = dateFilterEl.value;
+        dateFilterEl.innerHTML = '<option value="all">All Past Days (' + uniquePastDates.length + ')</option>';
+        uniquePastDates.forEach(dStr => {
+          const opt = document.createElement('option');
+          opt.value = dStr;
+          opt.textContent = dStr;
+          dateFilterEl.appendChild(opt);
+        });
+        if (currentFilter && (currentFilter === 'all' || uniquePastDates.includes(currentFilter))) {
+          dateFilterEl.value = currentFilter;
+        }
+      }
+      renderParentPastHistory();
+
       // Render Scheduled Tests & Score Reports
       const parTestsList = document.getElementById('parTestsList');
-      parTestsList.innerHTML = tests.length === 0
+      parTestsList.innerHTML = monitoredTests.length === 0
         ? '<p class="text-xs text-slate-400 text-center py-8">No tests assigned to this student yet.</p>'
-        : tests.map(test => {
+        : monitoredTests.map(test => {
             const isCompleted = test.status === 'completed';
             const scorePct = isCompleted && test.max_marks > 0 ? Math.round((test.marks_obtained / test.max_marks) * 100) : 0;
             return `
@@ -2314,9 +2407,9 @@
 
       // Render Parent Notes with Read Receipts
       const parNotesList = document.getElementById('parNotesList');
-      parNotesList.innerHTML = notes.length === 0
+      parNotesList.innerHTML = monitoredNotes.length === 0
         ? '<p class="text-xs text-slate-400 text-center py-6">No messages sent yet.</p>'
-        : notes.map(note => `
+        : monitoredNotes.map(note => `
             <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
               <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(note.message_text)}</p>
               <div class="flex items-center justify-between text-[10px] font-bold">
@@ -2331,21 +2424,102 @@
           `).join('');
     }
 
+    function renderParentPastHistory() {
+      const container = document.getElementById('parPastHistoryContainer');
+      const filterVal = document.getElementById('parHistoryDateFilter')?.value || 'all';
+      if (!container) return;
+
+      const todayStr = getTodayDateString();
+      const subjectMap = new Map(monitoredSubjects.map(s => [s.id, s]));
+      const pastTopics = monitoredTopics.filter(t => t.target_date < todayStr && (filterVal === 'all' || t.target_date === filterVal));
+
+      if (pastTopics.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">No past daily study records found.</p>';
+        return;
+      }
+
+      const grouped = {};
+      pastTopics.forEach(t => {
+        if (!grouped[t.target_date]) grouped[t.target_date] = [];
+        grouped[t.target_date].push(t);
+      });
+
+      const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+      container.innerHTML = sortedDates.map(dateStr => {
+        const dayItems = grouped[dateStr];
+        const doneCount = dayItems.filter(i => i.is_completed).length;
+        const pct = Math.round((doneCount / dayItems.length) * 100);
+
+        return `
+          <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="font-mono-code text-xs font-extrabold text-slate-900">${escapeHtml(dateStr)}</span>
+                <span class="text-[11px] font-bold text-slate-500">(${pct}% Completed)</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${doneCount === dayItems.length ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                ${doneCount} / ${dayItems.length} Covered
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${dayItems.map(t => {
+                const subj = subjectMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#10b981' };
+                return `
+                  <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white border border-slate-100">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <i class="fa-solid ${t.is_completed ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-400'} text-xs shrink-0"></i>
+                      <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold text-white shrink-0" style="background-color: ${escapeHtml(subj.color_hex)};">${escapeHtml(subj.subject_name)}</span>
+                      <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(t.topic_title)}</span>
+                    </div>
+                    <span class="text-[10px] font-extrabold shrink-0 ${t.is_completed ? 'text-emerald-700' : 'text-rose-600'}">
+                      ${t.is_completed ? 'Covered' : 'Missed'}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     function openScheduleTestModal() {
-      if (!selectedStudentId) return;
+      if (!singleLinkedStudent) return;
       const nowPlus1h = new Date(Date.now() + 3600000);
       const localIso = new Date(nowPlus1h.getTime() - nowPlus1h.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
       document.getElementById('testDateTimeInput').value = localIso;
-      document.getElementById('testSubjectInput').value = '';
       document.getElementById('testTopicInput').value = '';
+
+      const selectEl = document.getElementById('testSubjectSelect');
+      const hintEl = document.getElementById('testNoSubjectsHint');
+      selectEl.innerHTML = '<option value="">Select a student subject...</option>';
+
+      if (monitoredSubjects.length === 0) {
+        if (hintEl) hintEl.classList.remove('hidden');
+      } else {
+        if (hintEl) hintEl.classList.add('hidden');
+        monitoredSubjects.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.subject_name;
+          opt.textContent = s.subject_name;
+          selectEl.appendChild(opt);
+        });
+      }
+
       openModal('modalScheduleTest');
     }
 
     async function handleCreateScheduledTest(event) {
       event.preventDefault();
-      if (!selectedStudentId) return;
+      if (!singleLinkedStudent) return;
 
-      const subject = document.getElementById('testSubjectInput').value.trim();
+      const subject = document.getElementById('testSubjectSelect').value.trim();
+      if (!subject) {
+        showToast('Select one of the student\'s added subjects.', 'error');
+        return;
+      }
+
       const topic = document.getElementById('testTopicInput').value.trim();
       const dtVal = document.getElementById('testDateTimeInput').value;
       const qCount = parseInt(document.getElementById('testQuestionsInput').value, 10) || 20;
@@ -2353,7 +2527,7 @@
 
       const payload = {
         parent_id: currentProfile.id,
-        student_id: selectedStudentId,
+        student_id: singleLinkedStudent.id,
         subject_name: subject,
         topic_name: topic,
         scheduled_at: new Date(dtVal).toISOString(),
@@ -2373,7 +2547,7 @@
         }
         closeModal('modalScheduleTest');
         showToast('Test scheduled & pinned to student dashboard!');
-        await loadMonitoredStudentWorkspace(selectedStudentId);
+        await loadMonitoredStudentWorkspace(singleLinkedStudent.id);
       } catch (err) {
         showToast('Could not schedule test.', 'error');
       }
@@ -2381,14 +2555,14 @@
 
     async function handleSendParentNote(event) {
       event.preventDefault();
-      if (!selectedStudentId) return;
+      if (!singleLinkedStudent) return;
       const input = document.getElementById('parentNoteInput');
       const text = input.value.trim();
       if (!text) return;
 
       const payload = {
         parent_id: currentProfile.id,
-        student_id: selectedStudentId,
+        student_id: singleLinkedStudent.id,
         message_text: text,
         is_seen: false
       };
@@ -2404,15 +2578,15 @@
         }
         input.value = '';
         showToast('Note sent with read-receipt tracking.');
-        await loadMonitoredStudentWorkspace(selectedStudentId);
+        await loadMonitoredStudentWorkspace(singleLinkedStudent.id);
       } catch (err) {
         showToast('Could not send message.', 'error');
       }
     }
 
     function handleResetStudentDeviceLock() {
-      const student = linkedStudents.find(s => s.id === selectedStudentId);
-      if (!student) return;
+      if (!singleLinkedStudent) return;
+      const student = singleLinkedStudent;
 
       openConfirmModal(
         'Reset Student Hardware Lock?',
