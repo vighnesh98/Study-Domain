@@ -149,30 +149,30 @@
           </div>
           <div>
             <h1 class="text-lg font-extrabold text-slate-900 leading-tight">StudyBridge Setup</h1>
-            <p class="text-[11px] text-slate-500 font-medium">Bind this device to your profile</p>
+            <p class="text-[11px] text-slate-500 font-medium">Bind this physical hardware to your profile</p>
           </div>
         </div>
         <div class="text-right">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Device ID</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Searchable ID</span>
           <span id="onboardDeviceIdBadge" class="font-mono-code text-xs font-bold px-2.5 py-1 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 inline-block">
             #000000
           </span>
         </div>
       </div>
 
-      <!-- Detected Hardware Banner -->
+      <!-- Unique Hardware Fingerprint Banner -->
       <div class="mt-4 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-600 shrink-0">
-            <i class="fa-solid fa-mobile-screen-button text-xs"></i>
+          <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-indigo-600 shrink-0">
+            <i class="fa-solid fa-microchip text-xs"></i>
           </div>
           <div class="truncate">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Detected Device Model</span>
-            <span id="onboardDeviceModel" class="text-xs font-bold text-slate-800 truncate block">Detecting...</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Unique Hardware Signature</span>
+            <span id="onboardDeviceModel" class="font-mono-code text-xs font-bold text-slate-800 truncate block">Computing SHA-256...</span>
           </div>
         </div>
-        <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
-          <i class="fa-solid fa-lock mr-1"></i>Device Bound
+        <span id="dbConnectionPill" class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
+          <i class="fa-solid fa-database mr-1"></i>Supabase Live
         </span>
       </div>
 
@@ -330,9 +330,9 @@
             <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase tracking-wider">Student</span>
           </div>
           <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500">
-            <span class="inline-flex items-center gap-1 font-medium">
-              <i class="fa-solid fa-mobile-screen text-slate-400"></i>
-              <span id="stuHeaderDevice">Device</span>
+            <span class="inline-flex items-center gap-1 font-mono-code font-semibold text-slate-700">
+              <i class="fa-solid fa-microchip text-emerald-600"></i>
+              <span id="stuHeaderDevice">HW-0000-0000</span>
             </span>
             <span>•</span>
             <span class="inline-flex items-center gap-1 text-indigo-600 font-bold">
@@ -514,7 +514,7 @@
             <h1 id="parHeaderName" class="text-base sm:text-lg font-extrabold text-slate-900">Parent Name</h1>
             <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold uppercase tracking-wider">Parent Console</span>
           </div>
-          <p id="parHeaderDevice" class="text-[11px] text-slate-500 mt-0.5">Registered Device</p>
+          <p id="parHeaderDevice" class="font-mono-code text-[11px] text-slate-500 mt-0.5">HW-0000-0000</p>
         </div>
       </div>
 
@@ -590,8 +590,8 @@
 
               <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs">
                 <span class="inline-flex items-center gap-1.5 text-slate-600 font-medium">
-                  <i class="fa-solid fa-mobile-screen-button text-emerald-600"></i>
-                  <span>Device: <strong id="monitoredStuDevice" class="text-slate-900">Unknown</strong></span>
+                  <i class="fa-solid fa-microchip text-emerald-600"></i>
+                  <span>Hardware Key: <strong id="monitoredStuDevice" class="font-mono-code text-slate-900">Unknown</strong></span>
                 </span>
                 <span class="inline-flex items-center gap-1.5 text-slate-600 font-medium">
                   <i class="fa-regular fa-clock text-indigo-600"></i>
@@ -847,187 +847,168 @@
     // -----------------------------------------------------------------------
     // 1. SUPABASE CONFIGURATION & SAFE STORAGE LAYER
     // -----------------------------------------------------------------------
-    const SUPABASE_URL = 'https://ujuotnduekxyuecvbued.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_OPHlLhgeWutPNcgrO-Q3hQ_u54Mvcxq';
+    const SUPABASE_URL = 'https://phwuikndcwrogeairtte.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_22G9HkO4P3dYGVod07uIkg_wI43-36l';
 
     // Track whether live Supabase network calls are reachable or if running in an isolated preview sandbox
     let isLocalSandboxMode = false;
-    const LOCAL_DB_STORAGE_KEY = 'sb_studybridge_local_db_v1';
 
-    function getLocalDb() {
-      try {
-        const raw = safeStorage.getItem(LOCAL_DB_STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
-      } catch (e) {}
-      return {
-        study_profiles: [],
-        student_subjects: [],
-        study_topics: [],
-        scheduled_tests: [],
-        parent_notes: []
-      };
-    }
-
-    function saveLocalDb(db) {
-      try {
-        safeStorage.setItem(LOCAL_DB_STORAGE_KEY, JSON.stringify(db));
-      } catch (e) {}
-    }
-
-    function generateLocalUuid() {
-      try {
-        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-          return window.crypto.randomUUID();
-        }
-      } catch (e) {}
-      return 'loc_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
-    }
-
-    function isNetworkFetchError(err) {
-      if (!err) return false;
-      const msg = String(err.message || err.details || err).toLowerCase();
-      return msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load failed');
-    }
-
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
         persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false
+        autoRefreshToken: false
       }
     });
 
-    // Safe storage wrapper with in-memory fallback for sandboxed iframes
+    // Safe localStorage wrapper (prevents SecurityError in restricted iframes)
     const memoryStorageFallback = {};
     const safeStorage = {
       getItem(key) {
         try {
           return window.localStorage.getItem(key);
-        } catch (err) {
+        } catch (e) {
           return Object.prototype.hasOwnProperty.call(memoryStorageFallback, key)
             ? memoryStorageFallback[key]
             : null;
         }
       },
       setItem(key, value) {
-        memoryStorageFallback[key] = String(value);
         try {
-          window.localStorage.setItem(key, String(value));
-        } catch (err) {
-          // Silently use memoryStorageFallback when iframe blocks storage
+          window.localStorage.setItem(key, value);
+        } catch (e) {
+          memoryStorageFallback[key] = String(value);
         }
-      },
-      removeItem(key) {
-        delete memoryStorageFallback[key];
-        try {
-          window.localStorage.removeItem(key);
-        } catch (err) {}
       }
     };
 
-    // Safe classList helpers that sanitize tokens to prevent DOMTokenList errors
-    function safeAddClass(el, classString) {
-      if (!el || !classString) return;
-      String(classString)
-        .split(/\s+/)
-        .map(t => t.trim())
-        .filter(Boolean)
-        .forEach(token => {
-          try { el.classList.add(token); } catch (e) {}
-        });
+    function getSandboxTable(tableName) {
+      try {
+        const raw = safeStorage.getItem('sb_sandbox_' + tableName);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
     }
 
-    function safeRemoveClass(el, classString) {
-      if (!el || !classString) return;
-      String(classString)
-        .split(/\s+/)
-        .map(t => t.trim())
-        .filter(Boolean)
-        .forEach(token => {
-          try { el.classList.remove(token); } catch (e) {}
-        });
+    function saveSandboxTable(tableName, rows) {
+      safeStorage.setItem('sb_sandbox_' + tableName, JSON.stringify(rows));
     }
 
     // -----------------------------------------------------------------------
-    // 2. APPLICATION STATE
+    // 2. APPLICATION STATE & CONSTANTS
     // -----------------------------------------------------------------------
-    const KEY_DEVICE_TOKEN = 'sb_studybridge_device_token';
-    const KEY_DEVICE_NUM_ID = 'sb_studybridge_device_num_id';
+    const KEY_DEVICE_TOKEN = 'studybridge_device_token_v1';
+    const KEY_DEVICE_NUM_ID = 'studybridge_device_num_id_v1';
 
-    let localDeviceToken = '';
-    let localDeviceNumId = '';
-    let detectedDeviceModel = '';
+    const PRESET_AVATARS = [
+      { id: 'grad', icon: 'fa-user-graduate' },
+      { id: 'tie', icon: 'fa-user-tie' },
+      { id: 'astronaut', icon: 'fa-user-astronaut' },
+      { id: 'ninja', icon: 'fa-user-ninja' },
+      { id: 'book', icon: 'fa-book-open-reader' },
+      { id: 'atom', icon: 'fa-atom' }
+    ];
+
+    const SUBJECT_COLORS = [
+      '#10b981',
+      '#4f46e5',
+      '#f59e0b',
+      '#ec4899',
+      '#06b6d4',
+      '#8b5cf6'
+    ];
+
+    let detectedDeviceModel = 'Computing SHA-256...';
+    let localDeviceToken = null;
+    let localDeviceNumId = null;
 
     let currentProfile = null;
-    let selectedOnboardingRole = 'student';
-    let selectedAvatarValue = 'icon:fa-user-graduate:#059669';
-    let foundParentForLink = null;
+    let selectedRole = 'student';
+    let selectedAvatarData = 'fa-user-graduate';
+    let selectedSubjectColor = '#10b981';
+    let pendingFoundParent = null;
 
     // Student state
+    let studentPlanTab = 'today';
     let studentSubjects = [];
-    let selectedSubjectColor = '#059669';
     let studentTopics = [];
-    let studentActivePlanTab = 'today';
     let studentTests = [];
-    let studentMessages = [];
+    let studentNotes = [];
 
     // Parent state
     let linkedStudents = [];
-    let activeMonitoredStudentId = null;
-    let monitoredTopics = [];
-    let monitoredTests = [];
-    let monitoredNotes = [];
-    let realtimeSubscription = null;
-
-    const SUBJECT_COLORS = [
-      '#059669', // Emerald
-      '#4f46e5', // Indigo
-      '#d97706', // Amber
-      '#e11d48', // Rose
-      '#0284c7', // Sky
-      '#7c3aed'  // Violet
-    ];
-
-    const PRESET_AVATARS = [
-      { id: 'icon:fa-user-graduate:#059669', icon: 'fa-user-graduate', bg: '#d1fae5', fg: '#059669' },
-      { id: 'icon:fa-user-astronaut:#4f46e5', icon: 'fa-user-astronaut', bg: '#e0e7ff', fg: '#4f46e5' },
-      { id: 'icon:fa-user-ninja:#0284c7', icon: 'fa-user-ninja', bg: '#e0f2fe', fg: '#0284c7' },
-      { id: 'icon:fa-user-tie:#d97706', icon: 'fa-user-tie', bg: '#fef3c7', fg: '#d97706' },
-      { id: 'icon:fa-user-shield:#7c3aed', icon: 'fa-user-shield', bg: '#ede9fe', fg: '#7c3aed' }
-    ];
+    let selectedStudentId = null;
 
     // -----------------------------------------------------------------------
     // 3. DEVICE DETECTION & HARDWARE TOKEN ENGINE
     // -----------------------------------------------------------------------
-    function detectDeviceHardwareModel() {
+    async function computeUniqueHardwareFingerprint() {
       try {
-        const ua = navigator.userAgent || '';
-        let platform = 'Desktop';
-        let browser = 'Browser';
+        const components = [];
 
-        if (/Android/i.test(ua)) {
-          const match = ua.match(/Android\s+[\d.]+;\s*([^;)]+)/i);
-          platform = match && match[1] ? match[1].trim() : 'Android Device';
-        } else if (/iPhone/i.test(ua)) {
-          platform = 'Apple iPhone';
-        } else if (/iPad/i.test(ua)) {
-          platform = 'Apple iPad';
-        } else if (/Macintosh|Mac OS X/i.test(ua)) {
-          platform = 'MacBook / macOS';
-        } else if (/Windows NT/i.test(ua)) {
-          platform = 'Windows PC';
-        } else if (/Linux/i.test(ua)) {
-          platform = 'Linux PC';
+        // 1. WebGL GPU Vendor & Renderer (distinct across laptop models & GPUs)
+        try {
+          const glCanvas = document.createElement('canvas');
+          const gl = glCanvas.getContext('webgl') || glCanvas.getContext('experimental-webgl');
+          if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+              components.push(gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || '');
+              components.push(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '');
+            }
+          }
+        } catch (e) {}
+
+        // 2. Canvas 2D GPU Rasterization Signature
+        try {
+          const c2d = document.createElement('canvas');
+          c2d.width = 220;
+          c2d.height = 40;
+          const ctx = c2d.getContext('2d');
+          if (ctx) {
+            ctx.textBaseline = 'top';
+            ctx.font = '14px "Plus Jakarta Sans", Arial, sans-serif';
+            ctx.fillStyle = '#059669';
+            ctx.fillRect(10, 4, 90, 24);
+            ctx.fillStyle = '#4f46e5';
+            ctx.fillText('StudyBridge-HW-Sig', 14, 10);
+            components.push(c2d.toDataURL());
+          }
+        } catch (e) {}
+
+        // 3. Physical Display, CPU Cores, Memory & Timezone
+        components.push(`${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}@${window.devicePixelRatio || 1}`);
+        components.push(`cores:${navigator.hardwareConcurrency || 0}`);
+        components.push(`mem:${navigator.deviceMemory || 0}`);
+        components.push(`lang:${navigator.language || ''}`);
+        components.push(`tz:${Intl.DateTimeFormat().resolvedOptions().timeZone || ''}`);
+
+        const rawPayload = components.join('||');
+        if (window.crypto && window.crypto.subtle) {
+          const encoded = new TextEncoder().encode(rawPayload);
+          const hashBuffer = await window.crypto.subtle.digest('SHA-256', encoded);
+          const hex = Array.from(new Uint8Array(hashBuffer))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('')
+            .toUpperCase();
+          return `HW-${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}`;
         }
 
-        if (/Edg\//i.test(ua)) browser = 'Edge';
-        else if (/Chrome\//i.test(ua) && !/Chromium/i.test(ua)) browser = 'Chrome';
-        else if (/Safari\//i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
-        else if (/Firefox\//i.test(ua)) browser = 'Firefox';
-
-        return `${platform} (${browser})`;
+        // Fallback deterministic FNV-1a 48-bit hash if SubtleCrypto is unavailable
+        let h1 = 0x811c9dc5;
+        let h2 = 0x01000193;
+        for (let i = 0; i < rawPayload.length; i++) {
+          const ch = rawPayload.charCodeAt(i);
+          h1 ^= ch;
+          h1 = Math.imul(h1, 0x01000193);
+          h2 ^= ch;
+          h2 = Math.imul(h2, 0x85ebca6b);
+        }
+        const hex1 = (h1 >>> 0).toString(16).padStart(8, '0').toUpperCase();
+        const hex2 = (h2 >>> 0).toString(16).padStart(8, '0').toUpperCase();
+        return `HW-${hex1.slice(0, 4)}-${hex1.slice(4, 8)}-${hex2.slice(0, 4)}`;
       } catch (e) {
-        return 'Web Device';
+        return 'HW-0000-0000-0000';
       }
     }
 
@@ -1044,8 +1025,8 @@
       return String(Math.floor(100000 + Math.random() * 900000));
     }
 
-    function ensureLocalDeviceIdentity() {
-      detectedDeviceModel = detectDeviceHardwareModel();
+    async function ensureLocalDeviceIdentity() {
+      detectedDeviceModel = await computeUniqueHardwareFingerprint();
       localDeviceToken = safeStorage.getItem(KEY_DEVICE_TOKEN);
       localDeviceNumId = safeStorage.getItem(KEY_DEVICE_NUM_ID);
 
@@ -1060,54 +1041,92 @@
     }
 
     // -----------------------------------------------------------------------
-    // 4. DATE & FORMATTING HELPERS
+    // 4. VIEW ROUTER & UI UTILITIES
     // -----------------------------------------------------------------------
-    function getLocalDateString(offsetDays = 0) {
-      const d = new Date();
-      d.setDate(d.getDate() + offsetDays);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
+    const ALL_VIEW_IDS = [
+      'viewLoading',
+      'viewDeviceLocked',
+      'viewOnboarding',
+      'viewStudentLinkGate',
+      'viewStudentDashboard',
+      'viewParentDashboard'
+    ];
+
+    function showView(targetId) {
+      ALL_VIEW_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === targetId) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
     }
 
-    function formatRelativeAndExactTime(isoString) {
-      if (!isoString) return 'Never';
-      const date = new Date(isoString);
-      if (isNaN(date.getTime())) return 'Recently';
+    function updateDbConnectionPill(isLive, customText = '') {
+      const pill = document.getElementById('dbConnectionPill');
+      if (!pill) return;
+      if (isLive) {
+        pill.className = 'px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0';
+        pill.innerHTML = `<i class="fa-solid fa-database mr-1"></i>${escapeHtml(customText || 'Supabase Live')}`;
+      } else {
+        pill.className = 'px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold shrink-0';
+        pill.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>${escapeHtml(customText || 'Offline Mode')}`;
+      }
+    }
 
-      const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
-      let rel = 'Just now';
-      if (diffSec >= 60 && diffSec < 3600) {
-        const mins = Math.floor(diffSec / 60);
-        rel = `${mins} min${mins === 1 ? '' : 's'} ago`;
-      } else if (diffSec >= 3600 && diffSec < 86400) {
-        const hrs = Math.floor(diffSec / 3600);
-        rel = `${hrs} hr${hrs === 1 ? '' : 's'} ago`;
-      } else if (diffSec >= 86400) {
-        const days = Math.floor(diffSec / 86400);
-        rel = `${days} day${days === 1 ? '' : 's'} ago`;
+    function renderAvatarIntoElement(el, avatarUrl, fallbackIcon = 'fa-user') {
+      if (!el) return;
+      if (avatarUrl && avatarUrl.startsWith('data:image')) {
+        el.innerHTML = `<img src="${avatarUrl}" alt="Avatar" class="w-full h-full object-cover" />`;
+      } else {
+        const iconClass = avatarUrl && avatarUrl.startsWith('fa-') ? avatarUrl : fallbackIcon;
+        el.innerHTML = `<i class="fa-solid ${escapeHtml(iconClass)}"></i>`;
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(message, type = 'success') {
+      const banner = document.getElementById('toastBanner');
+      const icon = document.getElementById('toastIcon');
+      const text = document.getElementById('toastText');
+      if (!banner || !icon || !text) return;
+
+      text.textContent = message;
+      if (type === 'error') {
+        icon.className = 'fa-solid fa-circle-exclamation text-rose-400';
+      } else if (type === 'info') {
+        icon.className = 'fa-solid fa-circle-info text-indigo-400';
+      } else {
+        icon.className = 'fa-solid fa-circle-check text-emerald-400';
       }
 
-      const exact = date.toLocaleString([], {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      return `${rel} • ${exact}`;
+      banner.classList.remove('opacity-0', 'translate-y-4');
+      banner.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        banner.classList.add('opacity-0', 'translate-y-4');
+        banner.classList.remove('opacity-100', 'translate-y-0');
+      }, 3200);
     }
 
-    function formatScheduledDateTime(isoString) {
-      if (!isoString) return '';
-      const date = new Date(isoString);
-      return date.toLocaleString([], {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+    function copyTextToClipboard(text) {
+      if (!text) return;
+      try {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = text;
+        tempInput.style.position = 'fixed';
+        tempInput.style.opacity = '0';
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        showToast(`Copied ID: ${text}`);
+      } catch (e) {
+        showToast('Could not copy ID.', 'error');
+      }
     }
 
     function escapeHtml(str) {
@@ -1121,114 +1140,48 @@
     }
 
     // -----------------------------------------------------------------------
-    // 5. UI VIEW SWITCHING, TOASTS & MODALS
+    // 5. DATE & TIME FORMATTING HELPERS
     // -----------------------------------------------------------------------
-    const ALL_VIEWS = [
-      'viewLoading',
-      'viewDeviceLocked',
-      'viewOnboarding',
-      'viewStudentLinkGate',
-      'viewStudentDashboard',
-      'viewParentDashboard'
-    ];
+    function getLocalIsoDate(offsetDays = 0) {
+      const d = new Date(Date.now() + offsetDays * 86400000);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
 
-    function showView(viewId) {
-      ALL_VIEWS.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (id === viewId) {
-          safeRemoveClass(el, 'hidden');
-          safeAddClass(el, 'flex');
-        } else {
-          safeAddClass(el, 'hidden');
-          safeRemoveClass(el, 'flex');
-        }
+    function getTodayDateString() {
+      return getLocalIsoDate(0);
+    }
+
+    function getTomorrowDateString() {
+      return getLocalIsoDate(1);
+    }
+
+    function formatRelativeTime(isoStr) {
+      if (!isoStr) return 'Just now';
+      const ts = new Date(isoStr).getTime();
+      if (isNaN(ts)) return 'Recently';
+      const diffSec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+      if (diffSec < 60) return 'Just now';
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin}m ago`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${diffHr}h ago`;
+      const diffDays = Math.floor(diffHr / 24);
+      return `${diffDays}d ago`;
+    }
+
+    function formatDateTimeShort(isoStr) {
+      if (!isoStr) return '';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return isoStr;
+      return d.toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
       });
-    }
-
-    let toastTimeout = null;
-    function showToast(message, type = 'success') {
-      const banner = document.getElementById('toastBanner');
-      const icon = document.getElementById('toastIcon');
-      const text = document.getElementById('toastText');
-      if (!banner || !text) return;
-
-      text.textContent = message;
-      icon.className = type === 'error'
-        ? 'fa-solid fa-circle-exclamation text-rose-400'
-        : type === 'info'
-          ? 'fa-solid fa-circle-info text-indigo-400'
-          : 'fa-solid fa-circle-check text-emerald-400';
-
-      safeRemoveClass(banner, 'opacity-0 translate-y-4');
-      safeAddClass(banner, 'opacity-100 translate-y-0');
-
-      if (toastTimeout) clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        safeRemoveClass(banner, 'opacity-100 translate-y-0');
-        safeAddClass(banner, 'opacity-0 translate-y-4');
-      }, 3200);
-    }
-
-    function openModal(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      safeRemoveClass(el, 'hidden');
-      safeAddClass(el, 'flex');
-    }
-
-    function closeModal(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      safeAddClass(el, 'hidden');
-      safeRemoveClass(el, 'flex');
-    }
-
-    function askConfirmation(title, description, onConfirmCallback) {
-      document.getElementById('confirmModalTitle').textContent = title;
-      document.getElementById('confirmModalDesc').textContent = description;
-      const btn = document.getElementById('confirmModalProceedBtn');
-      btn.onclick = () => {
-        closeModal('modalConfirmAction');
-        onConfirmCallback();
-      };
-      openModal('modalConfirmAction');
-    }
-
-    function copyTextToClipboard(text) {
-      if (!text) return;
-      const temp = document.createElement('textarea');
-      temp.value = text;
-      temp.style.position = 'fixed';
-      temp.style.opacity = '0';
-      document.body.appendChild(temp);
-      temp.select();
-      try {
-        document.execCommand('copy');
-        showToast(`Copied ID: ${text}`);
-      } catch (err) {
-        showToast('Could not copy ID', 'error');
-      }
-      document.body.removeChild(temp);
-    }
-
-    function renderAvatarIntoElement(el, avatarUrl, fallbackName = 'U') {
-      if (!el) return;
-      if (avatarUrl && avatarUrl.startsWith('data:image')) {
-        el.innerHTML = `<img src="${avatarUrl}" alt="Avatar" class="w-full h-full object-cover" />`;
-        return;
-      }
-      if (avatarUrl && avatarUrl.startsWith('icon:')) {
-        const parts = avatarUrl.split(':');
-        const iconClass = parts[1] || 'fa-user';
-        const colorHex = parts[2] || '#059669';
-        el.style.backgroundColor = colorHex + '18';
-        el.style.color = colorHex;
-        el.innerHTML = `<i class="fa-solid ${escapeHtml(iconClass)}"></i>`;
-        return;
-      }
-      const initial = (fallbackName || 'U').trim().charAt(0).toUpperCase();
-      el.textContent = initial;
     }
 
     // -----------------------------------------------------------------------
@@ -1236,74 +1189,80 @@
     // -----------------------------------------------------------------------
     async function bootApplication() {
       showView('viewLoading');
-      ensureLocalDeviceIdentity();
+      await ensureLocalDeviceIdentity();
       initOnboardingUI();
 
       try {
-        // Query Supabase study_profiles matching this device's hardware token
-        const { data: profile, error } = await supabaseClient
+        // Query Supabase for existing profile bound to this device token
+        const { data: existingProfile, error } = await dbClient
           .from('study_profiles')
           .select('*')
           .eq('device_token', localDeviceToken)
           .maybeSingle();
 
         if (error) {
-          if (isNetworkFetchError(error)) {
-            // Switch seamlessly to Local Preview Mode when sandboxed iframe blocks external network fetch
-            isLocalSandboxMode = true;
-            const localDb = getLocalDb();
-            const localProfile = localDb.study_profiles.find(p => p.device_token === localDeviceToken);
-            if (!localProfile) {
-              showToast('Preview Sandbox: Running in Local Sync Mode', 'info');
-              showView('viewOnboarding');
-              return;
-            }
-            localProfile.last_visit_at = new Date().toISOString();
-            localProfile.device_model = detectedDeviceModel;
-            saveLocalDb(localDb);
-            currentProfile = localProfile;
-            routeAuthenticatedProfile();
+          throw error;
+        }
+
+        if (!existingProfile) {
+          // Check if a profile exists with the same 6-digit device ID (e.g. different device attempt)
+          const { data: idMatchProfile } = await dbClient
+            .from('study_profiles')
+            .select('*')
+            .eq('device_number_id', localDeviceNumId)
+            .maybeSingle();
+
+          if (idMatchProfile && idMatchProfile.role === 'student' && idMatchProfile.device_token !== localDeviceToken) {
+            document.getElementById('lockCurrentDevice').textContent = detectedDeviceModel;
+            document.getElementById('lockRegisteredDevice').textContent = idMatchProfile.device_model || 'Registered Hardware';
+            showView('viewDeviceLocked');
             return;
           }
-          showToast('Database check failed. Ready for setup.', 'error');
+
+          // First-time device launch -> show onboarding
+          updateDbConnectionPill(true);
           showView('viewOnboarding');
           return;
         }
 
-        if (!profile) {
-          // Device not registered yet -> show Onboarding
-          showView('viewOnboarding');
-          return;
-        }
-
-        // Strict Device Lock Verification
-        if (profile.device_token !== localDeviceToken) {
+        // Verify hardware lock if student profile exists
+        if (existingProfile.role === 'student' && existingProfile.device_token !== localDeviceToken) {
           document.getElementById('lockCurrentDevice').textContent = detectedDeviceModel;
-          document.getElementById('lockRegisteredDevice').textContent = profile.device_model || 'Registered Hardware';
+          document.getElementById('lockRegisteredDevice').textContent = existingProfile.device_model || 'Registered Hardware';
           showView('viewDeviceLocked');
           return;
         }
 
-        // Update heartbeat last_visit_at and device_model
-        const nowIso = new Date().toISOString();
-        await supabaseClient
+        currentProfile = existingProfile;
+        updateDbConnectionPill(true);
+
+        // Update last_visit_at and latest hardware key
+        await dbClient
           .from('study_profiles')
           .update({
-            last_visit_at: nowIso,
+            last_visit_at: new Date().toISOString(),
             device_model: detectedDeviceModel
           })
-          .eq('id', profile.id);
+          .eq('id', currentProfile.id);
 
-        profile.last_visit_at = nowIso;
-        profile.device_model = detectedDeviceModel;
-        currentProfile = profile;
-
-        routeAuthenticatedProfile();
-      } catch (err) {
-        if (isNetworkFetchError(err)) {
-          isLocalSandboxMode = true;
+        if (currentProfile.role === 'parent') {
+          await mountParentDashboard();
+        } else if (!currentProfile.linked_parent_id) {
+          await mountStudentLinkGate();
+        } else {
+          await mountStudentDashboard();
         }
-        showView('viewOnboarding');
+      } catch (err) {
+        console.warn('Supabase boot check fallback:', err);
+        const msg = (err && err.message) ? err.message : '';
+        if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+          isLocalSandboxMode = true;
+          updateDbConnectionPill(false, 'Sandbox Local Mode');
+          bootLocalSandboxFallback();
+        } else {
+          updateDbConnectionPill(false, 'DB Error: Check SQL');
+          showView('viewOnboarding');
+        }
       }
     }
 
@@ -1311,90 +1270,118 @@
       bootApplication();
     }
 
-    function routeAuthenticatedProfile() {
-      if (!currentProfile) {
+    function bootLocalSandboxFallback() {
+      const localProfiles = getSandboxTable('study_profiles');
+      const existing = localProfiles.find(p => p.device_token === localDeviceToken);
+      if (!existing) {
         showView('viewOnboarding');
         return;
       }
-
+      currentProfile = existing;
       if (currentProfile.role === 'parent') {
         mountParentDashboard();
+      } else if (!currentProfile.linked_parent_id) {
+        mountStudentLinkGate();
       } else {
-        // Student role: verify if linked to a parent
-        if (!currentProfile.linked_parent_id) {
-          document.getElementById('gateStudentOwnId').textContent = currentProfile.device_number_id;
-          showView('viewStudentLinkGate');
-        } else {
-          mountStudentDashboard();
-        }
+        mountStudentDashboard();
       }
     }
 
-    // -----------------------------------------------------------------------
-    // 7. ONBOARDING & AVATAR COMPRESSION
-    // -----------------------------------------------------------------------
-    function initOnboardingUI() {
-      document.getElementById('onboardDeviceIdBadge').textContent = `#${localDeviceNumId}`;
-      document.getElementById('onboardDeviceModel').textContent = detectedDeviceModel;
-
-      const presetsRow = document.getElementById('presetAvatarsRow');
-      presetsRow.innerHTML = '';
-      PRESET_AVATARS.forEach(item => {
+    function mountStudentColorDots() {
+      const container = document.getElementById('subjectColorPicker');
+      if (!container) return;
+      container.innerHTML = '';
+      SUBJECT_COLORS.forEach(hex => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'w-8 h-8 rounded-xl flex items-center justify-center text-xs border transition';
-        btn.style.backgroundColor = item.bg;
-        btn.style.color = item.fg;
-        btn.style.borderColor = item.fg + '44';
-        btn.innerHTML = `<i class="fa-solid ${item.icon}"></i>`;
+        btn.className = `w-5 h-5 rounded-full transition transform ${selectedSubjectColor === hex ? 'scale-125 ring-2 ring-offset-1 ring-slate-400' : 'opacity-75 hover:opacity-100'}`;
+        btn.style.backgroundColor = hex;
         btn.onclick = () => {
-          selectedAvatarValue = item.id;
-          renderAvatarIntoElement(document.getElementById('onboardAvatarPreview'), selectedAvatarValue);
+          selectedSubjectColor = hex;
+          mountStudentColorDots();
         };
-        presetsRow.appendChild(btn);
+        container.appendChild(btn);
       });
+    }
 
-      renderAvatarIntoElement(document.getElementById('onboardAvatarPreview'), selectedAvatarValue);
+    // -----------------------------------------------------------------------
+    // 7. ONBOARDING & ACCOUNT REGISTRATION
+    // -----------------------------------------------------------------------
+    function initOnboardingUI() {
+      const idBadge = document.getElementById('onboardDeviceIdBadge');
+      const modelEl = document.getElementById('onboardDeviceModel');
+      if (idBadge) idBadge.textContent = `#${localDeviceNumId}`;
+      if (modelEl) modelEl.textContent = detectedDeviceModel;
+
+      const presetsRow = document.getElementById('presetAvatarsRow');
+      if (presetsRow) {
+        presetsRow.innerHTML = '';
+        PRESET_AVATARS.forEach((av, idx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `w-8 h-8 rounded-xl border text-xs flex items-center justify-center transition ${
+            selectedAvatarData === av.icon
+              ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+          }`;
+          btn.innerHTML = `<i class="fa-solid ${av.icon}"></i>`;
+          btn.onclick = () => {
+            selectedAvatarData = av.icon;
+            updateOnboardingAvatarPreview();
+            initOnboardingUI();
+          };
+          presetsRow.appendChild(btn);
+        });
+      }
+      updateOnboardingAvatarPreview();
+    }
+
+    function updateOnboardingAvatarPreview() {
+      const preview = document.getElementById('onboardAvatarPreview');
+      if (!preview) return;
+      if (selectedAvatarData && selectedAvatarData.startsWith('data:image')) {
+        preview.innerHTML = `<img src="${selectedAvatarData}" alt="Avatar" class="w-full h-full object-cover" />`;
+      } else {
+        const iconClass = selectedAvatarData || 'fa-user-graduate';
+        preview.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+      }
     }
 
     function selectOnboardingRole(role) {
-      selectedOnboardingRole = role;
-      const stuBtn = document.getElementById('roleBtnStudent');
-      const parBtn = document.getElementById('roleBtnParent');
-
+      selectedRole = role;
+      const btnStu = document.getElementById('roleBtnStudent');
+      const btnPar = document.getElementById('roleBtnParent');
       if (role === 'student') {
-        stuBtn.className = 'p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 text-left transition relative';
-        parBtn.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
+        btnStu.className = 'p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 text-left transition relative';
+        btnPar.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
       } else {
-        parBtn.className = 'p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50/60 text-left transition relative';
-        stuBtn.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
+        btnPar.className = 'p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50/60 text-left transition relative';
+        btnStu.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition relative';
       }
     }
 
     function handleAvatarUpload(event) {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = e => {
         const img = new Image();
-        img.onload = function() {
+        img.onload = () => {
           const canvas = document.createElement('canvas');
-          const maxDim = 140;
+          const MAX = 160;
           let w = img.width;
           let h = img.height;
           if (w > h) {
-            if (w > maxDim) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+            if (w > MAX) { h *= MAX / w; w = MAX; }
           } else {
-            if (h > maxDim) { w = Math.round(w * (maxDim / h)); h = maxDim; }
+            if (h > MAX) { w *= MAX / h; h = MAX; }
           }
           canvas.width = w;
           canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
-          selectedAvatarValue = canvas.toDataURL('image/jpeg', 0.78);
-          renderAvatarIntoElement(document.getElementById('onboardAvatarPreview'), selectedAvatarValue);
-          showToast('Profile photo ready!');
+          selectedAvatarData = canvas.toDataURL('image/jpeg', 0.78);
+          updateOnboardingAvatarPreview();
         };
         img.src = e.target.result;
       };
@@ -1404,84 +1391,53 @@
     async function handleRegisterProfile(event) {
       event.preventDefault();
       const nameVal = document.getElementById('onboardNameInput').value.trim();
-      if (!nameVal) return;
+      if (!nameVal) {
+        showToast('Please enter your full name.', 'error');
+        return;
+      }
 
       const submitBtn = document.getElementById('onboardSubmitBtn');
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Binding Device...</span>';
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Binding Hardware...</span>';
+
+      const payload = {
+        device_number_id: localDeviceNumId,
+        device_token: localDeviceToken,
+        device_model: detectedDeviceModel,
+        name: nameVal,
+        avatar_url: selectedAvatarData || (selectedRole === 'parent' ? 'fa-user-tie' : 'fa-user-graduate'),
+        role: selectedRole,
+        linked_parent_id: null,
+        last_visit_at: new Date().toISOString()
+      };
 
       try {
         if (isLocalSandboxMode) {
-          const localDb = getLocalDb();
-          const createdLocal = {
-            id: generateLocalUuid(),
-            device_number_id: localDeviceNumId,
-            device_token: localDeviceToken,
-            device_model: detectedDeviceModel,
-            name: nameVal,
-            avatar_url: selectedAvatarValue,
-            role: selectedOnboardingRole,
-            linked_parent_id: null,
-            last_visit_at: new Date().toISOString(),
-            created_at: new Date().toISOString()
-          };
-          localDb.study_profiles.push(createdLocal);
-          saveLocalDb(localDb);
-          currentProfile = createdLocal;
-          showToast(`Welcome, ${createdLocal.name}! (Local Mode)`);
-          routeAuthenticatedProfile();
-          return;
+          const profiles = getSandboxTable('study_profiles');
+          const created = { id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() };
+          profiles.push(created);
+          saveSandboxTable('study_profiles', profiles);
+          currentProfile = created;
+        } else {
+          const { data, error } = await dbClient
+            .from('study_profiles')
+            .insert([payload])
+            .select()
+            .single();
+
+          if (error) throw error;
+          currentProfile = data;
         }
 
-        // Ensure 6-digit device_number_id is unique in Supabase
-        let candidateId = localDeviceNumId;
-        const { data: existingId, error: checkErr } = await supabaseClient
-          .from('study_profiles')
-          .select('id')
-          .eq('device_number_id', candidateId)
-          .maybeSingle();
-
-        if (checkErr && isNetworkFetchError(checkErr)) {
-          isLocalSandboxMode = true;
-          return handleRegisterProfile(event);
+        showToast(`Welcome, ${currentProfile.name}! Device bound.`);
+        if (currentProfile.role === 'parent') {
+          await mountParentDashboard();
+        } else {
+          await mountStudentLinkGate();
         }
-
-        if (existingId) {
-          candidateId = generateSixDigitId();
-          localDeviceNumId = candidateId;
-          safeStorage.setItem(KEY_DEVICE_NUM_ID, candidateId);
-        }
-
-        const payload = {
-          device_number_id: candidateId,
-          device_token: localDeviceToken,
-          device_model: detectedDeviceModel,
-          name: nameVal,
-          avatar_url: selectedAvatarValue,
-          role: selectedOnboardingRole,
-          linked_parent_id: null,
-          last_visit_at: new Date().toISOString()
-        };
-
-        const { data: created, error } = await supabaseClient
-          .from('study_profiles')
-          .insert([payload])
-          .select()
-          .single();
-
-        if (error) {
-          if (isNetworkFetchError(error)) {
-            isLocalSandboxMode = true;
-            return handleRegisterProfile(event);
-          }
-          throw error;
-        }
-
-        currentProfile = created;
-        showToast(`Welcome, ${created.name}!`);
-        routeAuthenticatedProfile();
       } catch (err) {
-        showToast('Could not register device. Try again.', 'error');
+        console.error('Registration error:', err);
+        showToast(err.message || 'Could not save profile. Check Supabase SQL.', 'error');
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<span>Continue to StudyBridge</span><i class="fa-solid fa-arrow-right"></i>';
@@ -1489,96 +1445,94 @@
     }
 
     // -----------------------------------------------------------------------
-    // 8. STUDENT -> PARENT LINKING GATE LOGIC
+    // 8. STUDENT -> PARENT LINKING GATE
     // -----------------------------------------------------------------------
-    let lookupDebounce = null;
-    function handleLookupParentById(rawVal) {
-      const cleanId = (rawVal || '').replace(/\D/g, '').slice(0, 6);
-      const previewEl = document.getElementById('parentLookupPreview');
-      foundParentForLink = null;
+    async function mountStudentLinkGate() {
+      showView('viewStudentLinkGate');
+      document.getElementById('gateStudentOwnId').textContent = currentProfile.device_number_id;
+    }
 
-      if (cleanId.length !== 6) {
-        safeAddClass(previewEl, 'hidden');
+    async function handleLookupParentById(rawInput) {
+      const cleanId = (rawInput || '').replace(/\D/g, '').slice(0, 6);
+      const inputEl = document.getElementById('parentSearchIdInput');
+      if (inputEl && inputEl.value !== cleanId) {
+        inputEl.value = cleanId;
+      }
+
+      const previewBox = document.getElementById('parentLookupPreview');
+      if (cleanId.length < 6) {
+        pendingFoundParent = null;
+        previewBox.classList.add('hidden');
         return;
       }
 
-      if (lookupDebounce) clearTimeout(lookupDebounce);
-      lookupDebounce = setTimeout(async () => {
+      try {
+        let foundParent = null;
         if (isLocalSandboxMode) {
-          const localDb = getLocalDb();
-          const data = localDb.study_profiles.find(p => p.device_number_id === cleanId && p.role === 'parent');
-          if (!data) {
-            safeAddClass(previewEl, 'hidden');
-            showToast('No Parent found with that 6-digit ID', 'error');
-            return;
-          }
-          foundParentForLink = data;
-          renderAvatarIntoElement(document.getElementById('lookupParentAvatar'), data.avatar_url, data.name);
-          document.getElementById('lookupParentName').textContent = data.name;
-          document.getElementById('lookupParentDevice').textContent = `${data.device_model} • ID #${data.device_number_id}`;
-          safeRemoveClass(previewEl, 'hidden');
+          foundParent = getSandboxTable('study_profiles').find(
+            p => p.device_number_id === cleanId && p.role === 'parent'
+          );
+        } else {
+          const { data, error } = await dbClient
+            .from('study_profiles')
+            .select('*')
+            .eq('device_number_id', cleanId)
+            .eq('role', 'parent')
+            .maybeSingle();
+
+          if (error) throw error;
+          foundParent = data;
+        }
+
+        if (!foundParent) {
+          pendingFoundParent = null;
+          previewBox.classList.add('hidden');
+          showToast('No Parent account found with that 6-digit ID.', 'error');
           return;
         }
 
-        const { data, error } = await supabaseClient
-          .from('study_profiles')
-          .select('*')
-          .eq('device_number_id', cleanId)
-          .eq('role', 'parent')
-          .maybeSingle();
-
-        if (error || !data) {
-          safeAddClass(previewEl, 'hidden');
-          showToast('No Parent found with that 6-digit ID', 'error');
-          return;
-        }
-
-        foundParentForLink = data;
-        renderAvatarIntoElement(document.getElementById('lookupParentAvatar'), data.avatar_url, data.name);
-        document.getElementById('lookupParentName').textContent = data.name;
-        document.getElementById('lookupParentDevice').textContent = `${data.device_model} • ID #${data.device_number_id}`;
-        safeRemoveClass(previewEl, 'hidden');
-      }, 250);
+        pendingFoundParent = foundParent;
+        renderAvatarIntoElement(document.getElementById('lookupParentAvatar'), foundParent.avatar_url, 'fa-user-tie');
+        document.getElementById('lookupParentName').textContent = foundParent.name;
+        document.getElementById('lookupParentDevice').textContent = foundParent.device_model || 'Verified Parent Hardware';
+        previewBox.classList.remove('hidden');
+      } catch (err) {
+        console.error('Parent lookup error:', err);
+        showToast('Search failed. Verify connection.', 'error');
+      }
     }
 
     async function confirmLinkToParent() {
-      if (!currentProfile || !foundParentForLink) return;
-
+      if (!pendingFoundParent || !currentProfile) return;
       const btn = document.getElementById('confirmLinkParentBtn');
       btn.disabled = true;
 
       try {
         if (isLocalSandboxMode) {
-          const localDb = getLocalDb();
-          const target = localDb.study_profiles.find(p => p.id === currentProfile.id);
-          if (target) {
-            target.linked_parent_id = foundParentForLink.id;
-            target.last_visit_at = new Date().toISOString();
-            saveLocalDb(localDb);
-            currentProfile = target;
+          const profiles = getSandboxTable('study_profiles');
+          const idx = profiles.findIndex(p => p.id === currentProfile.id);
+          if (idx !== -1) {
+            profiles[idx].linked_parent_id = pendingFoundParent.id;
+            saveSandboxTable('study_profiles', profiles);
+            currentProfile = profiles[idx];
           }
-          showToast(`Linked to Parent: ${foundParentForLink.name}`);
-          mountStudentDashboard();
-          return;
+        } else {
+          const { data, error } = await dbClient
+            .from('study_profiles')
+            .update({ linked_parent_id: pendingFoundParent.id })
+            .eq('id', currentProfile.id)
+            .select()
+            .single();
+
+          if (error) throw error;
+          currentProfile = data;
         }
 
-        const { data, error } = await supabaseClient
-          .from('study_profiles')
-          .update({
-            linked_parent_id: foundParentForLink.id,
-            last_visit_at: new Date().toISOString()
-          })
-          .eq('id', currentProfile.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        currentProfile = data;
-        showToast(`Linked to Parent: ${foundParentForLink.name}`);
-        mountStudentDashboard();
+        showToast(`Linked to Parent: ${pendingFoundParent.name}`);
+        await mountStudentDashboard();
       } catch (err) {
-        showToast('Failed to link parent account', 'error');
+        console.error('Link parent error:', err);
+        showToast('Failed to link parent account.', 'error');
       } finally {
         btn.disabled = false;
       }
@@ -1586,332 +1540,231 @@
 
     async function refreshCurrentProfileState() {
       if (!currentProfile) return;
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        const data = localDb.study_profiles.find(p => p.id === currentProfile.id);
-        if (data && data.linked_parent_id) {
-          currentProfile = data;
-          showToast('Parent link confirmed!');
-          mountStudentDashboard();
+      try {
+        if (isLocalSandboxMode) {
+          const found = getSandboxTable('study_profiles').find(p => p.id === currentProfile.id);
+          if (found) currentProfile = found;
         } else {
-          showToast('Not linked yet. Ask your parent to add your ID.', 'info');
+          const { data } = await dbClient
+            .from('study_profiles')
+            .select('*')
+            .eq('id', currentProfile.id)
+            .single();
+          if (data) currentProfile = data;
         }
-        return;
-      }
 
-      const { data } = await supabaseClient
-        .from('study_profiles')
-        .select('*')
-        .eq('id', currentProfile.id)
-        .maybeSingle();
-
-      if (data) {
-        currentProfile = data;
         if (currentProfile.linked_parent_id) {
-          showToast('Parent link confirmed!');
-          mountStudentDashboard();
+          showToast('Parent link verified!');
+          await mountStudentDashboard();
         } else {
-          showToast('Not linked yet. Ask your parent to add your ID.', 'info');
+          showToast('Not linked yet. Ask parent to add your ID.', 'info');
         }
+      } catch (e) {
+        showToast('Could not refresh status.', 'error');
       }
     }
 
     // -----------------------------------------------------------------------
-    // 9. STUDENT DASHBOARD ENGINE
+    // 9. STUDENT DASHBOARD LOGIC
     // -----------------------------------------------------------------------
     async function mountStudentDashboard() {
       showView('viewStudentDashboard');
-      renderAvatarIntoElement(document.getElementById('stuHeaderAvatar'), currentProfile.avatar_url, currentProfile.name);
+      renderAvatarIntoElement(document.getElementById('stuHeaderAvatar'), currentProfile.avatar_url, 'fa-user-graduate');
       document.getElementById('stuHeaderName').textContent = currentProfile.name;
-      document.getElementById('stuHeaderDevice').textContent = currentProfile.device_model;
+      document.getElementById('stuHeaderDevice').textContent = currentProfile.device_model || detectedDeviceModel;
       document.getElementById('stuHeaderDeviceId').textContent = currentProfile.device_number_id;
 
-      // Build subject color dots
-      const colorContainer = document.getElementById('subjectColorPicker');
-      colorContainer.innerHTML = '';
-      SUBJECT_COLORS.forEach(hex => {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'w-5 h-5 rounded-full border-2 transition transform hover:scale-110';
-        dot.style.backgroundColor = hex;
-        dot.style.borderColor = hex === selectedSubjectColor ? '#0f172a' : 'transparent';
-        dot.onclick = () => {
-          selectedSubjectColor = hex;
-          mountStudentColorDots();
-        };
-        colorContainer.appendChild(dot);
-      });
-
-      // Fetch linked parent name
-      if (currentProfile.linked_parent_id) {
-        if (isLocalSandboxMode) {
-          const par = getLocalDb().study_profiles.find(p => p.id === currentProfile.linked_parent_id);
-          if (par) {
-            document.getElementById('stuLinkedParentLabel').textContent = `Parent: ${par.name} (#${par.device_number_id})`;
-          }
-        } else {
-          const { data: par } = await supabaseClient
-            .from('study_profiles')
-            .select('name, device_number_id')
-            .eq('id', currentProfile.linked_parent_id)
-            .maybeSingle();
-          if (par) {
-            document.getElementById('stuLinkedParentLabel').textContent = `Parent: ${par.name} (#${par.device_number_id})`;
-          }
-        }
-      }
-
+      mountStudentColorDots();
       await loadStudentDashboardData(false);
-      if (!isLocalSandboxMode) setupRealtimeChannel();
     }
 
-    function mountStudentColorDots() {
-      const colorContainer = document.getElementById('subjectColorPicker');
-      if (!colorContainer) return;
-      Array.from(colorContainer.children).forEach((btn, idx) => {
-        btn.style.borderColor = SUBJECT_COLORS[idx] === selectedSubjectColor ? '#0f172a' : 'transparent';
-      });
-    }
-
-    async function loadStudentDashboardData(showFeedback = false) {
-      if (!currentProfile) return;
+    async function loadStudentDashboardData(manualRefresh = false) {
       const syncIcon = document.getElementById('stuSyncIcon');
-      if (syncIcon) safeAddClass(syncIcon, 'fa-spin');
+      if (syncIcon) syncIcon.classList.add('fa-spin');
 
       try {
         if (isLocalSandboxMode) {
-          const localDb = getLocalDb();
-          const me = localDb.study_profiles.find(p => p.id === currentProfile.id);
-          if (me) {
-            me.last_visit_at = new Date().toISOString();
-            saveLocalDb(localDb);
+          const profiles = getSandboxTable('study_profiles');
+          const parent = profiles.find(p => p.id === currentProfile.linked_parent_id);
+          document.getElementById('stuLinkedParentLabel').textContent = parent ? `Linked: ${parent.name}` : 'Linked to Parent';
+
+          studentSubjects = getSandboxTable('student_subjects').filter(s => s.student_id === currentProfile.id);
+          studentTopics = getSandboxTable('study_topics').filter(t => t.student_id === currentProfile.id);
+          studentTests = getSandboxTable('scheduled_tests').filter(t => t.student_id === currentProfile.id);
+          studentNotes = getSandboxTable('parent_notes').filter(n => n.student_id === currentProfile.id);
+
+          // Mark unseen notes as seen
+          const allNotes = getSandboxTable('parent_notes');
+          let changed = false;
+          allNotes.forEach(n => {
+            if (n.student_id === currentProfile.id && !n.is_seen) {
+              n.is_seen = true;
+              n.seen_at = new Date().toISOString();
+              changed = true;
+            }
+          });
+          if (changed) saveSandboxTable('parent_notes', allNotes);
+        } else {
+          // Heartbeat update
+          await dbClient
+            .from('study_profiles')
+            .update({ last_visit_at: new Date().toISOString() })
+            .eq('id', currentProfile.id);
+
+          // Fetch linked parent name
+          if (currentProfile.linked_parent_id) {
+            const { data: parentData } = await dbClient
+              .from('study_profiles')
+              .select('name')
+              .eq('id', currentProfile.linked_parent_id)
+              .maybeSingle();
+            document.getElementById('stuLinkedParentLabel').textContent = parentData
+              ? `Linked: ${parentData.name}`
+              : 'Linked to Parent';
           }
-          studentSubjects = localDb.student_subjects.filter(s => s.student_id === currentProfile.id);
-          studentTopics = localDb.study_topics.filter(t => t.student_id === currentProfile.id);
-          studentTests = localDb.scheduled_tests.filter(t => t.student_id === currentProfile.id);
-          studentMessages = localDb.parent_notes.filter(n => n.student_id === currentProfile.id);
 
-          renderStudentSubjects();
-          renderStudentTopics();
-          renderStudentTests();
-          await renderAndAcknowledgeStudentMessages();
-          if (showFeedback) showToast('Synced (Local Mode)');
-          return;
+          const [subjRes, topicsRes, testsRes, notesRes] = await Promise.all([
+            dbClient.from('student_subjects').select('*').eq('student_id', currentProfile.id).order('created_at', { ascending: true }),
+            dbClient.from('study_topics').select('*').eq('student_id', currentProfile.id).order('created_at', { ascending: true }),
+            dbClient.from('scheduled_tests').select('*').eq('student_id', currentProfile.id).order('scheduled_at', { ascending: false }),
+            dbClient.from('parent_notes').select('*').eq('student_id', currentProfile.id).order('created_at', { ascending: false })
+          ]);
+
+          studentSubjects = subjRes.data || [];
+          studentTopics = topicsRes.data || [];
+          studentTests = testsRes.data || [];
+          studentNotes = notesRes.data || [];
+
+          // Mark unseen parent messages as seen with timestamp
+          const unseenIds = studentNotes.filter(n => !n.is_seen).map(n => n.id);
+          if (unseenIds.length > 0) {
+            const nowIso = new Date().toISOString();
+            await dbClient
+              .from('parent_notes')
+              .update({ is_seen: true, seen_at: nowIso })
+              .in('id', unseenIds);
+            studentNotes.forEach(n => {
+              if (unseenIds.includes(n.id)) {
+                n.is_seen = true;
+                n.seen_at = nowIso;
+              }
+            });
+          }
         }
-
-        // Update student last_visit_at heartbeat
-        await supabaseClient
-          .from('study_profiles')
-          .update({ last_visit_at: new Date().toISOString() })
-          .eq('id', currentProfile.id);
-
-        // Fetch Subjects, Topics, Scheduled Tests, and Parent Notes in parallel
-        const [subRes, topRes, testRes, noteRes] = await Promise.all([
-          supabaseClient.from('student_subjects').select('*').eq('student_id', currentProfile.id).order('created_at', { ascending: true }),
-          supabaseClient.from('study_topics').select('*').eq('student_id', currentProfile.id).order('created_at', { ascending: true }),
-          supabaseClient.from('scheduled_tests').select('*').eq('student_id', currentProfile.id).order('scheduled_at', { ascending: true }),
-          supabaseClient.from('parent_notes').select('*').eq('student_id', currentProfile.id).order('created_at', { ascending: false })
-        ]);
-
-        studentSubjects = subRes.data || [];
-        studentTopics = topRes.data || [];
-        studentTests = testRes.data || [];
-        studentMessages = noteRes.data || [];
 
         renderStudentSubjects();
         renderStudentTopics();
         renderStudentTests();
-        await renderAndAcknowledgeStudentMessages();
+        renderStudentMessages();
 
-        if (showFeedback) showToast('Synced with Supabase');
+        if (manualRefresh) showToast('Dashboard synced with Supabase.');
       } catch (err) {
-        // Handled cleanly
+        console.error('Student dashboard load error:', err);
+        showToast('Sync error while loading data.', 'error');
       } finally {
-        if (syncIcon) safeRemoveClass(syncIcon, 'fa-spin');
+        if (syncIcon) syncIcon.classList.remove('fa-spin');
       }
-    }
-
-    async function renderAndAcknowledgeStudentMessages() {
-      const listEl = document.getElementById('stuMessagesList');
-      const unreadBadge = document.getElementById('stuUnreadBadge');
-
-      if (!studentMessages.length) {
-        listEl.innerHTML = '<p class="text-xs text-slate-400 py-2">No messages from your parent yet.</p>';
-        safeAddClass(unreadBadge, 'hidden');
-        return;
-      }
-
-      const unreadNotes = studentMessages.filter(m => !m.is_seen);
-      if (unreadNotes.length > 0) {
-        unreadBadge.textContent = `${unreadNotes.length} New`;
-        safeRemoveClass(unreadBadge, 'hidden');
-
-        // Automatically mark unread notes as seen with timestamp
-        const nowIso = new Date().toISOString();
-        const unreadIds = unreadNotes.map(n => n.id);
-        if (isLocalSandboxMode) {
-          const localDb = getLocalDb();
-          localDb.parent_notes.forEach(n => {
-            if (unreadIds.includes(n.id)) {
-              n.is_seen = true;
-              n.seen_at = nowIso;
-            }
-          });
-          saveLocalDb(localDb);
-        } else {
-          await supabaseClient
-            .from('parent_notes')
-            .update({ is_seen: true, seen_at: nowIso })
-            .in('id', unreadIds);
-        }
-
-        studentMessages.forEach(m => {
-          if (unreadIds.includes(m.id)) {
-            m.is_seen = true;
-            m.seen_at = nowIso;
-          }
-        });
-      } else {
-        safeAddClass(unreadBadge, 'hidden');
-      }
-
-      listEl.innerHTML = studentMessages.map(msg => `
-        <div class="p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-start justify-between gap-3">
-          <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(msg.message_text)}</p>
-          <span class="text-[10px] font-medium text-indigo-600 shrink-0 whitespace-nowrap">
-            <i class="fa-solid fa-check-double mr-0.5"></i>${formatRelativeAndExactTime(msg.created_at).split('•')[0]}
-          </span>
-        </div>
-      `).join('');
     }
 
     function renderStudentSubjects() {
       const listEl = document.getElementById('stuSubjectsList');
       const selectEl = document.getElementById('topicSubjectSelect');
-      document.getElementById('stuSubjectCount').textContent = `${studentSubjects.length} subjects`;
+      const countEl = document.getElementById('stuSubjectCount');
 
-      const prevSelected = selectEl.value;
-      selectEl.innerHTML = '<option value="">Select Subject...</option>';
-      studentSubjects.forEach(sub => {
-        const opt = document.createElement('option');
-        opt.value = sub.id;
-        opt.textContent = sub.subject_name;
-        selectEl.appendChild(opt);
-      });
-      if (prevSelected) selectEl.value = prevSelected;
+      if (countEl) countEl.textContent = `${studentSubjects.length} Total`;
 
-      if (!studentSubjects.length) {
+      if (selectEl) {
+        const prevVal = selectEl.value;
+        selectEl.innerHTML = '<option value="">Select Subject...</option>';
+        studentSubjects.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = s.subject_name;
+          selectEl.appendChild(opt);
+        });
+        if (prevVal) selectEl.value = prevVal;
+      }
+
+      if (!listEl) return;
+      if (studentSubjects.length === 0) {
         listEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Add your subjects above to begin planning.</p>';
         return;
       }
 
-      listEl.innerHTML = studentSubjects.map(sub => `
-        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${escapeHtml(sub.color_hex)}"></span>
-            <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(sub.subject_name)}</span>
+      listEl.innerHTML = studentSubjects
+        .map(s => `
+          <div class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${escapeHtml(s.color_hex || '#10b981')};"></span>
+              <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(s.subject_name)}</span>
+            </div>
+            <button type="button" onclick="handleDeleteSubject('${s.id}')" class="w-7 h-7 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition" title="Remove Subject">
+              <i class="fa-solid fa-trash-can text-[11px]"></i>
+            </button>
           </div>
-          <button type="button" onclick="handleDeleteSubject('${sub.id}', '${escapeHtml(sub.subject_name)}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition" title="Delete Subject">
-            <i class="fa-solid fa-trash-can text-[11px]"></i>
-          </button>
-        </div>
-      `).join('');
+        `)
+        .join('');
     }
 
     async function handleAddSubject(event) {
       event.preventDefault();
       const input = document.getElementById('newSubjectNameInput');
       const name = input.value.trim();
-      if (!name || !currentProfile) return;
+      if (!name) return;
 
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        const created = {
-          id: generateLocalUuid(),
-          student_id: currentProfile.id,
-          subject_name: name,
-          color_hex: selectedSubjectColor,
-          created_at: new Date().toISOString()
-        };
-        localDb.student_subjects.push(created);
-        saveLocalDb(localDb);
-        studentSubjects.push(created);
+      const payload = {
+        student_id: currentProfile.id,
+        subject_name: name,
+        color_hex: selectedSubjectColor
+      };
+
+      try {
+        if (isLocalSandboxMode) {
+          const table = getSandboxTable('student_subjects');
+          table.push({ id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() });
+          saveSandboxTable('student_subjects', table);
+        } else {
+          const { error } = await dbClient.from('student_subjects').insert([payload]);
+          if (error) throw error;
+        }
         input.value = '';
-        renderStudentSubjects();
-        showToast(`Added subject: ${name}`);
-        return;
+        showToast(`Subject "${name}" added.`);
+        await loadStudentDashboardData(false);
+      } catch (err) {
+        showToast('Could not add subject.', 'error');
       }
-
-      const { data, error } = await supabaseClient
-        .from('student_subjects')
-        .insert([{
-          student_id: currentProfile.id,
-          subject_name: name,
-          color_hex: selectedSubjectColor
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        showToast('Failed to add subject', 'error');
-        return;
-      }
-
-      studentSubjects.push(data);
-      input.value = '';
-      renderStudentSubjects();
-      showToast(`Added subject: ${name}`);
     }
 
-    function handleDeleteSubject(subjectId, subjectName) {
-      askConfirmation(
-        `Delete ${subjectName}?`,
-        'This will also remove any study topics tagged under this subject.',
-        async () => {
-          if (isLocalSandboxMode) {
-            const localDb = getLocalDb();
-            localDb.student_subjects = localDb.student_subjects.filter(s => s.id !== subjectId);
-            localDb.study_topics = localDb.study_topics.filter(t => t.subject_id !== subjectId);
-            saveLocalDb(localDb);
-            studentSubjects = studentSubjects.filter(s => s.id !== subjectId);
-            studentTopics = studentTopics.filter(t => t.subject_id !== subjectId);
-            renderStudentSubjects();
-            renderStudentTopics();
-            showToast('Subject deleted');
-            return;
-          }
-
-          const { error } = await supabaseClient
-            .from('student_subjects')
-            .delete()
-            .eq('id', subjectId);
-
-          if (error) {
-            showToast('Could not delete subject', 'error');
-            return;
-          }
-          studentSubjects = studentSubjects.filter(s => s.id !== subjectId);
-          studentTopics = studentTopics.filter(t => t.subject_id !== subjectId);
-          renderStudentSubjects();
-          renderStudentTopics();
-          showToast('Subject deleted');
+    async function handleDeleteSubject(subjectId) {
+      try {
+        if (isLocalSandboxMode) {
+          saveSandboxTable('student_subjects', getSandboxTable('student_subjects').filter(s => s.id !== subjectId));
+          saveSandboxTable('study_topics', getSandboxTable('study_topics').filter(t => t.subject_id !== subjectId));
+        } else {
+          const { error } = await dbClient.from('student_subjects').delete().eq('id', subjectId);
+          if (error) throw error;
         }
-      );
+        showToast('Subject removed.');
+        await loadStudentDashboardData(false);
+      } catch (err) {
+        showToast('Could not remove subject.', 'error');
+      }
     }
 
     function switchStudentPlanTab(tab) {
-      studentActivePlanTab = tab;
+      studentPlanTab = tab;
       const todayBtn = document.getElementById('stuTabTodayBtn');
       const tmrBtn = document.getElementById('stuTabTomorrowBtn');
+      const daySelect = document.getElementById('topicDaySelect');
 
       if (tab === 'today') {
         todayBtn.className = 'px-3.5 py-1.5 rounded-xl bg-white text-emerald-700 shadow-xs transition';
         tmrBtn.className = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
-        document.getElementById('topicDaySelect').value = 'today';
+        if (daySelect) daySelect.value = 'today';
       } else {
         tmrBtn.className = 'px-3.5 py-1.5 rounded-xl bg-white text-indigo-700 shadow-xs transition';
         todayBtn.className = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition';
-        document.getElementById('topicDaySelect').value = 'tomorrow';
+        if (daySelect) daySelect.value = 'tomorrow';
       }
       renderStudentTopics();
     }
@@ -1920,258 +1773,215 @@
       event.preventDefault();
       const subjectId = document.getElementById('topicSubjectSelect').value;
       const titleInput = document.getElementById('topicTitleInput');
-      const dayChoice = document.getElementById('topicDaySelect').value;
+      const dayVal = document.getElementById('topicDaySelect').value;
       const title = titleInput.value.trim();
 
       if (!subjectId) {
-        showToast('Please select a subject first', 'error');
+        showToast('Select a subject first.', 'error');
         return;
       }
-      if (!title || !currentProfile) return;
+      if (!title) return;
 
-      const targetDate = dayChoice === 'tomorrow' ? getLocalDateString(1) : getLocalDateString(0);
+      const targetDate = dayVal === 'tomorrow' ? getTomorrowDateString() : getTodayDateString();
+      const payload = {
+        student_id: currentProfile.id,
+        subject_id: subjectId,
+        topic_title: title,
+        target_date: targetDate,
+        is_completed: false
+      };
 
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        const created = {
-          id: generateLocalUuid(),
-          student_id: currentProfile.id,
-          subject_id: subjectId,
-          topic_title: title,
-          target_date: targetDate,
-          is_completed: false,
-          completed_at: null,
-          created_at: new Date().toISOString()
-        };
-        localDb.study_topics.push(created);
-        saveLocalDb(localDb);
-        studentTopics.push(created);
+      try {
+        if (isLocalSandboxMode) {
+          const table = getSandboxTable('study_topics');
+          table.push({ id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() });
+          saveSandboxTable('study_topics', table);
+        } else {
+          const { error } = await dbClient.from('study_topics').insert([payload]);
+          if (error) throw error;
+        }
         titleInput.value = '';
-        switchStudentPlanTab(dayChoice);
-        showToast(`Topic added to ${dayChoice === 'tomorrow' ? "Tomorrow's Plan" : "Today's Checklist"}`);
-        return;
+        showToast(`Topic queued for ${dayVal === 'tomorrow' ? 'Tomorrow' : 'Today'}.`);
+        await loadStudentDashboardData(false);
+      } catch (err) {
+        showToast('Could not save topic.', 'error');
       }
-
-      const { data, error } = await supabaseClient
-        .from('study_topics')
-        .insert([{
-          student_id: currentProfile.id,
-          subject_id: subjectId,
-          topic_title: title,
-          target_date: targetDate,
-          is_completed: false
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        showToast('Failed to add study topic', 'error');
-        return;
-      }
-
-      studentTopics.push(data);
-      titleInput.value = '';
-      switchStudentPlanTab(dayChoice);
-      showToast(`Topic added to ${dayChoice === 'tomorrow' ? "Tomorrow's Plan" : "Today's Checklist"}`);
     }
 
     function renderStudentTopics() {
       const container = document.getElementById('stuTopicsContainer');
-      const todayStr = getLocalDateString(0);
-      const tmrStr = getLocalDateString(1);
+      const progressWrap = document.getElementById('stuTodayProgressWrap');
+      const todayStr = getTodayDateString();
+      const tomorrowStr = getTomorrowDateString();
 
-      // Automatic rollover: anything with target_date <= todayStr appears in Today's Checklist
-      const todaysTopics = studentTopics.filter(t => t.target_date <= todayStr);
-      const tmrsTopics = studentTopics.filter(t => t.target_date === tmrStr);
+      const todayTopics = studentTopics.filter(t => t.target_date === todayStr);
+      const completedCount = todayTopics.filter(t => t.is_completed).length;
+      const pct = todayTopics.length > 0 ? Math.round((completedCount / todayTopics.length) * 100) : 0;
 
-      // Update Today's Progress Bar
-      const coveredCount = todaysTopics.filter(t => t.is_completed).length;
-      const totalToday = todaysTopics.length;
-      const pct = totalToday > 0 ? Math.round((coveredCount / totalToday) * 100) : 0;
-      document.getElementById('stuProgressText').textContent = `${coveredCount} / ${totalToday} Covered (${pct}%)`;
+      document.getElementById('stuProgressText').textContent = `${completedCount} / ${todayTopics.length} Covered (${pct}%)`;
       document.getElementById('stuProgressBar').style.width = `${pct}%`;
 
-      const listToShow = studentActivePlanTab === 'today' ? todaysTopics : tmrsTopics;
+      if (progressWrap) {
+        progressWrap.classList.toggle('hidden', studentPlanTab !== 'today');
+      }
+
+      const activeList = studentPlanTab === 'today'
+        ? todayTopics
+        : studentTopics.filter(t => t.target_date === tomorrowStr);
+
+      if (activeList.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No topics scheduled for ${studentPlanTab === 'today' ? 'Today' : 'Tomorrow'} yet.</p>`;
+        return;
+      }
+
       const subjectMap = new Map(studentSubjects.map(s => [s.id, s]));
 
-      if (!listToShow.length) {
-        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No topics planned for ${studentActivePlanTab === 'today' ? 'today' : 'tomorrow'} yet.</p>`;
-        return;
-      }
+      container.innerHTML = activeList
+        .map(topic => {
+          const subj = subjectMap.get(topic.subject_id) || { subject_name: 'General', color_hex: '#10b981' };
+          const isToday = topic.target_date === todayStr;
 
-      container.innerHTML = listToShow.map(topic => {
-        const subj = subjectMap.get(topic.subject_id) || { subject_name: 'General', color_hex: '#64748b' };
-        const isTodayView = studentActivePlanTab === 'today';
-
-        return `
-          <div class="flex items-center justify-between gap-3 p-3.5 rounded-2xl border transition ${
-            topic.is_completed
-              ? 'bg-emerald-50/50 border-emerald-200'
-              : 'bg-white border-slate-200 hover:border-slate-300'
-          }">
-            <div class="flex items-center gap-3 min-w-0">
-              ${isTodayView ? `
-                <button type="button" onclick="toggleTopicCompletion('${topic.id}', ${!topic.is_completed})" class="w-6 h-6 rounded-lg flex items-center justify-center border-2 transition shrink-0 ${
-                  topic.is_completed
-                    ? 'bg-emerald-600 border-emerald-600 text-white'
-                    : 'border-slate-300 hover:border-emerald-500 bg-white'
-                }">
-                  ${topic.is_completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
-                </button>
-              ` : `
-                <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
-                  <i class="fa-regular fa-clock"></i>
-                </span>
-              `}
-              <div class="min-w-0">
-                <div class="flex items-center gap-2 mb-0.5">
-                  <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold text-white" style="background-color: ${escapeHtml(subj.color_hex)}">
-                    ${escapeHtml(subj.subject_name)}
-                  </span>
-                  ${topic.is_completed && topic.completed_at ? `
-                    <span class="text-[10px] font-semibold text-emerald-700">
-                      Covered ${new Date(topic.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          return `
+            <div class="flex items-center justify-between gap-3 p-3.5 rounded-2xl border ${
+              topic.is_completed ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200'
+            } transition">
+              <div class="flex items-center gap-3 min-w-0">
+                ${
+                  isToday
+                    ? `<button type="button" onclick="handleToggleTopicComplete('${topic.id}', ${!topic.is_completed})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition shrink-0 ${
+                        topic.is_completed
+                          ? 'bg-emerald-600 border-emerald-600 text-white'
+                          : 'border-slate-300 hover:border-emerald-500 bg-white'
+                      }">
+                        ${topic.is_completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                      </button>`
+                    : `<div class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-[11px] shrink-0" title="Unlocks tomorrow">
+                        <i class="fa-regular fa-clock"></i>
+                      </div>`
+                }
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold text-white" style="background-color: ${escapeHtml(subj.color_hex)};">
+                      ${escapeHtml(subj.subject_name)}
                     </span>
-                  ` : ''}
+                    ${
+                      topic.is_completed
+                        ? '<span class="text-[10px] font-bold text-emerald-700">Covered</span>'
+                        : !isToday
+                        ? '<span class="text-[10px] font-bold text-indigo-600">Queued for Tomorrow</span>'
+                        : ''
+                    }
+                  </div>
+                  <p class="text-xs sm:text-sm font-bold mt-1 truncate ${
+                    topic.is_completed ? 'line-through text-slate-400' : 'text-slate-900'
+                  }">${escapeHtml(topic.topic_title)}</p>
                 </div>
-                <p class="text-xs sm:text-sm font-bold truncate ${topic.is_completed ? 'line-through text-slate-400' : 'text-slate-900'}">
-                  ${escapeHtml(topic.topic_title)}
-                </p>
               </div>
-            </div>
 
-            <button type="button" onclick="handleDeleteTopic('${topic.id}')" class="w-8 h-8 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition shrink-0" title="Remove Topic">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </div>
-        `;
-      }).join('');
+              <button type="button" onclick="handleDeleteTopic('${topic.id}')" class="w-8 h-8 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition shrink-0">
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+            </div>
+          `;
+        })
+        .join('');
     }
 
-    async function toggleTopicCompletion(topicId, nextState) {
+    async function handleToggleTopicComplete(topicId, nextState) {
       const completedAt = nextState ? new Date().toISOString() : null;
-
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        const item = localDb.study_topics.find(t => t.id === topicId);
-        if (item) {
-          item.is_completed = nextState;
-          item.completed_at = completedAt;
-          saveLocalDb(localDb);
+      try {
+        if (isLocalSandboxMode) {
+          const table = getSandboxTable('study_topics');
+          const idx = table.findIndex(t => t.id === topicId);
+          if (idx !== -1) {
+            table[idx].is_completed = nextState;
+            table[idx].completed_at = completedAt;
+            saveSandboxTable('study_topics', table);
+          }
+        } else {
+          const { error } = await dbClient
+            .from('study_topics')
+            .update({ is_completed: nextState, completed_at: completedAt })
+            .eq('id', topicId);
+          if (error) throw error;
         }
-        const target = studentTopics.find(t => t.id === topicId);
-        if (target) {
-          target.is_completed = nextState;
-          target.completed_at = completedAt;
-        }
-        renderStudentTopics();
-        showToast(nextState ? 'Marked as Covered!' : 'Marked as Pending');
-        return;
+        await loadStudentDashboardData(false);
+      } catch (err) {
+        showToast('Could not update topic status.', 'error');
       }
-
-      const { error } = await supabaseClient
-        .from('study_topics')
-        .update({
-          is_completed: nextState,
-          completed_at: completedAt
-        })
-        .eq('id', topicId);
-
-      if (error) {
-        showToast('Could not update topic status', 'error');
-        return;
-      }
-
-      const target = studentTopics.find(t => t.id === topicId);
-      if (target) {
-        target.is_completed = nextState;
-        target.completed_at = completedAt;
-      }
-      renderStudentTopics();
-      showToast(nextState ? 'Marked as Covered!' : 'Marked as Pending');
     }
 
     async function handleDeleteTopic(topicId) {
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        localDb.study_topics = localDb.study_topics.filter(t => t.id !== topicId);
-        saveLocalDb(localDb);
-        studentTopics = studentTopics.filter(t => t.id !== topicId);
-        renderStudentTopics();
-        return;
+      try {
+        if (isLocalSandboxMode) {
+          saveSandboxTable('study_topics', getSandboxTable('study_topics').filter(t => t.id !== topicId));
+        } else {
+          const { error } = await dbClient.from('study_topics').delete().eq('id', topicId);
+          if (error) throw error;
+        }
+        await loadStudentDashboardData(false);
+      } catch (err) {
+        showToast('Could not delete topic.', 'error');
       }
-
-      const { error } = await supabaseClient
-        .from('study_topics')
-        .delete()
-        .eq('id', topicId);
-
-      if (error) {
-        showToast('Failed to delete topic', 'error');
-        return;
-      }
-      studentTopics = studentTopics.filter(t => t.id !== topicId);
-      renderStudentTopics();
     }
 
     function renderStudentTests() {
-      const container = document.getElementById('stuTestsList');
-      if (!studentTests.length) {
-        container.innerHTML = `
+      const listEl = document.getElementById('stuTestsList');
+      if (!listEl) return;
+
+      if (studentTests.length === 0) {
+        listEl.innerHTML = `
           <div class="col-span-full text-center py-6 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
             No tests scheduled by your parent yet.
-          </div>`;
+          </div>
+        `;
         return;
       }
 
-      container.innerHTML = studentTests.map(test => {
-        const isDone = test.status === 'completed';
-        const pct = isDone && test.max_marks > 0
-          ? Math.round((Number(test.marks_obtained) / Number(test.max_marks)) * 100)
-          : null;
+      listEl.innerHTML = studentTests
+        .map(test => {
+          const isCompleted = test.status === 'completed';
+          const pct = isCompleted && test.max_marks > 0 ? Math.round((test.marks_obtained / test.max_marks) * 100) : 0;
 
-        return `
-          <div class="p-4 rounded-2xl border ${isDone ? 'bg-emerald-50/40 border-emerald-200' : 'bg-amber-50/40 border-amber-200'} flex flex-col justify-between gap-3">
-            <div>
-              <div class="flex items-center justify-between gap-2">
-                <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
-                  isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                }">
-                  ${escapeHtml(test.subject_name)}
-                </span>
-                <span class="text-[11px] font-bold ${isDone ? 'text-emerald-700' : 'text-amber-700'}">
-                  ${isDone ? 'Report Submitted' : 'Scheduled'}
-                </span>
+          return `
+            <div class="p-4 rounded-2xl border ${isCompleted ? 'bg-emerald-50/40 border-emerald-200' : 'bg-amber-50/40 border-amber-200'} flex flex-col justify-between gap-3">
+              <div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="px-2.5 py-0.5 rounded-lg bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
+                    ${escapeHtml(test.subject_name)}
+                  </span>
+                  <span class="text-[11px] font-bold ${isCompleted ? 'text-emerald-700' : 'text-amber-700'}">
+                    ${isCompleted ? `Score: ${test.marks_obtained}/${test.max_marks} (${pct}%)` : 'Scheduled by Parent'}
+                  </span>
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-900 mt-2">${escapeHtml(test.topic_name)}</h3>
+                <div class="flex flex-wrap items-center gap-3 mt-2 text-[11px] text-slate-600 font-medium">
+                  <span><i class="fa-regular fa-calendar mr-1 text-amber-600"></i>${formatDateTimeShort(test.scheduled_at)}</span>
+                  <span><i class="fa-solid fa-list-ol mr-1 text-indigo-600"></i>${test.question_count} Qs</span>
+                  <span><i class="fa-regular fa-hourglass-half mr-1 text-emerald-600"></i>${test.duration_minutes} mins</span>
+                </div>
               </div>
-              <h3 class="text-sm font-extrabold text-slate-900 mt-2">${escapeHtml(test.topic_name)}</h3>
-              <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-600 font-medium">
-                <span><i class="fa-regular fa-calendar mr-1 text-slate-400"></i>${formatScheduledDateTime(test.scheduled_at)}</span>
-                <span><i class="fa-solid fa-list-ol mr-1 text-slate-400"></i>${test.question_count} Qs</span>
-                <span><i class="fa-regular fa-hourglass-half mr-1 text-slate-400"></i>${test.duration_minutes} mins</span>
-              </div>
+
+              ${
+                !isCompleted
+                  ? `<button type="button" onclick="openSubmitTestReportModal('${test.id}', '${escapeHtml(test.subject_name)} - ${escapeHtml(test.topic_name)}')" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold transition">
+                      Submit Test Report
+                    </button>`
+                  : `<div class="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-check"></i><span>Report sent to Parent</span>
+                    </div>`
+              }
             </div>
-
-            ${isDone ? `
-              <div class="pt-2.5 border-t border-emerald-200/70 flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-700">Score: <strong class="font-mono-code text-emerald-800">${test.marks_obtained} / ${test.max_marks}</strong></span>
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono-code text-[11px] font-bold">${pct}%</span>
-              </div>
-            ` : `
-              <button type="button" onclick="openSubmitTestReportModal('${test.id}', '${escapeHtml(test.subject_name)} - ${escapeHtml(test.topic_name)}', ${test.question_count})" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-upload"></i>
-                <span>Submit Test Report</span>
-              </button>
-            `}
-          </div>
-        `;
-      }).join('');
+          `;
+        })
+        .join('');
     }
 
-    function openSubmitTestReportModal(testId, title, defaultMaxMarks) {
+    function openSubmitTestReportModal(testId, title) {
       document.getElementById('submitReportTestId').value = testId;
       document.getElementById('submitReportTestTitle').textContent = title;
       document.getElementById('reportMarksObtainedInput').value = '';
-      document.getElementById('reportMaxMarksInput').value = defaultMaxMarks || 25;
+      document.getElementById('reportMaxMarksInput').value = '';
       openModal('modalSubmitTestReport');
     }
 
@@ -2181,330 +1991,350 @@
       const obtained = parseFloat(document.getElementById('reportMarksObtainedInput').value);
       const maxMarks = parseFloat(document.getElementById('reportMaxMarksInput').value);
 
-      if (isNaN(obtained) || isNaN(maxMarks) || obtained > maxMarks) {
-        showToast('Marks obtained cannot exceed max marks', 'error');
+      if (isNaN(obtained) || isNaN(maxMarks) || maxMarks <= 0 || obtained > maxMarks) {
+        showToast('Enter valid marks (obtained cannot exceed max marks).', 'error');
         return;
       }
 
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        const item = localDb.scheduled_tests.find(t => t.id === testId);
-        if (item) {
-          item.status = 'completed';
-          item.marks_obtained = obtained;
-          item.max_marks = maxMarks;
-          saveLocalDb(localDb);
-          const idx = studentTests.findIndex(t => t.id === testId);
-          if (idx !== -1) studentTests[idx] = item;
+      try {
+        if (isLocalSandboxMode) {
+          const table = getSandboxTable('scheduled_tests');
+          const idx = table.findIndex(t => t.id === testId);
+          if (idx !== -1) {
+            table[idx].status = 'completed';
+            table[idx].marks_obtained = obtained;
+            table[idx].max_marks = maxMarks;
+            saveSandboxTable('scheduled_tests', table);
+          }
+        } else {
+          const { error } = await dbClient
+            .from('scheduled_tests')
+            .update({
+              status: 'completed',
+              marks_obtained: obtained,
+              max_marks: maxMarks
+            })
+            .eq('id', testId);
+          if (error) throw error;
         }
+
         closeModal('modalSubmitTestReport');
-        renderStudentTests();
-        showToast('Test report submitted!');
+        showToast('Test report submitted to your Parent!');
+        await loadStudentDashboardData(false);
+      } catch (err) {
+        showToast('Failed to submit test report.', 'error');
+      }
+    }
+
+    function renderStudentMessages() {
+      const listEl = document.getElementById('stuMessagesList');
+      if (!listEl) return;
+
+      if (studentNotes.length === 0) {
+        listEl.innerHTML = '<p class="text-xs text-slate-400 py-2">No messages from your parent yet.</p>';
         return;
       }
 
-      const { data, error } = await supabaseClient
-        .from('scheduled_tests')
-        .update({
-          status: 'completed',
-          marks_obtained: obtained,
-          max_marks: maxMarks
-        })
-        .eq('id', testId)
-        .select()
-        .single();
-
-      if (error) {
-        showToast('Failed to submit test report', 'error');
-        return;
-      }
-
-      const idx = studentTests.findIndex(t => t.id === testId);
-      if (idx !== -1) studentTests[idx] = data;
-
-      closeModal('modalSubmitTestReport');
-      renderStudentTests();
-      showToast('Test report submitted to your parent!');
+      listEl.innerHTML = studentNotes
+        .map(note => `
+          <div class="p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-start justify-between gap-3">
+            <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(note.message_text)}</p>
+            <span class="text-[10px] font-bold text-indigo-600 shrink-0 whitespace-nowrap">
+              <i class="fa-solid fa-check-double mr-0.5"></i>${formatRelativeTime(note.created_at)}
+            </span>
+          </div>
+        `)
+        .join('');
     }
 
     // -----------------------------------------------------------------------
-    // 10. PARENT DASHBOARD ENGINE
+    // 10. PARENT DASHBOARD LOGIC
     // -----------------------------------------------------------------------
     async function mountParentDashboard() {
       showView('viewParentDashboard');
-      renderAvatarIntoElement(document.getElementById('parHeaderAvatar'), currentProfile.avatar_url, currentProfile.name);
+      renderAvatarIntoElement(document.getElementById('parHeaderAvatar'), currentProfile.avatar_url, 'fa-user-tie');
       document.getElementById('parHeaderName').textContent = currentProfile.name;
-      document.getElementById('parHeaderDevice').textContent = currentProfile.device_model;
+      document.getElementById('parHeaderDevice').textContent = currentProfile.device_model || detectedDeviceModel;
       document.getElementById('parHeaderDeviceId').textContent = currentProfile.device_number_id;
       document.getElementById('emptyParIdCopy').textContent = currentProfile.device_number_id;
 
       await loadParentDashboardData(false);
-      if (!isLocalSandboxMode) setupRealtimeChannel();
     }
 
-    async function loadParentDashboardData(showFeedback = false) {
-      if (!currentProfile) return;
+    async function loadParentDashboardData(manualRefresh = false) {
       const syncIcon = document.getElementById('parSyncIcon');
-      if (syncIcon) safeAddClass(syncIcon, 'fa-spin');
+      if (syncIcon) syncIcon.classList.add('fa-spin');
 
       try {
         if (isLocalSandboxMode) {
-          const localDb = getLocalDb();
-          linkedStudents = localDb.study_profiles.filter(p => p.linked_parent_id === currentProfile.id && p.role === 'student');
-          renderParentLinkedStudentsBar();
+          linkedStudents = getSandboxTable('study_profiles').filter(
+            p => p.role === 'student' && p.linked_parent_id === currentProfile.id
+          );
+        } else {
+          const { data, error } = await dbClient
+            .from('study_profiles')
+            .select('*')
+            .eq('role', 'student')
+            .eq('linked_parent_id', currentProfile.id)
+            .order('created_at', { ascending: true });
 
-          if (!linkedStudents.length) {
-            safeRemoveClass(document.getElementById('parNoStudentEmpty'), 'hidden');
-            safeAddClass(document.getElementById('parStudentWorkspace'), 'hidden');
-            return;
-          }
-
-          safeAddClass(document.getElementById('parNoStudentEmpty'), 'hidden');
-          safeRemoveClass(document.getElementById('parStudentWorkspace'), 'hidden');
-
-          if (!activeMonitoredStudentId || !linkedStudents.some(s => s.id === activeMonitoredStudentId)) {
-            activeMonitoredStudentId = linkedStudents[0].id;
-          }
-
-          await loadMonitoredStudentDetails();
-          if (showFeedback) showToast('Student progress refreshed');
-          return;
+          if (error) throw error;
+          linkedStudents = data || [];
         }
 
-        // Fetch all students linked to this parent
-        const { data: students, error } = await supabaseClient
-          .from('study_profiles')
-          .select('*')
-          .eq('linked_parent_id', currentProfile.id)
-          .eq('role', 'student')
-          .order('created_at', { ascending: true });
-
-        if (error) throw error;
-
-        linkedStudents = students || [];
         renderParentLinkedStudentsBar();
 
-        if (!linkedStudents.length) {
-          safeRemoveClass(document.getElementById('parNoStudentEmpty'), 'hidden');
-          safeAddClass(document.getElementById('parStudentWorkspace'), 'hidden');
-          return;
+        if (linkedStudents.length === 0) {
+          selectedStudentId = null;
+          document.getElementById('parNoStudentEmpty').classList.remove('hidden');
+          document.getElementById('parStudentWorkspace').classList.add('hidden');
+        } else {
+          if (!selectedStudentId || !linkedStudents.some(s => s.id === selectedStudentId)) {
+            selectedStudentId = linkedStudents[0].id;
+          }
+          document.getElementById('parNoStudentEmpty').classList.add('hidden');
+          document.getElementById('parStudentWorkspace').classList.remove('hidden');
+          await loadMonitoredStudentWorkspace(selectedStudentId);
         }
 
-        safeAddClass(document.getElementById('parNoStudentEmpty'), 'hidden');
-        safeRemoveClass(document.getElementById('parStudentWorkspace'), 'hidden');
-
-        if (!activeMonitoredStudentId || !linkedStudents.some(s => s.id === activeMonitoredStudentId)) {
-          activeMonitoredStudentId = linkedStudents[0].id;
-        }
-
-        await loadMonitoredStudentDetails();
-        if (showFeedback) showToast('Student progress refreshed');
+        if (manualRefresh) showToast('Parent console refreshed.');
       } catch (err) {
-        // Handled cleanly
+        console.error('Parent load error:', err);
+        showToast('Failed to load linked students.', 'error');
       } finally {
-        if (syncIcon) safeRemoveClass(syncIcon, 'fa-spin');
+        if (syncIcon) syncIcon.classList.remove('fa-spin');
       }
     }
 
     function renderParentLinkedStudentsBar() {
       const bar = document.getElementById('parLinkedStudentsBar');
-      if (!linkedStudents.length) {
+      if (!bar) return;
+
+      if (linkedStudents.length === 0) {
         bar.innerHTML = '<span class="text-xs font-bold text-slate-400">No students linked yet.</span>';
         return;
       }
 
-      bar.innerHTML = linkedStudents.map(stu => {
-        const isSelected = stu.id === activeMonitoredStudentId;
-        return `
-          <button type="button" onclick="selectMonitoredStudent('${stu.id}')" class="px-3.5 py-2 rounded-2xl text-xs font-extrabold transition flex items-center gap-2 border ${
-            isSelected
-              ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-          }">
-            <i class="fa-solid fa-user-graduate text-[11px]"></i>
-            <span>${escapeHtml(stu.name)}</span>
-            <span class="font-mono-code text-[10px] opacity-80">#${stu.device_number_id}</span>
-          </button>
-        `;
-      }).join('');
+      bar.innerHTML = linkedStudents
+        .map(stu => {
+          const isActive = stu.id === selectedStudentId;
+          return `
+            <button type="button" onclick="selectMonitoredStudent('${stu.id}')" class="px-3.5 py-2 rounded-2xl text-xs font-extrabold transition flex items-center gap-2 border ${
+              isActive
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+            }">
+              <i class="fa-solid fa-user-graduate text-[11px]"></i>
+              <span>${escapeHtml(stu.name)}</span>
+              <span class="font-mono-code text-[10px] opacity-80">#${escapeHtml(stu.device_number_id)}</span>
+            </button>
+          `;
+        })
+        .join('');
     }
 
     async function selectMonitoredStudent(studentId) {
-      activeMonitoredStudentId = studentId;
+      selectedStudentId = studentId;
       renderParentLinkedStudentsBar();
-      await loadMonitoredStudentDetails();
+      await loadMonitoredStudentWorkspace(studentId);
     }
 
     async function handleParentLinkStudent(event) {
       event.preventDefault();
-      const input = document.getElementById('parSearchStudentIdInput');
-      const targetId = (input.value || '').replace(/\D/g, '').trim();
+      const inputEl = document.getElementById('parSearchStudentIdInput');
+      const cleanId = (inputEl.value || '').replace(/\D/g, '').slice(0, 6);
 
-      if (targetId.length !== 6) {
-        showToast('Enter a valid 6-digit Student Device ID', 'error');
+      if (cleanId.length !== 6) {
+        showToast('Enter a valid 6-digit Student Device ID.', 'error');
         return;
       }
 
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        const student = localDb.study_profiles.find(p => p.device_number_id === targetId && p.role === 'student');
-        if (!student) {
-          showToast('No Student account found with that ID', 'error');
+      try {
+        let studentProfile = null;
+        if (isLocalSandboxMode) {
+          studentProfile = getSandboxTable('study_profiles').find(
+            p => p.device_number_id === cleanId && p.role === 'student'
+          );
+        } else {
+          const { data, error } = await dbClient
+            .from('study_profiles')
+            .select('*')
+            .eq('device_number_id', cleanId)
+            .eq('role', 'student')
+            .maybeSingle();
+
+          if (error) throw error;
+          studentProfile = data;
+        }
+
+        if (!studentProfile) {
+          showToast(`No Student found with ID #${cleanId}.`, 'error');
           return;
         }
-        student.linked_parent_id = currentProfile.id;
-        saveLocalDb(localDb);
-        input.value = '';
-        activeMonitoredStudentId = student.id;
-        showToast(`Linked student: ${student.name}`);
+
+        if (isLocalSandboxMode) {
+          const profiles = getSandboxTable('study_profiles');
+          const idx = profiles.findIndex(p => p.id === studentProfile.id);
+          if (idx !== -1) {
+            profiles[idx].linked_parent_id = currentProfile.id;
+            saveSandboxTable('study_profiles', profiles);
+          }
+        } else {
+          const { error: updateErr } = await dbClient
+            .from('study_profiles')
+            .update({ linked_parent_id: currentProfile.id })
+            .eq('id', studentProfile.id);
+          if (updateErr) throw updateErr;
+        }
+
+        inputEl.value = '';
+        selectedStudentId = studentProfile.id;
+        showToast(`Linked Student: ${studentProfile.name}!`);
         await loadParentDashboardData(false);
-        return;
+      } catch (err) {
+        console.error('Link student error:', err);
+        showToast('Could not link student account.', 'error');
       }
-
-      const { data: student, error } = await supabaseClient
-        .from('study_profiles')
-        .select('*')
-        .eq('device_number_id', targetId)
-        .eq('role', 'student')
-        .maybeSingle();
-
-      if (error || !student) {
-        showToast('No Student account found with that ID', 'error');
-        return;
-      }
-
-      const { error: updateErr } = await supabaseClient
-        .from('study_profiles')
-        .update({ linked_parent_id: currentProfile.id })
-        .eq('id', student.id);
-
-      if (updateErr) {
-        showToast('Failed to link student', 'error');
-        return;
-      }
-
-      input.value = '';
-      activeMonitoredStudentId = student.id;
-      showToast(`Linked student: ${student.name}`);
-      await loadParentDashboardData(false);
     }
 
-    async function loadMonitoredStudentDetails() {
-      const student = linkedStudents.find(s => s.id === activeMonitoredStudentId);
+    async function loadMonitoredStudentWorkspace(studentId) {
+      const student = linkedStudents.find(s => s.id === studentId);
       if (!student) return;
 
-      renderAvatarIntoElement(document.getElementById('monitoredStuAvatar'), student.avatar_url, student.name);
+      renderAvatarIntoElement(document.getElementById('monitoredStuAvatar'), student.avatar_url, 'fa-user-graduate');
       document.getElementById('monitoredStuName').textContent = student.name;
       document.getElementById('monitoredStuIdBadge').textContent = `#${student.device_number_id}`;
-      document.getElementById('monitoredStuDevice').textContent = student.device_model || 'Registered Device';
-      document.getElementById('monitoredStuLastVisit').textContent = formatRelativeAndExactTime(student.last_visit_at);
+      document.getElementById('monitoredStuDevice').textContent = student.device_model || 'Hardware Verified';
+      document.getElementById('monitoredStuLastVisit').textContent = formatRelativeTime(student.last_visit_at);
+
+      let subjects = [];
+      let topics = [];
+      let tests = [];
+      let notes = [];
 
       if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        const subjectsMap = new Map(localDb.student_subjects.filter(s => s.student_id === student.id).map(s => [s.id, s]));
-        monitoredTopics = localDb.study_topics.filter(t => t.student_id === student.id);
-        monitoredTests = localDb.scheduled_tests.filter(t => t.student_id === student.id);
-        monitoredNotes = localDb.parent_notes.filter(n => n.student_id === student.id);
+        subjects = getSandboxTable('student_subjects').filter(s => s.student_id === studentId);
+        topics = getSandboxTable('study_topics').filter(t => t.student_id === studentId);
+        tests = getSandboxTable('scheduled_tests').filter(t => t.student_id === studentId);
+        notes = getSandboxTable('parent_notes').filter(n => n.student_id === studentId);
+      } else {
+        const [subjRes, topicsRes, testsRes, notesRes] = await Promise.all([
+          dbClient.from('student_subjects').select('*').eq('student_id', studentId),
+          dbClient.from('study_topics').select('*').eq('student_id', studentId).order('created_at', { ascending: true }),
+          dbClient.from('scheduled_tests').select('*').eq('student_id', studentId).order('scheduled_at', { ascending: false }),
+          dbClient.from('parent_notes').select('*').eq('student_id', studentId).order('created_at', { ascending: false })
+        ]);
 
-        renderParentTopicsView(subjectsMap);
-        renderParentTestsView();
-        renderParentNotesView();
-        return;
+        subjects = subjRes.data || [];
+        topics = topicsRes.data || [];
+        tests = testsRes.data || [];
+        notes = notesRes.data || [];
       }
 
-      const [subRes, topRes, testRes, noteRes] = await Promise.all([
-        supabaseClient.from('student_subjects').select('*').eq('student_id', student.id),
-        supabaseClient.from('study_topics').select('*').eq('student_id', student.id).order('created_at', { ascending: true }),
-        supabaseClient.from('scheduled_tests').select('*').eq('student_id', student.id).order('scheduled_at', { ascending: false }),
-        supabaseClient.from('parent_notes').select('*').eq('student_id', student.id).order('created_at', { ascending: false })
-      ]);
+      const subjectMap = new Map(subjects.map(s => [s.id, s]));
+      const todayStr = getTodayDateString();
+      const tomorrowStr = getTomorrowDateString();
 
-      const subjectsMap = new Map((subRes.data || []).map(s => [s.id, s]));
-      monitoredTopics = topRes.data || [];
-      monitoredTests = testRes.data || [];
-      monitoredNotes = noteRes.data || [];
+      const todayTopics = topics.filter(t => t.target_date === todayStr);
+      const tomorrowTopics = topics.filter(t => t.target_date === tomorrowStr);
 
-      renderParentTopicsView(subjectsMap);
-      renderParentTestsView();
-      renderParentNotesView();
-    }
+      const coveredCount = todayTopics.filter(t => t.is_completed).length;
+      const pct = todayTopics.length > 0 ? Math.round((coveredCount / todayTopics.length) * 100) : 0;
 
-    function renderParentTopicsView(subjectsMap) {
-      const todayStr = getLocalDateString(0);
-      const tmrStr = getLocalDateString(1);
-
-      const todayList = monitoredTopics.filter(t => t.target_date <= todayStr);
-      const tmrList = monitoredTopics.filter(t => t.target_date === tmrStr);
-
-      const covered = todayList.filter(t => t.is_completed).length;
-      const total = todayList.length;
-      const pct = total > 0 ? Math.round((covered / total) * 100) : 0;
-
-      document.getElementById('parTodayProgressLabel').textContent = `${covered} / ${total} Topics Covered (${pct}%)`;
+      document.getElementById('parTodayProgressLabel').textContent = `${coveredCount} / ${todayTopics.length} Topics Covered (${pct}%)`;
       document.getElementById('parTodayProgressBar').style.width = `${pct}%`;
-      document.getElementById('parTodayCountPill').textContent = `${covered}/${total}`;
-      document.getElementById('parTomorrowCountPill').textContent = `${tmrList.length}`;
+      document.getElementById('parTodayCountPill').textContent = String(todayTopics.length);
+      document.getElementById('parTomorrowCountPill').textContent = String(tomorrowTopics.length);
 
-      const todayEl = document.getElementById('parTodayTopicsList');
-      if (!todayList.length) {
-        todayEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">No topics logged for today yet.</p>';
-      } else {
-        todayEl.innerHTML = todayList.map(t => {
-          const subj = subjectsMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#64748b' };
-          return `
-            <div class="p-3 rounded-2xl border flex items-center justify-between gap-2.5 ${
-              t.is_completed ? 'bg-emerald-50/60 border-emerald-200' : 'bg-slate-50 border-slate-200'
-            }">
-              <div class="flex items-center gap-2.5 min-w-0">
-                <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs shrink-0 ${
-                  t.is_completed ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-300 text-slate-400'
-                }">
-                  <i class="fa-solid ${t.is_completed ? 'fa-check' : 'fa-hourglass-start'}"></i>
+      // Render Today's Topics
+      const parTodayList = document.getElementById('parTodayTopicsList');
+      parTodayList.innerHTML = todayTopics.length === 0
+        ? '<p class="text-xs text-slate-400 text-center py-6">No topics logged for today yet.</p>'
+        : todayTopics.map(t => {
+            const subj = subjectMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#10b981' };
+            return `
+              <div class="flex items-center justify-between gap-2.5 p-3 rounded-2xl border ${t.is_completed ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200/80'}">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <i class="fa-solid ${t.is_completed ? 'fa-circle-check text-emerald-600' : 'fa-circle text-slate-300'} text-sm shrink-0"></i>
+                  <div class="min-w-0">
+                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md text-white inline-block" style="background-color: ${escapeHtml(subj.color_hex)};">${escapeHtml(subj.subject_name)}</span>
+                    <p class="text-xs font-bold text-slate-900 mt-1 truncate">${escapeHtml(t.topic_title)}</p>
+                  </div>
+                </div>
+                <span class="text-[10px] font-extrabold px-2 py-1 rounded-lg shrink-0 ${t.is_completed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                  ${t.is_completed ? 'Covered' : 'Pending'}
                 </span>
+              </div>
+            `;
+          }).join('');
+
+      // Render Tomorrow's Topics
+      const parTomorrowList = document.getElementById('parTomorrowTopicsList');
+      parTomorrowList.innerHTML = tomorrowTopics.length === 0
+        ? '<p class="text-xs text-slate-400 text-center py-6">Student hasn\'t queued topics for tomorrow yet.</p>'
+        : tomorrowTopics.map(t => {
+            const subj = subjectMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#6366f1' };
+            return `
+              <div class="flex items-center justify-between gap-2.5 p-3 rounded-2xl bg-indigo-50/40 border border-indigo-100">
                 <div class="min-w-0">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-extrabold text-white inline-block mb-0.5" style="background-color: ${escapeHtml(subj.color_hex)}">
-                    ${escapeHtml(subj.subject_name)}
-                  </span>
-                  <p class="text-xs font-bold text-slate-900 truncate">${escapeHtml(t.topic_title)}</p>
+                  <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md text-white inline-block" style="background-color: ${escapeHtml(subj.color_hex)};">${escapeHtml(subj.subject_name)}</span>
+                  <p class="text-xs font-bold text-slate-900 mt-1 truncate">${escapeHtml(t.topic_title)}</p>
+                </div>
+                <span class="text-[10px] font-bold text-indigo-700 bg-white px-2 py-1 rounded-lg border border-indigo-100 shrink-0">Tomorrow</span>
+              </div>
+            `;
+          }).join('');
+
+      // Render Scheduled Tests & Score Reports
+      const parTestsList = document.getElementById('parTestsList');
+      parTestsList.innerHTML = tests.length === 0
+        ? '<p class="text-xs text-slate-400 text-center py-8">No tests assigned to this student yet.</p>'
+        : tests.map(test => {
+            const isCompleted = test.status === 'completed';
+            const scorePct = isCompleted && test.max_marks > 0 ? Math.round((test.marks_obtained / test.max_marks) * 100) : 0;
+            return `
+              <div class="p-3.5 rounded-2xl border ${isCompleted ? 'bg-emerald-50/40 border-emerald-200' : 'bg-amber-50/40 border-amber-200'}">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-extrabold uppercase">${escapeHtml(test.subject_name)}</span>
+                  ${
+                    isCompleted
+                      ? `<span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-extrabold">Score: ${test.marks_obtained}/${test.max_marks} (${scorePct}%)</span>`
+                      : `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">Awaiting Completion</span>`
+                  }
+                </div>
+                <h4 class="text-xs sm:text-sm font-extrabold text-slate-900 mt-1.5">${escapeHtml(test.topic_name)}</h4>
+                <div class="flex flex-wrap items-center gap-3 mt-1.5 text-[11px] text-slate-600 font-medium">
+                  <span><i class="fa-regular fa-clock mr-1 text-amber-600"></i>${formatDateTimeShort(test.scheduled_at)}</span>
+                  <span><i class="fa-solid fa-list-ol mr-1 text-indigo-600"></i>${test.question_count} Questions</span>
+                  <span><i class="fa-solid fa-stopwatch mr-1 text-emerald-600"></i>${test.duration_minutes} Mins</span>
                 </div>
               </div>
-              <span class="text-[10px] font-extrabold px-2 py-1 rounded-lg shrink-0 ${
-                t.is_completed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-              }">
-                ${t.is_completed ? 'Covered' : 'Pending'}
-              </span>
-            </div>
-          `;
-        }).join('');
-      }
+            `;
+          }).join('');
 
-      const tmrEl = document.getElementById('parTomorrowTopicsList');
-      if (!tmrList.length) {
-        tmrEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">Student has not queued topics for tomorrow yet.</p>';
-      } else {
-        tmrEl.innerHTML = tmrList.map(t => {
-          const subj = subjectsMap.get(t.subject_id) || { subject_name: 'General', color_hex: '#64748b' };
-          return `
-            <div class="p-3 rounded-2xl bg-indigo-50/40 border border-indigo-100 flex items-center gap-2.5">
-              <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs shrink-0">
-                <i class="fa-regular fa-calendar"></i>
-              </span>
-              <div class="min-w-0">
-                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold text-white inline-block mb-0.5" style="background-color: ${escapeHtml(subj.color_hex)}">
-                  ${escapeHtml(subj.subject_name)}
-                </span>
-                <p class="text-xs font-bold text-slate-900 truncate">${escapeHtml(t.topic_title)}</p>
+      // Render Parent Notes with Read Receipts
+      const parNotesList = document.getElementById('parNotesList');
+      parNotesList.innerHTML = notes.length === 0
+        ? '<p class="text-xs text-slate-400 text-center py-6">No messages sent yet.</p>'
+        : notes.map(note => `
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+              <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(note.message_text)}</p>
+              <div class="flex items-center justify-between text-[10px] font-bold">
+                <span class="text-slate-400">${formatRelativeTime(note.created_at)}</span>
+                ${
+                  note.is_seen
+                    ? `<span class="text-emerald-700 flex items-center gap-1"><i class="fa-solid fa-check-double"></i>Seen ${note.seen_at ? formatRelativeTime(note.seen_at) : ''}</span>`
+                    : `<span class="text-slate-400 flex items-center gap-1"><i class="fa-solid fa-check"></i>Delivered (Unseen)</span>`
+                }
               </div>
             </div>
-          `;
-        }).join('');
-      }
+          `).join('');
     }
 
     function openScheduleTestModal() {
-      if (!activeMonitoredStudentId) return;
-      const defaultTime = new Date(Date.now() + 2 * 3600 * 1000);
-      const localIso = new Date(defaultTime.getTime() - defaultTime.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      if (!selectedStudentId) return;
+      const nowPlus1h = new Date(Date.now() + 3600000);
+      const localIso = new Date(nowPlus1h.getTime() - nowPlus1h.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
       document.getElementById('testDateTimeInput').value = localIso;
       document.getElementById('testSubjectInput').value = '';
       document.getElementById('testTopicInput').value = '';
@@ -2513,283 +2343,138 @@
 
     async function handleCreateScheduledTest(event) {
       event.preventDefault();
-      if (!currentProfile || !activeMonitoredStudentId) return;
+      if (!selectedStudentId) return;
 
       const subject = document.getElementById('testSubjectInput').value.trim();
       const topic = document.getElementById('testTopicInput').value.trim();
-      const dateTimeVal = document.getElementById('testDateTimeInput').value;
-      const qCount = parseInt(document.getElementById('testQuestionsInput').value, 10);
-      const duration = parseInt(document.getElementById('testDurationInput').value, 10);
+      const dtVal = document.getElementById('testDateTimeInput').value;
+      const qCount = parseInt(document.getElementById('testQuestionsInput').value, 10) || 20;
+      const durMins = parseInt(document.getElementById('testDurationInput').value, 10) || 30;
 
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        const created = {
-          id: generateLocalUuid(),
-          parent_id: currentProfile.id,
-          student_id: activeMonitoredStudentId,
-          subject_name: subject,
-          topic_name: topic,
-          scheduled_at: new Date(dateTimeVal).toISOString(),
-          question_count: qCount,
-          duration_minutes: duration,
-          status: 'scheduled',
-          marks_obtained: null,
-          max_marks: null,
-          created_at: new Date().toISOString()
-        };
-        localDb.scheduled_tests.unshift(created);
-        saveLocalDb(localDb);
-        monitoredTests.unshift(created);
+      const payload = {
+        parent_id: currentProfile.id,
+        student_id: selectedStudentId,
+        subject_name: subject,
+        topic_name: topic,
+        scheduled_at: new Date(dtVal).toISOString(),
+        question_count: qCount,
+        duration_minutes: durMins,
+        status: 'scheduled'
+      };
+
+      try {
+        if (isLocalSandboxMode) {
+          const table = getSandboxTable('scheduled_tests');
+          table.push({ id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() });
+          saveSandboxTable('scheduled_tests', table);
+        } else {
+          const { error } = await dbClient.from('scheduled_tests').insert([payload]);
+          if (error) throw error;
+        }
         closeModal('modalScheduleTest');
-        renderParentTestsView();
-        showToast('Test scheduled!');
-        return;
-      }
-
-      const { data, error } = await supabaseClient
-        .from('scheduled_tests')
-        .insert([{
-          parent_id: currentProfile.id,
-          student_id: activeMonitoredStudentId,
-          subject_name: subject,
-          topic_name: topic,
-          scheduled_at: new Date(dateTimeVal).toISOString(),
-          question_count: qCount,
-          duration_minutes: duration,
-          status: 'scheduled'
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        showToast('Could not schedule test', 'error');
-        return;
-      }
-
-      monitoredTests.unshift(data);
-      closeModal('modalScheduleTest');
-      renderParentTestsView();
-      showToast('Test scheduled & sent to student!');
-    }
-
-    function renderParentTestsView() {
-      const container = document.getElementById('parTestsList');
-      if (!monitoredTests.length) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-8">No tests assigned to this student yet.</p>';
-        return;
-      }
-
-      container.innerHTML = monitoredTests.map(test => {
-        const isDone = test.status === 'completed';
-        const pct = isDone && test.max_marks > 0
-          ? Math.round((Number(test.marks_obtained) / Number(test.max_marks)) * 100)
-          : null;
-
-        return `
-          <div class="p-3.5 rounded-2xl border ${isDone ? 'bg-emerald-50/40 border-emerald-200' : 'bg-white border-slate-200'}">
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-bold">${escapeHtml(test.subject_name)}</span>
-                <span class="text-xs font-extrabold text-slate-900">${escapeHtml(test.topic_name)}</span>
-              </div>
-              <button type="button" onclick="handleDeleteScheduledTest('${test.id}')" class="text-slate-400 hover:text-rose-600 text-xs p-1" title="Delete Test">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </div>
-
-            <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
-              <span>${formatScheduledDateTime(test.scheduled_at)} • ${test.question_count} Qs • ${test.duration_minutes}m</span>
-              ${isDone ? `
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono-code font-bold text-[11px]">
-                  Score: ${test.marks_obtained}/${test.max_marks} (${pct}%)
-                </span>
-              ` : `
-                <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px]">
-                  Awaiting Report
-                </span>
-              `}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    async function handleDeleteScheduledTest(testId) {
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        localDb.scheduled_tests = localDb.scheduled_tests.filter(t => t.id !== testId);
-        saveLocalDb(localDb);
-        monitoredTests = monitoredTests.filter(t => t.id !== testId);
-        renderParentTestsView();
-        showToast('Test removed');
-        return;
-      }
-
-      const { error } = await supabaseClient
-        .from('scheduled_tests')
-        .delete()
-        .eq('id', testId);
-
-      if (!error) {
-        monitoredTests = monitoredTests.filter(t => t.id !== testId);
-        renderParentTestsView();
-        showToast('Test removed');
+        showToast('Test scheduled & pinned to student dashboard!');
+        await loadMonitoredStudentWorkspace(selectedStudentId);
+      } catch (err) {
+        showToast('Could not schedule test.', 'error');
       }
     }
 
     async function handleSendParentNote(event) {
       event.preventDefault();
+      if (!selectedStudentId) return;
       const input = document.getElementById('parentNoteInput');
       const text = input.value.trim();
-      if (!text || !currentProfile || !activeMonitoredStudentId) return;
+      if (!text) return;
 
-      if (isLocalSandboxMode) {
-        const localDb = getLocalDb();
-        const created = {
-          id: generateLocalUuid(),
-          parent_id: currentProfile.id,
-          student_id: activeMonitoredStudentId,
-          message_text: text,
-          is_seen: false,
-          seen_at: null,
-          created_at: new Date().toISOString()
-        };
-        localDb.parent_notes.unshift(created);
-        saveLocalDb(localDb);
-        monitoredNotes.unshift(created);
+      const payload = {
+        parent_id: currentProfile.id,
+        student_id: selectedStudentId,
+        message_text: text,
+        is_seen: false
+      };
+
+      try {
+        if (isLocalSandboxMode) {
+          const table = getSandboxTable('parent_notes');
+          table.push({ id: generateCryptographicToken(), ...payload, created_at: new Date().toISOString() });
+          saveSandboxTable('parent_notes', table);
+        } else {
+          const { error } = await dbClient.from('parent_notes').insert([payload]);
+          if (error) throw error;
+        }
         input.value = '';
-        renderParentNotesView();
-        showToast('Note sent to student');
-        return;
+        showToast('Note sent with read-receipt tracking.');
+        await loadMonitoredStudentWorkspace(selectedStudentId);
+      } catch (err) {
+        showToast('Could not send message.', 'error');
       }
-
-      const { data, error } = await supabaseClient
-        .from('parent_notes')
-        .insert([{
-          parent_id: currentProfile.id,
-          student_id: activeMonitoredStudentId,
-          message_text: text,
-          is_seen: false
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        showToast('Failed to send note', 'error');
-        return;
-      }
-
-      monitoredNotes.unshift(data);
-      input.value = '';
-      renderParentNotesView();
-      showToast('Note sent to student');
-    }
-
-    function renderParentNotesView() {
-      const listEl = document.getElementById('parNotesList');
-      if (!monitoredNotes.length) {
-        listEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">No messages sent yet.</p>';
-        return;
-      }
-
-      listEl.innerHTML = monitoredNotes.map(note => `
-        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-          <p class="text-xs font-semibold text-slate-800 leading-relaxed">${escapeHtml(note.message_text)}</p>
-          <div class="flex items-center justify-between text-[10px]">
-            <span class="text-slate-400">${formatRelativeAndExactTime(note.created_at).split('•')[1] || ''}</span>
-            ${note.is_seen ? `
-              <span class="font-bold text-indigo-600 flex items-center gap-1">
-                <i class="fa-solid fa-check-double"></i>
-                <span>Seen ${note.seen_at ? new Date(note.seen_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
-              </span>
-            ` : `
-              <span class="font-semibold text-slate-400 flex items-center gap-1">
-                <i class="fa-solid fa-check"></i>
-                <span>Delivered (Unseen)</span>
-              </span>
-            `}
-          </div>
-        </div>
-      `).join('');
     }
 
     function handleResetStudentDeviceLock() {
-      const student = linkedStudents.find(s => s.id === activeMonitoredStudentId);
+      const student = linkedStudents.find(s => s.id === selectedStudentId);
       if (!student) return;
 
-      askConfirmation(
-        `Reset Device Lock for ${student.name}?`,
-        'This generates a fresh hardware token lock so the student can log in and re-bind from a new phone.',
+      openConfirmModal(
+        'Reset Student Hardware Lock?',
+        `This allows ${student.name} (#${student.device_number_id}) to bind a new phone or laptop on their next visit.`,
         async () => {
-          const resetToken = 'reset_' + generateCryptographicToken();
-          if (isLocalSandboxMode) {
-            const localDb = getLocalDb();
-            const target = localDb.study_profiles.find(p => p.id === student.id);
-            if (target) {
-              target.device_token = resetToken;
-              target.device_model = 'Awaiting New Device Binding';
-              saveLocalDb(localDb);
+          try {
+            const newToken = generateCryptographicToken();
+            if (isLocalSandboxMode) {
+              const profiles = getSandboxTable('study_profiles');
+              const idx = profiles.findIndex(p => p.id === student.id);
+              if (idx !== -1) {
+                profiles[idx].device_token = newToken;
+                saveSandboxTable('study_profiles', profiles);
+              }
+            } else {
+              const { error } = await dbClient
+                .from('study_profiles')
+                .update({ device_token: newToken })
+                .eq('id', student.id);
+              if (error) throw error;
             }
-            showToast(`Device lock cleared for ${student.name}`);
-            await loadParentDashboardData(false);
-            return;
+            showToast(`Hardware lock reset for ${student.name}.`);
+          } catch (err) {
+            showToast('Failed to reset device lock.', 'error');
           }
-
-          const { error } = await supabaseClient
-            .from('study_profiles')
-            .update({
-              device_token: resetToken,
-              device_model: 'Awaiting New Device Binding'
-            })
-            .eq('id', student.id);
-
-          if (error) {
-            showToast('Failed to reset device lock', 'error');
-            return;
-          }
-          showToast(`Device lock cleared for ${student.name}`);
-          await loadParentDashboardData(false);
         }
       );
     }
 
     // -----------------------------------------------------------------------
-    // 11. SUPABASE REALTIME CHANNEL SUBSCRIPTION
+    // 11. MODAL & BOOT INITIALIZATION
     // -----------------------------------------------------------------------
-    function setupRealtimeChannel() {
-      if (realtimeSubscription) {
-        try { supabaseClient.removeChannel(realtimeSubscription); } catch (e) {}
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('hidden');
+        el.classList.add('flex');
       }
-
-      realtimeSubscription = supabaseClient
-        .channel('studybridge-live-sync')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
-          if (currentProfile && currentProfile.role === 'parent') loadMonitoredStudentDetails();
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'scheduled_tests' }, () => {
-          if (!currentProfile) return;
-          if (currentProfile.role === 'parent') loadMonitoredStudentDetails();
-          else loadStudentDashboardData(false);
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_notes' }, () => {
-          if (!currentProfile) return;
-          if (currentProfile.role === 'parent') loadMonitoredStudentDetails();
-          else loadStudentDashboardData(false);
-        })
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'study_profiles' }, () => {
-          if (currentProfile && currentProfile.role === 'parent') loadParentDashboardData(false);
-        })
-        .subscribe();
     }
 
-    // -----------------------------------------------------------------------
-    // 12. INITIALIZE ON DOM READY
-    // -----------------------------------------------------------------------
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', bootApplication);
-    } else {
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      }
+    }
+
+    function openConfirmModal(title, desc, onConfirm) {
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalDesc').textContent = desc;
+      const btn = document.getElementById('confirmModalProceedBtn');
+      btn.onclick = async () => {
+        closeModal('modalConfirmAction');
+        await onConfirm();
+      };
+      openModal('modalConfirmAction');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
       bootApplication();
-    }
+    });
   </script>
 </body>
 </html>
