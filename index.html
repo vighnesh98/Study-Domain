@@ -1182,18 +1182,49 @@
       return String(num);
     }
 
-    function getLinkedParentIdsArray(profile) {
-      if (!profile || !profile.linked_parent_id) return [];
-      return String(profile.linked_parent_id)
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean)
-        .slice(0, 2);
+    function extractCleanAvatarUrl(rawAvatarVal) {
+      if (!rawAvatarVal) return '';
+      return String(rawAvatarVal).split('||P2:')[0];
     }
 
-    function formatLinkedParentIdsString(idsArray) {
-      const unique = [...new Set((idsArray || []).map(s => String(s).trim()).filter(Boolean))].slice(0, 2);
-      return unique.length > 0 ? unique.join(',') : null;
+    function extractSecondaryParentIdFromAvatar(rawAvatarVal) {
+      if (!rawAvatarVal) return null;
+      const parts = String(rawAvatarVal).split('||P2:');
+      return parts.length > 1 && parts[1].trim() ? parts[1].trim() : null;
+    }
+
+    function buildAvatarWithSecondaryParent(rawAvatarVal, secondParentId) {
+      const cleanAvatar = extractCleanAvatarUrl(rawAvatarVal) || 'fa-user-graduate';
+      return secondParentId ? `${cleanAvatar}||P2:${secondParentId}` : cleanAvatar;
+    }
+
+    function getLinkedParentIdsArray(profile) {
+      if (!profile) return [];
+      const list = [];
+      if (profile.linked_parent_id) {
+        String(profile.linked_parent_id)
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean)
+          .forEach(id => {
+            if (!list.includes(id)) list.push(id);
+          });
+      }
+      const secondId = extractSecondaryParentIdFromAvatar(profile.avatar_url);
+      if (secondId && !list.includes(secondId)) {
+        list.push(secondId);
+      }
+      return list.slice(0, 2);
+    }
+
+    function buildStudentParentLinkUpdatePayload(studentProfile, parentIdsArray) {
+      const unique = [...new Set((parentIdsArray || []).map(s => String(s).trim()).filter(Boolean))].slice(0, 2);
+      const primaryParentUuid = unique.length > 0 ? unique[0] : null;
+      const secondaryParentUuid = unique.length > 1 ? unique[1] : null;
+      return {
+        linked_parent_id: primaryParentUuid,
+        avatar_url: buildAvatarWithSecondaryParent(studentProfile ? studentProfile.avatar_url : '', secondaryParentUuid)
+      };
     }
 
     function isStudentLinkedToParent(studentProfile, parentId) {
@@ -1307,7 +1338,7 @@
 
     function renderAvatarIntoElement(el, avatarVal, fallbackIcon = 'fa-user-graduate') {
       if (!el) return;
-      const val = avatarVal || fallbackIcon;
+      const val = extractCleanAvatarUrl(avatarVal) || fallbackIcon;
       if (val.startsWith('data:image')) {
         el.innerHTML = `<img src="${val}" alt="Avatar" class="w-full h-full object-cover" />`;
       } else {
@@ -1686,20 +1717,20 @@
           return;
         }
 
-        const nextLinkedStr = formatLinkedParentIdsString([...existingIds, pendingFoundParent.id]);
+        const updatePayload = buildStudentParentLinkUpdatePayload(currentProfile, [...existingIds, pendingFoundParent.id]);
 
         if (isLocalSandboxMode) {
           const profiles = getSandboxTable('study_profiles');
           const idx = profiles.findIndex(p => p.id === currentProfile.id);
           if (idx !== -1) {
-            profiles[idx].linked_parent_id = nextLinkedStr;
+            profiles[idx] = { ...profiles[idx], ...updatePayload };
             saveSandboxTable('study_profiles', profiles);
             currentProfile = profiles[idx];
           }
         } else {
           const { data, error } = await dbClient
             .from('study_profiles')
-            .update({ linked_parent_id: nextLinkedStr })
+            .update(updatePayload)
             .eq('id', currentProfile.id)
             .select()
             .single();
@@ -2310,9 +2341,7 @@
             .from('study_profiles')
             .select('*')
             .eq('role', 'student')
-            .ilike('linked_parent_id', `%${currentProfile.id}%`)
-            .order('created_at', { ascending: true })
-            .limit(1);
+            .order('created_at', { ascending: true });
 
           if (error) throw error;
           linkedList = (data || []).filter(s => isStudentLinkedToParent(s, currentProfile.id));
@@ -2385,19 +2414,19 @@
           return;
         }
 
-        const updatedLinkedStr = formatLinkedParentIdsString([...existingParentIds, currentProfile.id]);
+        const updatePayload = buildStudentParentLinkUpdatePayload(studentProfile, [...existingParentIds, currentProfile.id]);
 
         if (isLocalSandboxMode) {
           const profiles = getSandboxTable('study_profiles');
           const idx = profiles.findIndex(p => p.id === studentProfile.id);
           if (idx !== -1) {
-            profiles[idx].linked_parent_id = updatedLinkedStr;
+            profiles[idx] = { ...profiles[idx], ...updatePayload };
             saveSandboxTable('study_profiles', profiles);
           }
         } else {
           const { error: updateErr } = await dbClient
             .from('study_profiles')
-            .update({ linked_parent_id: updatedLinkedStr })
+            .update(updatePayload)
             .eq('id', studentProfile.id);
           if (updateErr) throw updateErr;
         }
@@ -3072,13 +3101,13 @@
           return;
         }
 
-        const updatedLinkedStr = formatLinkedParentIdsString([...existingIds, secondParent.id]);
+        const updatePayload = buildStudentParentLinkUpdatePayload(targetStudent, [...existingIds, secondParent.id]);
 
         if (isLocalSandboxMode) {
           const profiles = getSandboxTable('study_profiles');
           const idx = profiles.findIndex(p => p.id === targetStudent.id);
           if (idx !== -1) {
-            profiles[idx].linked_parent_id = updatedLinkedStr;
+            profiles[idx] = { ...profiles[idx], ...updatePayload };
             saveSandboxTable('study_profiles', profiles);
             if (isStudent) currentProfile = profiles[idx];
             else singleLinkedStudent = profiles[idx];
@@ -3086,7 +3115,7 @@
         } else {
           const { data, error } = await dbClient
             .from('study_profiles')
-            .update({ linked_parent_id: updatedLinkedStr })
+            .update(updatePayload)
             .eq('id', targetStudent.id)
             .select()
             .single();
@@ -3123,20 +3152,20 @@
       openConfirmModal(title, desc, async () => {
         try {
           const remainingIds = getLinkedParentIdsArray(targetStudent).filter(id => id !== parentIdToRemove);
-          const nextLinkedStr = formatLinkedParentIdsString(remainingIds);
+          const updatePayload = buildStudentParentLinkUpdatePayload(targetStudent, remainingIds);
 
           if (isLocalSandboxMode) {
             const profiles = getSandboxTable('study_profiles');
             const idx = profiles.findIndex(p => p.id === targetStudent.id);
             if (idx !== -1) {
-              profiles[idx].linked_parent_id = nextLinkedStr;
+              profiles[idx] = { ...profiles[idx], ...updatePayload };
               saveSandboxTable('study_profiles', profiles);
               if (isStudent) currentProfile = profiles[idx];
             }
           } else {
             const { data, error } = await dbClient
               .from('study_profiles')
-              .update({ linked_parent_id: nextLinkedStr })
+              .update(updatePayload)
               .eq('id', targetStudent.id)
               .select()
               .single();
