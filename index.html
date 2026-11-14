@@ -151,9 +151,9 @@
 <body class="ambient-mesh min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
 
   <!-- ===================================================================== -->
-  <!-- STICKY TOP GLOBAL BAR (BRAND LOGO + ROLE BADGE + QUICK SYNC)          -->
+  <!-- STICKY TOP GLOBAL BAR (BRAND LOGO + USERNAME + QUICK SYNC)            -->
   <!-- ===================================================================== -->
-  <nav class="sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-slate-200/80">
+  <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-slate-200/80">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
       <!-- Left: App Logo & Study Domain Title -->
       <div class="flex items-center gap-3 min-w-0">
@@ -167,21 +167,32 @@
               Student
             </span>
           </div>
-          <p class="text-[11px] font-medium text-slate-500 truncate">Student–Parent Accountability Bridge</p>
+          <p id="topActiveUsernameSub" class="text-[11px] font-semibold text-slate-500 truncate">Student–Parent Accountability Bridge</p>
         </div>
       </div>
 
-      <!-- Right: Quick Sync Button (PWA Install Button Removed, PWA Support Kept) -->
-      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <!-- Right: Pairing ID Pill + Quick Sync Button -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          id="topPairingCodeBtn"
+          onclick="copyCurrentUserCode()"
+          class="hidden px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-800 text-[11px] font-mono-code font-extrabold transition items-center gap-1.5 border border-slate-200/80"
+          title="Tap to copy your 6-digit Pairing ID"
+        >
+          <i class="fa-solid fa-hashtag text-emerald-600 text-[10px]"></i>
+          <span id="topPairingCodeText">000000</span>
+        </button>
+
         <button
           type="button"
           id="topQuickSyncBtn"
           onclick="triggerManualGlobalSync()"
-          class="hidden px-2.5 sm:px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-extrabold transition flex items-center gap-1.5 border border-slate-200/90 shadow-2xs"
+          class="hidden px-3 sm:px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-extrabold transition flex items-center gap-1.5 border border-slate-200/90 shadow-2xs"
           title="Sync Now"
         >
           <i id="globalSyncSpinner" class="fa-solid fa-arrows-rotate text-emerald-600"></i>
-          <span class="hidden sm:inline">Sync Now</span>
+          <span class="hidden sm:inline">Sync</span>
         </button>
       </div>
     </div>
@@ -193,153 +204,157 @@
   <div id="toastContainer" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-xs w-full pointer-events-none"></div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 1: INITIALIZING / HARDWARE SIGNATURE SCANNER                     -->
+  <!-- VIEW 1: INITIALIZING / RESTORING PERSISTENT SESSION                   -->
   <!-- ===================================================================== -->
   <div id="viewLoading" class="flex-grow flex items-center justify-center p-4">
     <div class="card-surface rounded-3xl p-8 max-w-sm w-full text-center space-y-4 animate-in">
       <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white mx-auto flex items-center justify-center text-2xl shadow-lg shadow-emerald-600/25">
-        <i class="fa-solid fa-microchip animate-pulse"></i>
+        <i class="fa-solid fa-cloud-bolt animate-pulse"></i>
       </div>
       <div>
-        <h2 class="text-lg font-extrabold text-slate-900">Verifying Device Signature</h2>
-        <p class="text-xs text-slate-500 mt-1">Matching your unique hardware key with Study Domain cloud...</p>
+        <h2 class="text-lg font-extrabold text-slate-900">Loading Study Domain</h2>
+        <p class="text-xs text-slate-500 mt-1">Restoring your persistent account session & cloud workspace...</p>
       </div>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 2: HARDWARE LOCK BLOCK SCREEN                                    -->
+  <!-- VIEW 2: LEGACY PLACEHOLDER (DEVICE BOND REMOVED)                      -->
   <!-- ===================================================================== -->
-  <div id="viewDeviceLocked" class="hidden flex-grow flex items-center justify-center p-4">
-    <div class="card-surface rounded-3xl p-7 sm:p-8 max-w-md w-full text-center space-y-5 border-2 border-rose-200 animate-in">
-      <div class="w-16 h-16 rounded-3xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center text-2xl border border-rose-200">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
-      <div>
-        <span class="px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-[10px] font-extrabold uppercase tracking-wider">
-          Strict Hardware Lock Active
-        </span>
-        <h2 class="text-xl font-extrabold text-slate-900 mt-3">Unauthorized Device Detected</h2>
-        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
-          This student account (<strong id="lockedAccountName" class="text-slate-900">—</strong>) is hardware-bound to a different device. Ask your linked Parent to tap <strong>Reset Student Device Hardware Lock</strong> inside their Settings tab.
-        </p>
-      </div>
-      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-1.5 text-xs">
-        <div class="flex justify-between">
-          <span class="text-slate-500 font-semibold">Registered Hardware:</span>
-          <span id="lockedExpectedModel" class="font-mono-code font-bold text-slate-900">—</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500 font-semibold">Current Hardware:</span>
-          <span id="lockedCurrentModel" class="font-mono-code font-bold text-rose-600">—</span>
-        </div>
-      </div>
-      <button type="button" onclick="bootApplication()" class="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold transition">
-        Re-Check Device Lock
-      </button>
-    </div>
-  </div>
+  <div id="viewDeviceLocked" class="hidden"></div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 3: FIRST-TIME ACCOUNT ONBOARDING                                 -->
+  <!-- VIEW 3: USERNAME LOGIN & CREATE ACCOUNT (A-Z, a-z, Space, Max 28)     -->
   <!-- ===================================================================== -->
   <div id="viewOnboarding" class="hidden flex-grow flex items-center justify-center p-4 py-8">
-    <div class="card-surface rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-6 animate-in">
+    <div class="card-surface rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-6 animate-in border border-slate-200/90">
+      <!-- Top Brand Header -->
       <div class="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider">
-            One-Account-Per-Device Lock
+          <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-200/60">
+            <i class="fa-solid fa-user-check mr-1"></i>Cloud Username Access
           </span>
-          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1.5">Welcome to Study Domain</h2>
-          <p class="text-xs text-slate-500">Your device is assigned one permanent 6-digit ID & hardware key</p>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">Welcome to Study Domain</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Sign in with your Username from any device or create a new account</p>
         </div>
       </div>
 
-      <!-- Detected Hardware Badge -->
-      <div class="p-4 rounded-2xl bg-slate-900 text-white flex items-center justify-between gap-3">
-        <div class="min-w-0">
-          <span class="text-[10px] uppercase tracking-wider font-bold text-emerald-400 block">Permanent Hardware Signature</span>
-          <p id="onboardDetectedModel" class="font-mono-code text-xs font-bold text-slate-200 truncate mt-0.5">Detecting...</p>
-        </div>
-        <div class="text-right shrink-0">
-          <span class="text-[10px] uppercase tracking-wider font-bold text-slate-400 block">Device 6-Digit ID</span>
-          <span id="onboardGeneratedDeviceId" class="font-mono-code text-base font-extrabold text-amber-300">------</span>
-        </div>
+      <!-- Mode Switcher: Log In vs Create New Account -->
+      <div class="grid grid-cols-2 p-1.5 rounded-2xl bg-slate-100 border border-slate-200/70 text-xs font-extrabold">
+        <button
+          type="button"
+          id="authModeLoginBtn"
+          onclick="switchAuthMode('login')"
+          class="py-2.5 rounded-xl bg-white text-slate-900 shadow-xs transition flex items-center justify-center gap-1.5"
+        >
+          <i class="fa-solid fa-right-to-bracket text-emerald-600"></i>
+          <span>Log In</span>
+        </button>
+        <button
+          type="button"
+          id="authModeSignupBtn"
+          onclick="switchAuthMode('signup')"
+          class="py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5"
+        >
+          <i class="fa-solid fa-user-plus text-indigo-600"></i>
+          <span>Create Account</span>
+        </button>
       </div>
 
       <form onsubmit="handleCompleteOnboarding(event)" class="space-y-5">
-        <!-- Role Selector -->
+        <!-- Username Input (Strictly Letters & Spaces, Max 28 chars) -->
         <div>
-          <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">1. Select Your Role</label>
-          <div class="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              id="roleBtnStudent"
-              onclick="selectOnboardingRole('student')"
-              class="p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-50/70 text-left transition flex flex-col justify-between gap-2"
-            >
-              <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="onboardNameInput" class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+              Username <span class="text-slate-400 font-semibold normal-case">(Letters & spaces only)</span>
+            </label>
+            <span id="usernameCharCounter" class="font-mono-code text-[11px] font-bold text-slate-400">0 / 28</span>
+          </div>
+          <div class="relative">
+            <span class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-xs absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none">
+              <i class="fa-solid fa-at"></i>
+            </span>
+            <input
+              type="text"
+              id="onboardNameInput"
+              required
+              maxlength="28"
+              autocomplete="off"
+              oninput="handleSanitizeUsernameInput(this)"
+              placeholder="e.g. Aarav Sharma"
+              class="w-full pl-13 pr-4 py-3.5 rounded-2xl border border-slate-200 bg-white text-sm font-extrabold text-slate-900 focus:outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/10 transition"
+              style="padding-left: 3.1rem;"
+            />
+          </div>
+          <p id="usernameValidationHint" class="text-[11px] font-semibold text-slate-500 mt-1.5 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info text-emerald-600"></i>
+            <span>Only capital & small letters (A–Z, a–z) and spaces allowed (max 28 chars).</span>
+          </p>
+        </div>
+
+        <!-- Signup-Only Fields (Role & Avatar Selection) -->
+        <div id="signupOnlyFieldsWrap" class="hidden space-y-5 pt-1 border-t border-slate-100">
+          <!-- Role Selector -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">Select Your Role</label>
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                id="roleBtnStudent"
+                onclick="selectOnboardingRole('student')"
+                class="p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-50/70 text-left transition flex flex-col justify-between gap-2"
+              >
+                <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm">
+                  <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-extrabold text-slate-900">I am a Student</p>
+                  <p class="text-[11px] text-slate-500">Plan daily topics & log NEET test scores</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                id="roleBtnParent"
+                onclick="selectOnboardingRole('parent')"
+                class="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between gap-2"
+              >
+                <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm">
+                  <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-extrabold text-slate-900">I am a Parent</p>
+                  <p class="text-[11px] text-slate-500">Monitor progress & schedule tests</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Avatar Preset / Upload -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Choose Profile Avatar</label>
+              <label class="text-[11px] font-extrabold text-emerald-700 hover:underline cursor-pointer">
+                <i class="fa-solid fa-camera mr-1"></i>Upload Photo
+                <input type="file" accept="image/*" class="hidden" onchange="handleAvatarFileUpload(event)" />
+              </label>
+            </div>
+            <div class="flex items-center gap-3">
+              <div id="onboardAvatarPreview" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl shadow-md shrink-0 overflow-hidden">
                 <i class="fa-solid fa-user-graduate"></i>
               </div>
-              <div>
-                <p class="text-sm font-extrabold text-slate-900">I am a Student</p>
-                <p class="text-[11px] text-slate-500">Plan topics & submit NEET test reports</p>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              id="roleBtnParent"
-              onclick="selectOnboardingRole('parent')"
-              class="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between gap-2"
-            >
-              <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm">
-                <i class="fa-solid fa-user-shield"></i>
-              </div>
-              <div>
-                <p class="text-sm font-extrabold text-slate-900">I am a Parent</p>
-                <p class="text-[11px] text-slate-500">Track progress, assign tests & verify</p>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- Full Name Input -->
-        <div>
-          <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">2. Your Full Name</label>
-          <input
-            type="text"
-            id="onboardNameInput"
-            required
-            maxlength="40"
-            placeholder="e.g. Aarav Sharma"
-            class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
-          />
-        </div>
-
-        <!-- Avatar Preset / Upload -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">3. Choose Profile Avatar</label>
-            <label class="text-[11px] font-extrabold text-emerald-700 hover:underline cursor-pointer">
-              <i class="fa-solid fa-camera mr-1"></i>Upload Photo
-              <input type="file" accept="image/*" class="hidden" onchange="handleAvatarFileUpload(event)" />
-            </label>
-          </div>
-          <div class="flex items-center gap-3">
-            <div id="onboardAvatarPreview" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl shadow-md shrink-0 overflow-hidden">
-              <i class="fa-solid fa-user-graduate"></i>
+              <div id="avatarPresetGrid" class="grid grid-cols-6 gap-2 flex-grow"></div>
             </div>
-            <div id="avatarPresetGrid" class="grid grid-cols-6 gap-2 flex-grow"></div>
           </div>
         </div>
 
         <button
           type="submit"
           id="onboardSubmitBtn"
-          class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/25 transition"
+          class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2"
         >
-          Create Hardware-Locked Account
+          <span id="onboardSubmitBtnText">Log In to Workspace</span>
+          <i class="fa-solid fa-arrow-right"></i>
         </button>
       </form>
     </div>
@@ -350,18 +365,28 @@
   <!-- ===================================================================== -->
   <div id="viewStudentLinkGate" class="hidden flex-grow flex items-center justify-center p-4">
     <div class="card-surface rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-5 animate-in">
-      <div class="flex items-center gap-3.5">
-        <div id="gateStudentAvatar" class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl font-extrabold shrink-0 overflow-hidden"></div>
-        <div class="min-w-0">
-          <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold uppercase">Parent Link Required</span>
-          <h2 id="gateStudentName" class="text-lg font-extrabold text-slate-900 truncate mt-0.5">Student</h2>
-          <p class="text-xs text-slate-500">Your Student ID: <strong id="gateStudentDeviceId" class="font-mono-code text-slate-900">#000000</strong></p>
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5 min-w-0">
+          <div id="gateStudentAvatar" class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl font-extrabold shrink-0 overflow-hidden"></div>
+          <div class="min-w-0">
+            <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold uppercase">Parent Link Required</span>
+            <h2 id="gateStudentName" class="text-lg font-extrabold text-slate-900 truncate mt-0.5">Student</h2>
+            <p class="text-xs text-slate-500">Your Student Pairing ID: <strong id="gateStudentDeviceId" class="font-mono-code text-slate-900">#000000</strong></p>
+          </div>
         </div>
+        <button
+          type="button"
+          onclick="handleSignOutAccount()"
+          class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 text-[11px] font-extrabold transition shrink-0"
+          title="Switch Account"
+        >
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
       </div>
 
       <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 space-y-3">
         <label class="block text-xs font-extrabold text-indigo-950">
-          Enter Your Parent's 6-Digit Device ID
+          Enter Your Parent's 6-Digit Pairing ID
         </label>
         <div class="flex gap-2">
           <input
@@ -406,89 +431,68 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 5: STUDENT HOME DASHBOARD (TAB 1 FOR STUDENT)                    -->
+  <!-- VIEW 5: STUDENT HOME DASHBOARD (REARRANGED & UPGRADED)                -->
   <!-- ===================================================================== -->
   <div id="viewStudentDashboard" class="hidden flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 pb-28 space-y-5 animate-in">
-    <!-- Student Hero Banner -->
+    <!-- Upgraded Student Hero Command Banner + 4 Live KPI Mini-Cards -->
     <div class="student-hero-gradient rounded-3xl p-5 sm:p-7 text-white shadow-xl relative overflow-hidden">
-      <div class="absolute -right-10 -bottom-10 w-52 h-52 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
-      <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="space-y-1">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-emerald-200 text-[10px] font-extrabold uppercase tracking-wider">
-            <i class="fa-solid fa-bolt"></i> Daily Study Execution
-          </span>
-          <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight">My Daily Study & Test Workspace</h2>
-          <p class="text-xs text-emerald-100/90">Plan Today & Tomorrow's topics and submit your NEET practice test scores</p>
-        </div>
-        <!-- Today's Live Progress Bar Box -->
-        <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3.5 sm:w-64 shrink-0">
-          <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="font-bold text-emerald-100">Today's Coverage</span>
-            <span id="stuProgressText" class="font-mono-code font-extrabold text-white">0 / 0 Covered (0%)</span>
+      <div class="absolute -right-12 -top-12 w-60 h-60 rounded-full bg-emerald-400/15 blur-3xl pointer-events-none"></div>
+      <div class="relative z-10 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-emerald-200 text-[10px] font-extrabold uppercase tracking-wider">
+                <i class="fa-solid fa-bolt"></i> Student Command Center
+              </span>
+              <span id="stuHeroLinkedParentsBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/20 text-emerald-100 text-[10px] font-bold">
+                <i class="fa-solid fa-user-shield text-emerald-300"></i> Supervised
+              </span>
+            </div>
+            <h2 id="stuHeroWelcomeTitle" class="text-xl sm:text-2xl font-extrabold tracking-tight pt-1">My Daily Study & NEET Workspace</h2>
+            <p class="text-xs text-emerald-100/90">Execute today's topics, queue tomorrow's targets & log your NEET test scores (/180)</p>
           </div>
-          <div class="w-full h-2.5 rounded-full bg-black/25 overflow-hidden">
-            <div id="stuProgressBar" class="h-full bg-gradient-to-r from-emerald-300 to-amber-300 transition-all duration-500" style="width: 0%;"></div>
+
+          <!-- Today's Live Progress Box -->
+          <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 sm:w-72 shrink-0">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="font-extrabold text-emerald-100 uppercase tracking-wider text-[10px]">Today's Topic Coverage</span>
+              <span id="stuProgressText" class="font-mono-code font-extrabold text-white">0 / 0 Covered (0%)</span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-black/30 overflow-hidden">
+              <div id="stuProgressBar" class="h-full bg-gradient-to-r from-emerald-300 via-teal-200 to-amber-300 transition-all duration-500" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student 4-Pillar Quick KPI Strip -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-1">
+          <div class="bg-white/10 backdrop-blur-xs border border-white/15 rounded-2xl p-3">
+            <span class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-200 block">Today's Queue</span>
+            <p id="stuKpiTodayCount" class="font-mono-code text-base sm:text-lg font-extrabold text-white mt-0.5">0 Topics</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xs border border-white/15 rounded-2xl p-3">
+            <span class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-200 block">Queued Tomorrow</span>
+            <p id="stuKpiTomorrowCount" class="font-mono-code text-base sm:text-lg font-extrabold text-white mt-0.5">0 Topics</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xs border border-white/15 rounded-2xl p-3">
+            <span class="text-[9px] font-extrabold uppercase tracking-wider text-amber-200 block">Pending Tests</span>
+            <p id="stuKpiPendingTests" class="font-mono-code text-base sm:text-lg font-extrabold text-amber-300 mt-0.5">0 Active</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xs border border-white/15 rounded-2xl p-3">
+            <span class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-200 block">Avg NEET Score</span>
+            <p id="stuKpiAvgNeet" class="font-mono-code text-base sm:text-lg font-extrabold text-white mt-0.5">— / 180</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Scheduled Tests Section (Shows Current Unattempted & Last Attempted Only) -->
-    <section class="card-surface rounded-3xl p-5 sm:p-6">
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center text-sm shadow-2xs">
-            <i class="fa-solid fa-file-signature"></i>
-          </div>
-          <div>
-            <h2 class="text-sm sm:text-base font-extrabold text-slate-900">Active & Latest Test Report</h2>
-            <p class="text-[11px] text-slate-500">Showing current unattempted test & last attempted test</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onclick="openMoreSubScreen('pastTests')"
-          class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold transition flex items-center gap-1.5"
-        >
-          <span>All Test Records</span>
-          <i class="fa-solid fa-arrow-right text-[10px]"></i>
-        </button>
-      </div>
-      <div id="stuTestsList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
-    </section>
-
-    <!-- Main Study Workspace: Subjects (Left) + Daily Topics Planner (Right) -->
+    <!-- REARRANGED PRIORITY WORKSPACE: Study Topic Planner (8 Cols) + Subjects Manager (4 Cols) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      <!-- Subjects Manager (4 cols) -->
-      <section class="lg:col-span-4 card-surface rounded-3xl p-5 sm:p-6 space-y-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-              <i class="fa-solid fa-book-bookmark"></i>
-            </div>
-            <h2 class="text-sm font-extrabold text-slate-900">My Subjects</h2>
-          </div>
-          <span id="stuSubjectCount" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-extrabold">0 Total</span>
-        </div>
-
-        <form onsubmit="handleAddSubject(event)" class="space-y-3 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/70">
-          <div class="flex gap-2">
-            <input type="text" id="newSubjectNameInput" required maxlength="35" placeholder="e.g. Physics, Chemistry, Botany, Zoology" class="flex-grow px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-600" />
-            <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition shrink-0 shadow-sm shadow-emerald-600/20">
-              + Add
-            </button>
-          </div>
-          <div id="subjectColorPicker" class="flex items-center gap-2 pt-0.5"></div>
-        </form>
-
-        <div id="stuSubjectsList" class="space-y-2.5 max-h-80 overflow-y-auto soft-scroll pr-1"></div>
-      </section>
-
-      <!-- Daily Topics Planner (8 cols - Today & Tomorrow Only) -->
+      <!-- Daily Topics Planner (8 cols - First on Mobile & Left on Desktop) -->
       <section class="lg:col-span-8 card-surface rounded-3xl p-5 sm:p-6 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-200/60 flex items-center justify-center text-sm shadow-2xs">
               <i class="fa-solid fa-list-check"></i>
             </div>
             <div>
@@ -498,7 +502,7 @@
           </div>
 
           <!-- Planner Tabs (Today & Tomorrow Only) -->
-          <div class="inline-flex p-1 rounded-2xl bg-slate-100 text-xs font-extrabold self-start">
+          <div class="inline-flex p-1 rounded-2xl bg-slate-100 text-xs font-extrabold self-start border border-slate-200/60">
             <button type="button" id="stuTabTodayBtn" onclick="switchStudentPlanTab('today')" class="px-4 py-1.5 rounded-xl bg-white text-emerald-700 shadow-xs transition">
               Today
             </button>
@@ -518,14 +522,14 @@
             id="topicTitleInput"
             required
             maxlength="90"
-            placeholder="What topic will you cover? (e.g., Rotational Dynamics DPP #4)"
+            placeholder="What topic will you cover? (e.g., Rotational Motion DPP #4)"
             class="sm:col-span-5 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-emerald-600"
           />
           <select id="topicDaySelect" class="sm:col-span-2 px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-600">
             <option value="today">For Today</option>
             <option value="tomorrow">For Tomorrow</option>
           </select>
-          <button type="submit" class="sm:col-span-2 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold transition">
+          <button type="submit" class="sm:col-span-2 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold transition shadow-sm">
             + Queue
           </button>
         </form>
@@ -533,7 +537,59 @@
         <!-- Topics Checklist Container -->
         <div id="stuTopicsContainer" class="space-y-2.5 max-h-96 overflow-y-auto soft-scroll pr-1"></div>
       </section>
+
+      <!-- Subjects Manager (4 cols - Right on Desktop) -->
+      <section class="lg:col-span-4 card-surface rounded-3xl p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-book-bookmark"></i>
+            </div>
+            <div>
+              <h2 class="text-sm font-extrabold text-slate-900">My Subjects</h2>
+              <p class="text-[10px] text-slate-500">Used for topics & parent tests</p>
+            </div>
+          </div>
+          <span id="stuSubjectCount" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-extrabold">0 Total</span>
+        </div>
+
+        <form onsubmit="handleAddSubject(event)" class="space-y-3 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/70">
+          <div class="flex gap-2">
+            <input type="text" id="newSubjectNameInput" required maxlength="35" placeholder="e.g. Physics, Botany..." class="flex-grow px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-600" />
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition shrink-0 shadow-sm shadow-emerald-600/20">
+              + Add
+            </button>
+          </div>
+          <div id="subjectColorPicker" class="flex items-center gap-2 pt-0.5"></div>
+        </form>
+
+        <div id="stuSubjectsList" class="space-y-2 max-h-80 overflow-y-auto soft-scroll pr-1"></div>
+      </section>
     </div>
+
+    <!-- Scheduled Tests Section (Current Unattempted & Last Attempted Only) -->
+    <section class="card-surface rounded-3xl p-5 sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center text-sm shadow-2xs">
+            <i class="fa-solid fa-file-signature"></i>
+          </div>
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900">Active & Latest NEET Test Report</h2>
+            <p class="text-[11px] text-slate-500">Showing current unattempted test & last attempted test (scaled out of 180)</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="openMoreSubScreen('pastTests')"
+          class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition flex items-center gap-1.5"
+        >
+          <span>View All Test Records</span>
+          <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </button>
+      </div>
+      <div id="stuTestsList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+    </section>
   </div>
 
   <!-- ===================================================================== -->
@@ -713,41 +769,66 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 7: DEDICATED TWO-WAY CHAT TAB (STUDENT <-> PARENT MESSENGER)     -->
+  <!-- VIEW 7: UPGRADED TWO-WAY CHAT TAB (STUDENT <-> PARENT MESSENGER)      -->
   <!-- ===================================================================== -->
-  <div id="viewChatTab" class="hidden flex-grow flex flex-col max-w-4xl w-full mx-auto px-4 sm:px-6 py-5 pb-28 animate-in">
-    <div class="card-surface rounded-3xl flex-grow flex flex-col overflow-hidden border border-slate-200/90" style="min-height: 70vh; max-height: 78vh;">
-      <!-- Chat Header -->
+  <div id="viewChatTab" class="hidden flex-grow flex flex-col max-w-4xl w-full mx-auto px-4 sm:px-6 py-4 pb-28 animate-in">
+    <div class="card-surface rounded-3xl flex-grow flex flex-col overflow-hidden border border-slate-200/90 shadow-xl" style="min-height: 66vh; max-height: 76vh;">
+      <!-- Upgraded Chat Header -->
       <div class="p-4 sm:p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-emerald-950 text-white flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-2xl bg-white/15 text-emerald-300 flex items-center justify-center text-sm shrink-0">
+          <div class="w-11 h-11 rounded-2xl bg-white/15 border border-white/20 text-emerald-300 flex items-center justify-center text-base shrink-0 shadow-inner">
             <i class="fa-solid fa-comments"></i>
           </div>
           <div class="min-w-0">
-            <h2 id="chatPartnerNameHeader" class="text-sm sm:text-base font-extrabold truncate">Family Study Chat</h2>
-            <p id="chatPartnerSubHeader" class="text-[11px] text-slate-300 truncate">Instant two-way notes with read receipts</p>
+            <div class="flex items-center gap-2">
+              <h2 id="chatPartnerNameHeader" class="text-sm sm:text-base font-extrabold truncate">Family Study Chat</h2>
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            </div>
+            <p id="chatPartnerSubHeader" class="text-[11px] text-slate-300 truncate">Instant two-way study notes with live read receipts</p>
           </div>
         </div>
-        <span class="px-2.5 py-1 rounded-full bg-white/10 text-[10px] font-bold text-emerald-300 shrink-0">
-          <i class="fa-solid fa-check-double mr-1"></i>Read Receipts On
-        </span>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[10px] font-extrabold text-emerald-300">
+            <i class="fa-solid fa-check-double mr-1.5"></i>Read Receipts Active
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Study Reply Chips Bar -->
+      <div class="px-4 py-2 bg-slate-100/90 border-b border-slate-200/70 flex items-center gap-2 overflow-x-auto soft-scroll">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0">Quick Note:</span>
+        <button type="button" onclick="fillQuickChatChip('Completed today\'s topic! ✅')" class="px-2.5 py-1 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 text-[11px] font-bold shrink-0 transition">
+          Completed today's topic! ✅
+        </button>
+        <button type="button" onclick="fillQuickChatChip('Starting my practice test now 📝')" class="px-2.5 py-1 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 text-[11px] font-bold shrink-0 transition">
+          Starting practice test 📝
+        </button>
+        <button type="button" onclick="fillQuickChatChip('Please check my latest NEET test report 📊')" class="px-2.5 py-1 rounded-full bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-[11px] font-bold shrink-0 transition">
+          Check test report 📊
+        </button>
+        <button type="button" onclick="fillQuickChatChip('Don\'t forget to revise before dinner! 📚')" class="px-2.5 py-1 rounded-full bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800 border border-slate-200 text-[11px] font-bold shrink-0 transition">
+          Revise before dinner 📚
+        </button>
       </div>
 
       <!-- Messages Feed -->
-      <div id="chatMessagesFeed" class="flex-grow p-4 sm:p-5 overflow-y-auto soft-scroll space-y-3 bg-slate-50/60"></div>
+      <div id="chatMessagesFeed" class="flex-grow p-4 sm:p-5 overflow-y-auto soft-scroll space-y-3.5 bg-slate-50/70"></div>
 
       <!-- Message Input Bar -->
-      <form onsubmit="handleSendChatMessage(event)" class="p-3.5 sm:p-4 bg-white border-t border-slate-200/80 flex items-center gap-2.5">
-        <input
-          type="text"
-          id="chatMessageInput"
-          required
-          maxlength="280"
-          placeholder="Write a study note or update..."
-          class="flex-grow px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:border-emerald-600"
-        />
+      <form onsubmit="handleSendChatMessage(event)" class="p-3 sm:p-4 bg-white border-t border-slate-200/80 flex items-center gap-2.5">
+        <div class="relative flex-grow">
+          <input
+            type="text"
+            id="chatMessageInput"
+            required
+            maxlength="280"
+            placeholder="Write a message to your family..."
+            class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:border-emerald-600 transition"
+          />
+        </div>
         <button
           type="submit"
+          id="chatSendBtn"
           class="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-extrabold shadow-md shadow-emerald-600/20 transition shrink-0 flex items-center gap-1.5"
         >
           <span>Send</span>
@@ -758,35 +839,70 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 8: DEDICATED SETTINGS SCREEN (TAB 3 - FULL SCREEN)               -->
+  <!-- VIEW 8: UPGRADED SETTINGS SCREEN (TAB 3 - FULL SCREEN)                -->
   <!-- ===================================================================== -->
-  <div id="viewSettingsScreen" class="hidden flex-grow flex flex-col max-w-3xl w-full mx-auto px-4 sm:px-6 py-5 pb-28 space-y-5 animate-in">
-    <div class="card-surface rounded-3xl p-6 sm:p-7 space-y-6">
-      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-base shadow-md">
-            <i class="fa-solid fa-sliders"></i>
-          </div>
-          <div>
-            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Account & Link Settings</h2>
-            <p class="text-xs text-slate-500">Manage linked parents (up to 2), student details & hardware lock</p>
+  <div id="viewSettingsScreen" class="hidden flex-grow flex flex-col max-w-4xl w-full mx-auto px-4 sm:px-6 py-5 pb-28 space-y-5 animate-in">
+    <!-- Top Profile Identity Hero Card -->
+    <div class="rounded-3xl p-6 sm:p-7 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none"></div>
+      <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4 min-w-0">
+          <div id="settingsSelfAvatar" class="w-16 h-16 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl font-extrabold shrink-0 overflow-hidden border-2 border-white/20 shadow-lg"></div>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="settingsSelfRoleBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-extrabold uppercase tracking-wider">
+                Account
+              </span>
+              <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 text-[10px] font-bold">
+                <i class="fa-solid fa-cloud-check text-emerald-400 mr-1"></i>Cloud Synced
+              </span>
+            </div>
+            <h2 id="settingsSelfUsername" class="text-xl sm:text-2xl font-extrabold tracking-tight truncate mt-1">—</h2>
+            <p class="text-xs text-slate-300">Username Login Enabled • No Device Restriction</p>
           </div>
         </div>
-      </div>
 
-      <!-- Parent Details Card (Supports up to 2 Parents) -->
-      <div class="p-4 sm:p-5 rounded-3xl bg-indigo-50/60 border border-indigo-200/80 space-y-3.5">
+        <!-- Own 6-Digit Pairing Code Box -->
+        <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3.5 flex items-center justify-between sm:justify-end gap-3 shrink-0">
+          <div>
+            <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-300 block">My 6-Digit Pairing ID</span>
+            <span id="settingsSelfPairingId" class="font-mono-code text-lg font-extrabold text-amber-300">#000000</span>
+          </div>
+          <button
+            type="button"
+            onclick="copyCurrentUserCode()"
+            class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-extrabold transition flex items-center gap-1.5"
+          >
+            <i class="fa-regular fa-copy"></i>
+            <span>Copy</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-Column Family Bonding Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- Linked Parents Card (Supports up to 2 Parents) -->
+      <div class="card-surface p-5 sm:p-6 rounded-3xl space-y-4 border border-indigo-100">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-700">Linked Parents (Max 2)</span>
-          <span id="settingsParentStatusBadge" class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">0 / 2 Linked</span>
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-900">Linked Parents</h3>
+              <p class="text-[11px] text-slate-500">Up to 2 parent accounts can supervise</p>
+            </div>
+          </div>
+          <span id="settingsParentStatusBadge" class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60 text-[10px] font-extrabold">0 / 2 Linked</span>
         </div>
 
         <div id="settingsParentsListContainer" class="space-y-2.5"></div>
 
         <!-- Add Second Parent Box (Shown when only 1 parent is linked) -->
-        <div id="settingsAddSecondParentBox" class="hidden pt-3 border-t border-indigo-200/70 space-y-2">
+        <div id="settingsAddSecondParentBox" class="hidden pt-3 border-t border-slate-200/70 space-y-2">
           <label class="block text-xs font-extrabold text-indigo-900">
-            <i class="fa-solid fa-user-plus mr-1"></i>Add Second Parent (6-Digit ID)
+            <i class="fa-solid fa-user-plus mr-1 text-indigo-600"></i>Link Second Parent (6-Digit ID)
           </label>
           <div class="flex items-center gap-2">
             <input
@@ -800,53 +916,69 @@
             <button
               type="button"
               onclick="handleAddSecondParentFromSettings()"
-              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition shrink-0"
+              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition shrink-0 shadow-sm"
             >
-              Add Parent
+              + Link
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Student Details Card -->
-      <div class="p-4 sm:p-5 rounded-3xl bg-emerald-50/60 border border-emerald-200/80 space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700">Student Account Details</span>
-          <span id="settingsStudentStatusBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Active</span>
-        </div>
-        <div id="settingsStudentCardBody" class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3 min-w-0">
-            <div id="settingsStudentAvatar" class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-base font-extrabold overflow-hidden shrink-0"></div>
-            <div class="min-w-0">
-              <p id="settingsStudentName" class="text-sm font-extrabold text-slate-900 truncate">—</p>
-              <p id="settingsStudentHardware" class="font-mono-code text-[11px] text-slate-500 truncate mt-0.5">HW-0000</p>
-              <p id="settingsStudentLastVisit" class="text-[11px] font-semibold text-emerald-700 mt-0.5">Last visit: —</p>
+      <!-- Linked Student Details Card -->
+      <div class="card-surface p-5 sm:p-6 rounded-3xl space-y-4 border border-emerald-100 flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">
+                <i class="fa-solid fa-user-graduate"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-extrabold text-slate-900">Student Account</h3>
+                <p class="text-[11px] text-slate-500">Real-time presence & study profile</p>
+              </div>
             </div>
+            <span id="settingsStudentStatusBadge" class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[10px] font-extrabold">Active</span>
           </div>
-          <div class="text-right shrink-0">
-            <span class="text-[9px] font-bold uppercase text-slate-400 block">Student ID</span>
-            <div class="flex items-center gap-1.5 mt-0.5">
-              <span id="settingsStudentDeviceId" class="font-mono-code text-xs font-extrabold text-emerald-950">000000</span>
-              <button type="button" id="settingsCopyStudentIdBtn" class="px-2.5 py-1 rounded-lg bg-white border border-emerald-200 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100">
-                Copy
-              </button>
-            </div>
-          </div>
-        </div>
-        <p id="settingsNoStudentMsg" class="hidden text-xs text-slate-500 py-1">No student is currently linked to your Parent account.</p>
-      </div>
 
-      <!-- Parent-Only Hardware Lock Reset -->
-      <div class="pt-1">
-        <button
-          type="button"
-          id="settingsResetLockBtn"
-          onclick="handleResetStudentDeviceLock()"
-          class="hidden w-full py-3 px-4 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-extrabold transition flex items-center justify-center gap-2"
-        >
-          <i class="fa-solid fa-unlock-keyhole"></i>
-          <span>Reset Student Device Hardware Lock</span>
-        </button>
+          <div id="settingsStudentCardBody" class="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/70 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div id="settingsStudentAvatar" class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-base font-extrabold overflow-hidden shrink-0"></div>
+              <div class="min-w-0">
+                <p id="settingsStudentName" class="text-sm font-extrabold text-slate-900 truncate">—</p>
+                <p id="settingsStudentHardware" class="text-[11px] font-semibold text-slate-500 truncate mt-0.5">Username Account</p>
+                <p id="settingsStudentLastVisit" class="text-[11px] font-bold text-emerald-700 mt-0.5">Last visit: —</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-[9px] font-bold uppercase text-slate-400 block">Student ID</span>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span id="settingsStudentDeviceId" class="font-mono-code text-xs font-extrabold text-emerald-950">#000000</span>
+                <button type="button" id="settingsCopyStudentIdBtn" class="px-2.5 py-1 rounded-lg bg-white border border-emerald-200 text-[10px] font-extrabold text-emerald-700 hover:bg-emerald-100">
+                  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p id="settingsNoStudentMsg" class="hidden text-xs text-slate-500 py-4 text-center bg-slate-50 rounded-2xl border border-slate-200/60">
+            No student is currently linked to your Parent account.
+          </p>
+        </div>
+
+        <!-- Account Session Controls -->
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+          <div class="text-[11px] text-slate-500 font-medium">
+            Need to switch user on this browser?
+          </div>
+          <button
+            type="button"
+            onclick="handleSignOutAccount()"
+            class="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-extrabold transition flex items-center gap-1.5 shrink-0"
+          >
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Switch Account / Log Out</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -952,292 +1084,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- VIEW 10: SUB-SCREEN 1 - FULL ANALYTICS DASHBOARD SCREEN               -->
-  <!-- ===================================================================== -->
-  <div id="viewAnalyticsScreen" class="hidden flex-grow flex flex-col max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 pb-28 space-y-5 animate-in">
-    <div class="card-surface rounded-3xl p-5 sm:p-7 space-y-5">
-      <!-- Header & Back Button -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <button
-            type="button"
-            onclick="switchBottomNavTab('more')"
-            class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs transition"
-            title="Back to More"
-          >
-            <i class="fa-solid fa-arrow-left"></i>
-          </button>
-          <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-sm shadow-sm">
-            <i class="fa-solid fa-chart-pie"></i>
-          </div>
-          <div>
-            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Study Analytics Dashboard</h2>
-            <p class="text-[11px] text-slate-500">Daily, Weekly & Monthly performance across topics and NEET tests</p>
-          </div>
-        </div>
-
-        <!-- Period Tabs -->
-        <div class="inline-flex p-1 rounded-xl bg-slate-100 text-xs font-extrabold">
-          <button type="button" id="dashPeriodDailyBtn" onclick="switchDashboardPeriod('daily')" class="px-3.5 py-1.5 rounded-lg bg-white text-emerald-700 shadow-2xs transition">
-            Daily
-          </button>
-          <button type="button" id="dashPeriodWeeklyBtn" onclick="switchDashboardPeriod('weekly')" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
-            Weekly
-          </button>
-          <button type="button" id="dashPeriodMonthlyBtn" onclick="switchDashboardPeriod('monthly')" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
-            Monthly
-          </button>
-        </div>
-      </div>
-
-      <!-- 4 KPI Cards for Selected Period -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block">Topics Covered</span>
-          <p id="dashStatCovered" class="font-mono-code text-xl font-extrabold text-emerald-950 mt-1">0 / 0</p>
-          <span id="dashStatPeriodLabel" class="text-[10px] font-semibold text-emerald-700 block mt-0.5">Today</span>
-        </div>
-
-        <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 block">Completion Rate</span>
-          <p id="dashStatRate" class="font-mono-code text-xl font-extrabold text-indigo-950 mt-1">0%</p>
-          <span class="text-[10px] font-semibold text-indigo-700 block mt-0.5">Target efficiency</span>
-        </div>
-
-        <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 block">Tests Taken</span>
-          <p id="dashStatTestsCount" class="font-mono-code text-xl font-extrabold text-amber-950 mt-1">0</p>
-          <span class="text-[10px] font-semibold text-amber-700 block mt-0.5">Completed reports</span>
-        </div>
-
-        <div class="p-4 rounded-2xl bg-slate-100/90 border border-slate-200">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600 block">Avg NEET Projection</span>
-          <p id="dashStatTestAvg" class="font-mono-code text-xl font-extrabold text-slate-900 mt-1">—</p>
-          <span class="text-[10px] font-semibold text-slate-500 block mt-0.5">Out of 180 Marks</span>
-        </div>
-      </div>
-
-      <!-- Subject-Wise Breakdown Bars -->
-      <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-        <div class="flex items-center justify-between">
-          <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Subject-Wise Topic Coverage</h4>
-          <span id="dashSubjectTotalBadge" class="text-[11px] font-bold text-slate-500">0 Subjects</span>
-        </div>
-        <div id="dashSubjectBarsList" class="space-y-3">
-          <p class="text-xs text-slate-400 text-center py-4">No topics recorded in this period.</p>
-        </div>
-      </div>
-
-      <!-- Period Activity Timeline / Trend -->
-      <div class="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 space-y-2.5">
-        <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Daily Activity Breakdown</h4>
-        <div id="dashDailyTrendList" class="space-y-2">
-          <p class="text-xs text-slate-400 text-center py-3">No daily entries for this timeframe.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- VIEW 11: SUB-SCREEN 2 - PAST RECORDS DATE-WISE SCREEN                 -->
-  <!-- ===================================================================== -->
-  <div id="viewPastTopicsScreen" class="hidden flex-grow flex flex-col max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 pb-28 space-y-5 animate-in">
-    <div class="card-surface rounded-3xl p-5 sm:p-7 space-y-5">
-      <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <button
-            type="button"
-            onclick="switchBottomNavTab('more')"
-            class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs transition"
-            title="Back to More"
-          >
-            <i class="fa-solid fa-arrow-left"></i>
-          </button>
-          <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-sm shadow-sm">
-            <i class="fa-solid fa-calendar-check"></i>
-          </div>
-          <div>
-            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Past Study Records (Date-Wise)</h2>
-            <p class="text-[11px] text-slate-500">Complete historical log of daily study topics covered vs. missed</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <select id="screenHistoryDateFilter" onchange="renderPastTopicsScreenData()" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500">
-            <option value="all">All Recorded Days</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="screenPastHistoryContainer" class="space-y-3.5">
-        <p class="text-xs text-slate-400 text-center py-8">No study history recorded yet.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- VIEW 12: SUB-SCREEN 3 - PAST TESTS RECORD SCREEN                      -->
-  <!-- ===================================================================== -->
-  <div id="viewPastTestsScreen" class="hidden flex-grow flex flex-col max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 pb-28 space-y-5 animate-in">
-    <div class="card-surface rounded-3xl p-5 sm:p-7 space-y-5">
-      <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <button
-            type="button"
-            onclick="switchBottomNavTab('more')"
-            class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs transition"
-            title="Back to More"
-          >
-            <i class="fa-solid fa-arrow-left"></i>
-          </button>
-          <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-sm shadow-sm">
-            <i class="fa-solid fa-file-waveform"></i>
-          </div>
-          <div>
-            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">All Scheduled & Past Tests Record</h2>
-            <p class="text-[11px] text-slate-500">Includes current unattempted, last attempted & all historical test reports with NEET projections (/180)</p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          id="pastTestsScreenAssignBtn"
-          onclick="openScheduleTestModal()"
-          class="hidden px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold transition shadow-sm"
-        >
-          + Assign New Test
-        </button>
-      </div>
-
-      <div id="screenAllTestsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <p class="text-xs text-slate-400 text-center py-8 col-span-full">No tests recorded yet.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- FLOATING 4-TAB BOTTOM NAVIGATION DOCK                                 -->
-  <!-- (1: Home | 2: Chat + Red Dot | 3: Settings | 4: More)                 -->
-  <!-- ===================================================================== -->
-  <div id="bottomAppNav" class="hidden fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-md bottom-dock-glass rounded-3xl p-1.5" style="padding-bottom: calc(0.375rem + env(safe-area-inset-bottom, 0px));">
-    <div class="grid grid-cols-4 gap-1">
-      <!-- Tab 1: Home -->
-      <button
-        type="button"
-        id="bnavHomeBtn"
-        onclick="switchBottomNavTab('home')"
-        class="nav-tab-btn active py-2.5 px-2 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-600 hover:text-slate-900"
-      >
-        <i class="fa-solid fa-house text-sm"></i>
-        <span class="text-[10px] font-extrabold tracking-tight">Home</span>
-      </button>
-
-      <!-- Tab 2: Chat (With Unread Red Dot Badge) -->
-      <button
-        type="button"
-        id="bnavChatBtn"
-        onclick="switchBottomNavTab('chat')"
-        class="nav-tab-btn py-2.5 px-2 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-600 hover:text-slate-900"
-      >
-        <div class="relative inline-flex">
-          <i class="fa-solid fa-comment-dots text-sm"></i>
-          <!-- Unread Red Dot -->
-          <span id="chatUnreadRedDot" class="hidden absolute -top-1 -right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
-        </div>
-        <span class="text-[10px] font-extrabold tracking-tight">Chat</span>
-      </button>
-
-      <!-- Tab 3: Settings (Full Screen) -->
-      <button
-        type="button"
-        id="bnavSettingsBtn"
-        onclick="switchBottomNavTab('settings')"
-        class="nav-tab-btn py-2.5 px-2 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-600 hover:text-slate-900"
-      >
-        <i class="fa-solid fa-sliders text-sm"></i>
-        <span class="text-[10px] font-extrabold tracking-tight">Settings</span>
-      </button>
-
-      <!-- Tab 4: More (Full Screen Hub -> Dashboard, Past Records, Past Tests) -->
-      <button
-        type="button"
-        id="bnavMoreBtn"
-        onclick="switchBottomNavTab('more')"
-        class="nav-tab-btn py-2.5 px-2 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-600 hover:text-slate-900"
-      >
-        <i class="fa-solid fa-layer-group text-sm"></i>
-        <span class="text-[10px] font-extrabold tracking-tight">More</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- MODAL 1: PARENT SCHEDULE / EDIT TEST MODAL (STUDENT SUBJECTS ONLY)    -->
-  <!-- ===================================================================== -->
-  <div id="modalScheduleTest" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-    <div class="card-surface rounded-3xl max-w-md w-full p-6 animate-in">
-      <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm">
-            <i class="fa-solid fa-file-circle-plus"></i>
-          </div>
-          <div>
-            <h3 id="scheduleTestModalTitle" class="text-base font-extrabold text-slate-900">Schedule a Test</h3>
-            <p class="text-[11px] text-slate-500">Select from student's enrolled subjects (NEET +4 / -1 pattern)</p>
-          </div>
-        </div>
-        <button type="button" onclick="closeModal('modalScheduleTest')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <form onsubmit="handleCreateScheduledTest(event)" class="mt-4 space-y-3.5">
-        <input type="hidden" id="editingScheduledTestId" value="" />
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Subject (Added by Student)</label>
-          <select id="testSubjectSelect" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
-            <option value="">Select a student subject...</option>
-          </select>
-          <p id="testNoSubjectsHint" class="hidden text-[11px] font-semibold text-rose-600 mt-1">
-            Student hasn't added any subjects yet. Ask them to add subjects first.
-          </p>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Topic to be Tested</label>
-          <input type="text" id="testTopicInput" required maxlength="80" placeholder="e.g., Electrostatics & Gauss Law" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-amber-500" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Test Date & Time</label>
-          <input type="datetime-local" id="testDateTimeInput" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-amber-500" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">No. of Questions</label>
-            <input type="number" id="testQuestionsInput" required min="1" max="500" value="15" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono-code text-xs font-bold focus:outline-none focus:border-amber-500" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Duration (Minutes)</label>
-            <input type="number" id="testDurationInput" required min="5" max="360" value="45" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono-code text-xs font-bold focus:outline-none focus:border-amber-500" />
-          </div>
-        </div>
-
-        <div class="pt-2 flex gap-2.5">
-          <button type="button" onclick="closeModal('modalScheduleTest')" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
-            Cancel
-          </button>
-          <button type="submit" id="scheduleTestSubmitBtn" class="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-md shadow-amber-500/20 transition">
-            Assign Test
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- MODAL 2: STUDENT SUBMIT TEST REPORT MODAL (NEET +4 / -1 FORMULA)      -->
+  <!-- MODAL 2: STUDENT SUBMIT TEST REPORT MODAL (NEET +4 / -1, LOCKED 180)  -->
   <!-- ===================================================================== -->
   <div id="modalSubmitTestReport" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
     <div class="card-surface rounded-3xl max-w-md w-full p-6 animate-in">
@@ -1255,9 +1102,20 @@
         <input type="hidden" id="submitReportTestId" />
         <input type="hidden" id="submitReportTotalQuestions" />
 
-        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
-          <span class="font-bold text-slate-600">Total Questions in Test:</span>
-          <span id="submitReportQCountBadge" class="font-mono-code font-extrabold text-slate-900">0 Qs</span>
+        <!-- Auto-Derived Test Info Banner (From Parent Scheduled Data Only) -->
+        <div class="p-3.5 rounded-2xl bg-slate-100/90 border border-slate-200/80 grid grid-cols-3 gap-2 text-center">
+          <div>
+            <span class="text-[9px] font-extrabold uppercase text-slate-400 block">Assigned Qs</span>
+            <span id="submitReportQCountBadge" class="font-mono-code text-xs font-extrabold text-slate-900 mt-0.5 block">0 Qs</span>
+          </div>
+          <div class="border-x border-slate-200/80 px-1">
+            <span class="text-[9px] font-extrabold uppercase text-slate-400 block">Test Max (x)</span>
+            <span id="submitReportMaxMarksBadge" class="font-mono-code text-xs font-extrabold text-slate-900 mt-0.5 block">0 Marks</span>
+          </div>
+          <div>
+            <span class="text-[9px] font-extrabold uppercase text-emerald-700 block">NEET Scale</span>
+            <span class="font-mono-code text-xs font-extrabold text-emerald-700 mt-0.5 block">180 Marks</span>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -1273,7 +1131,7 @@
               required
               oninput="recalculateLiveNeetScorePreview()"
               placeholder="e.g. 12"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50/30 font-mono-code text-sm font-extrabold text-slate-900 focus:outline-none focus:border-emerald-600"
+              class="w-full px-3.5 py-3 rounded-xl border border-emerald-200 bg-emerald-50/30 font-mono-code text-sm font-extrabold text-slate-900 focus:outline-none focus:border-emerald-600"
             />
           </div>
           <div>
@@ -1287,32 +1145,23 @@
               id="reportWrongQInput"
               required
               oninput="recalculateLiveNeetScorePreview()"
-              placeholder="e.g. 3"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-rose-200 bg-rose-50/30 font-mono-code text-sm font-extrabold text-slate-900 focus:outline-none focus:border-rose-600"
+              placeholder="e.g. 2"
+              class="w-full px-3.5 py-3 rounded-xl border border-rose-200 bg-rose-50/30 font-mono-code text-sm font-extrabold text-slate-900 focus:outline-none focus:border-rose-600"
             />
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Max Marks of Practice Test (x = Questions × 4)</label>
-          <input
-            type="number"
-            min="4"
-            step="1"
-            id="reportMaxMarksInput"
-            required
-            oninput="recalculateLiveNeetScorePreview()"
-            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 font-mono-code text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500"
-          />
-        </div>
-
-        <!-- Live Calculated y & Projected NEET Score Preview -->
-        <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-950 to-slate-900 text-white space-y-2">
+        <!-- Live Calculated y, Unattempted & Projected NEET Score (Always / 180) -->
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-950 via-slate-900 to-emerald-950 text-white space-y-2.5 shadow-md">
           <div class="flex items-center justify-between text-xs">
-            <span class="text-slate-300 font-semibold">Calculated Score (y = 4C - 1W):</span>
+            <span class="text-slate-300 font-semibold">Unattempted / Skipped (0M):</span>
+            <span id="livePreviewSkippedQ" class="font-mono-code font-bold text-slate-200">0 Qs</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-300 font-semibold">Test Marks Scored (y = 4C - 1W):</span>
             <span id="livePreviewRawScoreY" class="font-mono-code font-extrabold text-emerald-300">0 / 60</span>
           </div>
-          <div class="flex items-center justify-between pt-2 border-t border-white/15">
+          <div class="flex items-center justify-between pt-2.5 border-t border-white/15">
             <div>
               <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-300 block">Projected NEET Subject Score</span>
               <span class="text-[10px] text-slate-300">Formula: (y / x) × 180</span>
@@ -1321,7 +1170,7 @@
           </div>
         </div>
 
-        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 transition">
+        <button type="submit" id="submitTestReportBtn" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 transition">
           Save & Send NEET Report to Parent
         </button>
       </form>
@@ -1354,10 +1203,15 @@
   <!-- ===================================================================== -->
   <script>
     // -----------------------------------------------------------------------
-    // 1. SUPABASE CONFIGURATION & SAFE LOCAL FALLBACK ENGINE
+    // 1. SUPABASE CONFIGURATION & MULTI-LAYER PERSISTENT STORAGE ENGINE
     // -----------------------------------------------------------------------
     const SUPABASE_URL = 'https://phwuikndcwrogeairtte.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_22G9HkO4P3dYGVod07uIkg_wI43-36l';
+
+    // Persistent Session Storage Keys (Never wiped across app updates)
+    const SESSION_PRIMARY_KEY = 'sd_persistent_session_v1';
+    const SESSION_BACKUP_KEY = 'sd_persistent_session_backup_v1';
+    const LEGACY_HW_KEY = 'sd_hw_signature_v2';
 
     let dbClient = null;
     let isLocalSandboxMode = false;
@@ -1366,24 +1220,23 @@
     const safeStorage = {
       getItem(key) {
         try {
-          return window.localStorage.getItem(key);
-        } catch (e) {
-          return memoryStore[key] || null;
-        }
+          const val = window.localStorage.getItem(key);
+          if (val !== null) return val;
+        } catch (e) {}
+        return memoryStore[key] || null;
       },
       setItem(key, val) {
+        const strVal = String(val);
+        memoryStore[key] = strVal;
         try {
-          window.localStorage.setItem(key, val);
-        } catch (e) {
-          memoryStore[key] = String(val);
-        }
+          window.localStorage.setItem(key, strVal);
+        } catch (e) {}
       },
       removeItem(key) {
+        delete memoryStore[key];
         try {
           window.localStorage.removeItem(key);
-        } catch (e) {
-          delete memoryStore[key];
-        }
+        } catch (e) {}
       }
     };
 
@@ -1418,10 +1271,9 @@
     // -----------------------------------------------------------------------
     // 2. APPLICATION STATE VARIABLES
     // -----------------------------------------------------------------------
-    let hardwareSignatureKey = '';
-    let deterministicSixDigitId = '';
     let currentProfile = null;
     let currentBottomTab = 'home';
+    let authMode = 'login'; // 'login' | 'signup'
 
     // Onboarding State
     let selectedOnboardingRole = 'student';
@@ -1443,6 +1295,14 @@
     let monitoredTopics = [];
     let monitoredTests = [];
     let monitoredNotes = [];
+
+    // Anti-Double-Submit Locks & Chat State
+    let isSubmittingAuth = false;
+    let isSubmittingSubject = false;
+    let isSubmittingTopic = false;
+    let isSubmittingTest = false;
+    let isSubmittingChat = false;
+    let lastRenderedChatCount = 0;
 
     // Analytics & Realtime State
     let activeDashboardPeriod = 'daily';
@@ -1466,72 +1326,97 @@
     ];
 
     // -----------------------------------------------------------------------
-    // 3. DETERMINISTIC HARDWARE SIGNATURE & 6-DIGIT DEVICE ID
+    // 3. USERNAME SANITIZATION (ONLY A-Z, a-z, SPACE, MAX 28 CHARS) & SESSION VAULT
     // -----------------------------------------------------------------------
-    async function computeUniqueHardwareSignature() {
-      const cachedHw = safeStorage.getItem('sd_hw_signature_v2');
-      if (cachedHw && cachedHw.startsWith('HW-')) {
-        return cachedHw;
-      }
-
-      const signals = [];
-      try {
-        signals.push(`scr:${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`);
-        signals.push(`dpr:${window.devicePixelRatio || 1}`);
-        signals.push(`cores:${navigator.hardwareConcurrency || 2}`);
-        signals.push(`mem:${navigator.deviceMemory || 4}`);
-        signals.push(`tz:${Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'}`);
-        signals.push(`pf:${navigator.platform || 'web'}`);
-
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (gl) {
-          const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-          if (dbg) {
-            signals.push('gpu:' + gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL));
-          }
-        }
-      } catch (e) {
-        signals.push('fallback-signal');
-      }
-
-      const rawString = signals.join('|');
-      let hexHash = '';
-
-      try {
-        if (window.crypto && window.crypto.subtle) {
-          const msgBuffer = new TextEncoder().encode(rawString);
-          const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
-          const hashArray = Array.from(new Uint8Array(hashBuffer));
-          hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-        }
-      } catch (e) {
-        hexHash = '';
-      }
-
-      if (!hexHash) {
-        let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-        for (let i = 0; i < rawString.length; i++) {
-          const ch = rawString.charCodeAt(i);
-          h1 = Math.imul(h1 ^ ch, 2654435761);
-          h2 = Math.imul(h2 ^ ch, 1597334677);
-        }
-        hexHash = ((h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0')).toUpperCase();
-      }
-
-      const formatted = `HW-${hexHash.slice(0, 4)}-${hexHash.slice(4, 8)}-${hexHash.slice(8, 12)}`;
-      safeStorage.setItem('sd_hw_signature_v2', formatted);
-      return formatted;
+    function sanitizeUsernameStrict(raw) {
+      // Allow ONLY capital letters (A-Z), small letters (a-z), and spaces, max 28 chars
+      return String(raw || '')
+        .replace(/[^a-zA-Z ]/g, '')
+        .replace(/\s+/g, ' ')
+        .slice(0, 28);
     }
 
-    function deriveDeterministicSixDigitId(hwKey) {
+    function normalizeUsernameForLookup(raw) {
+      return sanitizeUsernameStrict(raw).trim();
+    }
+
+    function handleSanitizeUsernameInput(inputEl) {
+      if (!inputEl) return;
+      const cleaned = sanitizeUsernameStrict(inputEl.value);
+      if (inputEl.value !== cleaned) {
+        inputEl.value = cleaned;
+      }
+      const counter = document.getElementById('usernameCharCounter');
+      if (counter) {
+        counter.textContent = `${cleaned.trim().length} / 28`;
+      }
+    }
+
+    function deriveUserTokenFromUsername(cleanUsername) {
+      const slug = cleanUsername.toLowerCase().replace(/\s+/g, '_');
+      return `USR-${slug}`;
+    }
+
+    function deriveSixDigitIdFromString(seedStr) {
       let hash = 2166136261;
-      for (let i = 0; i < hwKey.length; i++) {
-        hash ^= hwKey.charCodeAt(i);
+      for (let i = 0; i < seedStr.length; i++) {
+        hash ^= seedStr.charCodeAt(i);
         hash = Math.imul(hash, 16777619);
       }
       const num = (Math.abs(hash) % 900000) + 100000;
       return String(num);
+    }
+
+    function persistUserSessionVault(profile) {
+      if (!profile || !profile.id) return;
+      const snapshot = JSON.stringify({
+        id: profile.id,
+        name: profile.name,
+        role: profile.role,
+        device_number_id: profile.device_number_id,
+        savedAt: Date.now()
+      });
+      safeStorage.setItem(SESSION_PRIMARY_KEY, snapshot);
+      safeStorage.setItem(SESSION_BACKUP_KEY, snapshot);
+      try {
+        window.name = 'SD_SESSION::' + snapshot;
+      } catch (e) {}
+    }
+
+    function readPersistedUserSessionVault() {
+      const primary = safeStorage.getItem(SESSION_PRIMARY_KEY);
+      const backup = safeStorage.getItem(SESSION_BACKUP_KEY);
+      let raw = primary || backup;
+
+      if (!raw) {
+        try {
+          if (window.name && window.name.startsWith('SD_SESSION::')) {
+            raw = window.name.slice(12);
+          }
+        } catch (e) {}
+      }
+
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && (parsed.id || parsed.name)) {
+          // Ensure both primary and backup stay hydrated
+          safeStorage.setItem(SESSION_PRIMARY_KEY, raw);
+          safeStorage.setItem(SESSION_BACKUP_KEY, raw);
+          return parsed;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function clearPersistedUserSessionVault() {
+      safeStorage.removeItem(SESSION_PRIMARY_KEY);
+      safeStorage.removeItem(SESSION_BACKUP_KEY);
+      try {
+        if (window.name && window.name.startsWith('SD_SESSION::')) {
+          window.name = '';
+        }
+      } catch (e) {}
     }
 
     // -----------------------------------------------------------------------
@@ -1569,7 +1454,7 @@
     }
 
     // -----------------------------------------------------------------------
-    // 5. UI, DATE, NEET SCORE & FULL-SCREEN ROUTING HELPERS
+    // 5. UI, DATE, NEET SCORE (/180 LOCKED) & FULL-SCREEN ROUTING HELPERS
     // -----------------------------------------------------------------------
     function escapeHtml(str) {
       return String(str ?? '')
@@ -1578,6 +1463,13 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    function getLocalDateStringFromIso(isoStr) {
+      if (!isoStr) return '';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return String(isoStr).slice(0, 10);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
     function getTodayDateString() {
@@ -1680,11 +1572,37 @@
       }
     }
 
-    function computeProjectedNeetScore(marksObtainedY, maxMarksX) {
-      const x = parseFloat(maxMarksX);
+    function copyCurrentUserCode() {
+      if (!currentProfile || !currentProfile.device_number_id) return;
+      copyTextToClipboard(currentProfile.device_number_id, 'Pairing ID');
+    }
+
+    // Core NEET Projection Formula: (y / x) * 180 (Subject max is strictly 180)
+    function computeProjectedNeetScore(marksObtainedY, totalQuestionsCount) {
+      const qCount = Math.max(1, parseInt(totalQuestionsCount, 10) || 15);
+      const x = qCount * 4;
       const y = parseFloat(marksObtainedY);
-      if (isNaN(x) || x <= 0 || isNaN(y)) return 0;
-      return Math.round(((y / x) * 180) * 10) / 10;
+      if (isNaN(y) || x <= 0) return 0;
+      const rawProjected = (y / x) * 180;
+      const rounded = Math.round(rawProjected * 10) / 10;
+      return Object.is(rounded, -0) ? 0 : rounded;
+    }
+
+    // Decode exact Correct & Wrong question counts from (y, totalQuestions, encodedMaxMarks)
+    function decodeTestCorrectAndWrongCounts(test) {
+      const totalQ = Math.max(1, parseInt(test.question_count, 10) || 15);
+      const maxX = totalQ * 4;
+      const rawY = Number(test.marks_obtained || 0);
+      // We encode Correct count in the fractional thousandths of max_marks (e.g. 60.012 => 12 correct)
+      const storedMax = Number(test.max_marks || maxX);
+      const frac = Math.round((storedMax - Math.floor(storedMax)) * 1000);
+      if (frac > 0 && frac <= totalQ) {
+        const c = frac;
+        const w = Math.max(0, (4 * c) - Math.round(rawY));
+        const s = Math.max(0, totalQ - c - w);
+        return { correctQ: c, wrongQ: w, skippedQ: s, maxMarksX: maxX };
+      }
+      return { correctQ: null, wrongQ: null, skippedQ: null, maxMarksX: maxX };
     }
 
     function filterHomeHighlightTests(allTestsList) {
@@ -1730,7 +1648,10 @@
 
       const bottomNav = document.getElementById('bottomAppNav');
       const topQuickSyncBtn = document.getElementById('topQuickSyncBtn');
+      const topPairingCodeBtn = document.getElementById('topPairingCodeBtn');
+      const topPairingCodeText = document.getElementById('topPairingCodeText');
       const topRolePill = document.getElementById('topRolePill');
+      const topUsernameSub = document.getElementById('topActiveUsernameSub');
 
       const workspaceViews = [
         'viewStudentDashboard',
@@ -1746,6 +1667,23 @@
 
       if (bottomNav) bottomNav.classList.toggle('hidden', !isMainWorkspace);
       if (topQuickSyncBtn) topQuickSyncBtn.classList.toggle('hidden', !isMainWorkspace);
+
+      if (topPairingCodeBtn && topPairingCodeText) {
+        if (currentProfile && isMainWorkspace) {
+          topPairingCodeBtn.classList.remove('hidden');
+          topPairingCodeBtn.classList.add('inline-flex');
+          topPairingCodeText.textContent = currentProfile.device_number_id || '000000';
+        } else {
+          topPairingCodeBtn.classList.add('hidden');
+          topPairingCodeBtn.classList.remove('inline-flex');
+        }
+      }
+
+      if (topUsernameSub) {
+        topUsernameSub.textContent = currentProfile
+          ? `@${currentProfile.name} • Cloud Connected`
+          : 'Student–Parent Accountability Bridge';
+      }
 
       if (topRolePill) {
         if (currentProfile && isMainWorkspace) {
@@ -1800,7 +1738,7 @@
         updateBottomNavHighlight('chat');
         showView('viewChatTab');
         await markIncomingChatMessagesAsSeen();
-        renderUnifiedChatView();
+        renderUnifiedChatView(true);
         return;
       }
 
@@ -1849,41 +1787,69 @@
     }
 
     // -----------------------------------------------------------------------
-    // 6. BOOT & AUTO-LOGIN BY HARDWARE DEVICE SIGNATURE
+    // 6. PERSISTENT SESSION BOOT & LEGACY ACCOUNT AUTO-MIGRATION
     // -----------------------------------------------------------------------
     async function bootApplication() {
       showView('viewLoading');
-      hardwareSignatureKey = await computeUniqueHardwareSignature();
-      deterministicSixDigitId = deriveDeterministicSixDigitId(hardwareSignatureKey);
-
       renderOnboardingStaticPresets();
+      switchAuthMode('login');
 
       try {
         let matchedProfile = null;
+        const savedSession = readPersistedUserSessionVault();
+        const legacyHwSig = safeStorage.getItem(LEGACY_HW_KEY);
 
         if (!isLocalSandboxMode && dbClient) {
-          const { data, error } = await dbClient
-            .from('study_profiles')
-            .select('*')
-            .or(`device_token.eq.${hardwareSignatureKey},device_number_id.eq.${deterministicSixDigitId}`)
-            .limit(1);
+          // Step 1: Restore by saved persistent session ID or Username
+          if (savedSession && savedSession.id) {
+            const { data, error } = await dbClient
+              .from('study_profiles')
+              .select('*')
+              .eq('id', savedSession.id)
+              .maybeSingle();
 
-          if (error) {
-            if (error.message && error.message.toLowerCase().includes('fetch')) {
+            if (error && error.message && error.message.toLowerCase().includes('fetch')) {
               isLocalSandboxMode = true;
-            } else {
-              throw error;
+            } else if (data) {
+              matchedProfile = data;
             }
-          } else if (data && data.length > 0) {
-            matchedProfile = data[0];
+          }
+
+          if (!matchedProfile && savedSession && savedSession.name && !isLocalSandboxMode) {
+            const { data } = await dbClient
+              .from('study_profiles')
+              .select('*')
+              .ilike('name', savedSession.name)
+              .limit(1);
+            if (data && data.length > 0) matchedProfile = data[0];
+          }
+
+          // Step 2: Seamless migration for existing users upgrading from the previous version
+          if (!matchedProfile && legacyHwSig && !isLocalSandboxMode) {
+            const { data } = await dbClient
+              .from('study_profiles')
+              .select('*')
+              .eq('device_token', legacyHwSig)
+              .limit(1);
+            if (data && data.length > 0) {
+              matchedProfile = data[0];
+            }
           }
         }
 
         if (isLocalSandboxMode) {
           const allProfiles = getSandboxTable('study_profiles');
-          matchedProfile = allProfiles.find(
-            p => p.device_token === hardwareSignatureKey || p.device_number_id === deterministicSixDigitId
-          ) || null;
+          if (savedSession && savedSession.id) {
+            matchedProfile = allProfiles.find(p => p.id === savedSession.id) || null;
+          }
+          if (!matchedProfile && savedSession && savedSession.name) {
+            matchedProfile = allProfiles.find(
+              p => (p.name || '').toLowerCase() === savedSession.name.toLowerCase()
+            ) || null;
+          }
+          if (!matchedProfile && legacyHwSig) {
+            matchedProfile = allProfiles.find(p => p.device_token === legacyHwSig) || null;
+          }
         }
 
         if (!matchedProfile) {
@@ -1891,41 +1857,8 @@
           return;
         }
 
-        // Enforce Strict Hardware Lock for Students
-        if (
-          matchedProfile.role === 'student' &&
-          matchedProfile.device_token &&
-          matchedProfile.device_token !== 'RESET_PENDING' &&
-          matchedProfile.device_token !== hardwareSignatureKey
-        ) {
-          document.getElementById('lockedAccountName').textContent = matchedProfile.name || 'Student';
-          document.getElementById('lockedExpectedModel').textContent = matchedProfile.device_model || matchedProfile.device_token;
-          document.getElementById('lockedCurrentModel').textContent = hardwareSignatureKey;
-          showView('viewDeviceLocked');
-          return;
-        }
-
-        // If Parent reset the student's lock, re-bind to current hardware
-        if (matchedProfile.device_token === 'RESET_PENDING') {
-          matchedProfile.device_token = hardwareSignatureKey;
-          matchedProfile.device_model = hardwareSignatureKey;
-          if (isLocalSandboxMode) {
-            const all = getSandboxTable('study_profiles');
-            const idx = all.findIndex(p => p.id === matchedProfile.id);
-            if (idx !== -1) {
-              all[idx].device_token = hardwareSignatureKey;
-              all[idx].device_model = hardwareSignatureKey;
-              saveSandboxTable('study_profiles', all);
-            }
-          } else {
-            await dbClient
-              .from('study_profiles')
-              .update({ device_token: hardwareSignatureKey, device_model: hardwareSignatureKey })
-              .eq('id', matchedProfile.id);
-          }
-        }
-
         currentProfile = matchedProfile;
+        persistUserSessionVault(currentProfile);
         await routeAuthenticatedProfile();
       } catch (err) {
         console.error('Boot error:', err);
@@ -1939,6 +1872,7 @@
         return;
       }
 
+      persistUserSessionVault(currentProfile);
       setupRealtimeAndPollingSync();
       startPresenceHeartbeat();
 
@@ -1965,14 +1899,27 @@
     }
 
     // -----------------------------------------------------------------------
-    // 7. ONBOARDING & STUDENT-PARENT PAIRING HANDLERS
+    // 7. USERNAME LOGIN & SIGNUP HANDLERS (NO DEVICE BOND)
     // -----------------------------------------------------------------------
-    function renderOnboardingStaticPresets() {
-      const modelEl = document.getElementById('onboardDetectedModel');
-      const idEl = document.getElementById('onboardGeneratedDeviceId');
-      if (modelEl) modelEl.textContent = hardwareSignatureKey;
-      if (idEl) idEl.textContent = `#${deterministicSixDigitId}`;
+    function switchAuthMode(mode) {
+      authMode = mode === 'signup' ? 'signup' : 'login';
+      const loginBtn = document.getElementById('authModeLoginBtn');
+      const signupBtn = document.getElementById('authModeSignupBtn');
+      const signupFields = document.getElementById('signupOnlyFieldsWrap');
+      const submitText = document.getElementById('onboardSubmitBtnText');
 
+      const activeCls = 'py-2.5 rounded-xl bg-white text-slate-900 shadow-xs transition flex items-center justify-center gap-1.5';
+      const inactiveCls = 'py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5';
+
+      if (loginBtn) loginBtn.className = authMode === 'login' ? activeCls : inactiveCls;
+      if (signupBtn) signupBtn.className = authMode === 'signup' ? activeCls : inactiveCls;
+      if (signupFields) signupFields.classList.toggle('hidden', authMode !== 'signup');
+      if (submitText) {
+        submitText.textContent = authMode === 'login' ? 'Log In with Username' : 'Create Username Account';
+      }
+    }
+
+    function renderOnboardingStaticPresets() {
       const grid = document.getElementById('avatarPresetGrid');
       if (grid) {
         grid.innerHTML = AVATAR_PRESETS.map(preset => {
@@ -2035,22 +1982,71 @@
 
     async function handleCompleteOnboarding(event) {
       event.preventDefault();
+      if (isSubmittingAuth) return;
+
       const nameInput = document.getElementById('onboardNameInput');
-      const fullName = (nameInput.value || '').trim();
-      if (!fullName) {
-        showToast('Please enter your name.', 'error');
+      const cleanUsername = normalizeUsernameForLookup(nameInput.value);
+
+      if (!cleanUsername || cleanUsername.length < 2) {
+        showToast('Enter a valid Username (letters & spaces only, 2–28 chars).', 'error');
+        return;
+      }
+      if (!/^[a-zA-Z ]{2,28}$/.test(cleanUsername)) {
+        showToast('Username can only contain capital/small letters and spaces (max 28 chars).', 'error');
         return;
       }
 
+      isSubmittingAuth = true;
       const btn = document.getElementById('onboardSubmitBtn');
       if (btn) btn.disabled = true;
 
       try {
+        let existingUser = null;
+        if (isLocalSandboxMode) {
+          existingUser = getSandboxTable('study_profiles').find(
+            p => (p.name || '').trim().toLowerCase() === cleanUsername.toLowerCase()
+          ) || null;
+        } else {
+          const { data, error } = await dbClient
+            .from('study_profiles')
+            .select('*')
+            .ilike('name', cleanUsername)
+            .limit(1);
+          if (error) throw error;
+          if (data && data.length > 0) existingUser = data[0];
+        }
+
+        // MODE 1: LOG IN TO EXISTING USERNAME
+        if (authMode === 'login') {
+          if (!existingUser) {
+            showToast(`No account found with username "${cleanUsername}". Tap "Create Account" to register it!`, 'info');
+            switchAuthMode('signup');
+            return;
+          }
+          currentProfile = existingUser;
+          persistUserSessionVault(currentProfile);
+          showToast(`Welcome back, ${currentProfile.name}!`);
+          await routeAuthenticatedProfile();
+          return;
+        }
+
+        // MODE 2: CREATE NEW ACCOUNT
+        if (existingUser) {
+          showToast(`Username "${cleanUsername}" is already registered! Logging you in...`, 'info');
+          currentProfile = existingUser;
+          persistUserSessionVault(currentProfile);
+          await routeAuthenticatedProfile();
+          return;
+        }
+
+        let candidateSixDigit = deriveSixDigitIdFromString(cleanUsername.toLowerCase());
+        const userToken = deriveUserTokenFromUsername(cleanUsername) + '_' + candidateSixDigit;
+
         const newRecord = {
-          device_number_id: deterministicSixDigitId,
-          device_token: hardwareSignatureKey,
-          device_model: hardwareSignatureKey,
-          name: fullName,
+          device_number_id: candidateSixDigit,
+          device_token: userToken,
+          device_model: 'Cloud Username Account',
+          name: cleanUsername,
           avatar_url: selectedAvatarValue,
           role: selectedOnboardingRole,
           linked_parent_id: null,
@@ -2059,35 +2055,71 @@
 
         if (isLocalSandboxMode) {
           const all = getSandboxTable('study_profiles');
+          while (all.some(p => p.device_number_id === newRecord.device_number_id)) {
+            newRecord.device_number_id = String(Math.floor(100000 + Math.random() * 900000));
+          }
           const created = { id: 'prof_' + Date.now(), ...newRecord, created_at: new Date().toISOString() };
           all.push(created);
           saveSandboxTable('study_profiles', all);
           currentProfile = created;
         } else {
-          const { data, error } = await dbClient
+          let insertRes = await dbClient
             .from('study_profiles')
-            .upsert(newRecord, { onConflict: 'device_number_id' })
+            .insert(newRecord)
             .select()
             .single();
-          if (error) throw error;
-          currentProfile = data;
+
+          if (insertRes.error) {
+            // Handle rare 6-digit ID collision
+            newRecord.device_number_id = String(Math.floor(100000 + Math.random() * 900000));
+            newRecord.device_token = deriveUserTokenFromUsername(cleanUsername) + '_' + Date.now();
+            insertRes = await dbClient
+              .from('study_profiles')
+              .insert(newRecord)
+              .select()
+              .single();
+            if (insertRes.error) throw insertRes.error;
+          }
+          currentProfile = insertRes.data;
         }
 
-        showToast(`Welcome to Study Domain, ${currentProfile.name}!`);
+        persistUserSessionVault(currentProfile);
+        showToast(`Account "${currentProfile.name}" created!`);
         await routeAuthenticatedProfile();
       } catch (err) {
-        console.error('Onboarding error:', err);
-        showToast('Could not create profile. Check connection.', 'error');
+        console.error('Auth error:', err);
+        showToast('Could not complete sign in. Check connection.', 'error');
       } finally {
+        isSubmittingAuth = false;
         if (btn) btn.disabled = false;
       }
+    }
+
+    function handleSignOutAccount() {
+      openConfirmModal(
+        'Switch Account / Log Out?',
+        'Your study data and parent links stay safely stored in the cloud. You can log back in anytime with your Username.',
+        async () => {
+          if (fallbackPollTimer) clearInterval(fallbackPollTimer);
+          if (heartbeatTimer) clearInterval(heartbeatTimer);
+          clearPersistedUserSessionVault();
+          currentProfile = null;
+          singleLinkedStudent = null;
+          const nameInput = document.getElementById('onboardNameInput');
+          if (nameInput) nameInput.value = '';
+          handleSanitizeUsernameInput(nameInput);
+          switchAuthMode('login');
+          showView('viewOnboarding');
+          showToast('Signed out cleanly.');
+        }
+      );
     }
 
     async function handleLookupParentById() {
       const rawInput = document.getElementById('studentParentCodeInput').value || '';
       const cleanCode = rawInput.replace(/\D/g, '').slice(0, 6);
       if (cleanCode.length !== 6) {
-        showToast('Enter a valid 6-digit Parent Device ID.', 'error');
+        showToast('Enter a valid 6-digit Parent Pairing ID.', 'error');
         return;
       }
 
@@ -2229,7 +2261,7 @@
     }
 
     // -----------------------------------------------------------------------
-    // 8. STUDENT DASHBOARD ENGINE (SUBJECTS, TODAY/TOMORROW TOPICS, TESTS)
+    // 8. STUDENT DASHBOARD ENGINE (SUBJECTS, TODAY/TOMORROW TOPICS, KPIs)
     // -----------------------------------------------------------------------
     function renderSubjectColorPicker() {
       const picker = document.getElementById('subjectColorPicker');
@@ -2278,7 +2310,10 @@
             .eq('id', currentProfile.id)
             .maybeSingle();
 
-          if (freshProfile) currentProfile = freshProfile;
+          if (freshProfile) {
+            currentProfile = freshProfile;
+            persistUserSessionVault(currentProfile);
+          }
 
           const parentIds = getStudentLinkedParentIds(currentProfile);
           if (parentIds.length === 0) {
@@ -2301,21 +2336,63 @@
           studentNotes = notesRes.data || [];
         }
 
+        renderStudentHeroKpis();
         renderStudentSubjects();
         renderStudentTopics();
         renderStudentTests();
-        updateUnreadChatIndicators();
+
         if (currentBottomTab === 'chat') {
-          renderUnifiedChatView();
+          await markIncomingChatMessagesAsSeen();
+          renderUnifiedChatView(false);
+        } else {
+          updateUnreadChatIndicators();
         }
         refreshActiveSubScreensIfVisible();
 
         if (manualRefresh) showToast('Dashboard synced.');
       } catch (err) {
         console.error('Student dashboard load error:', err);
-        showToast('Sync error while loading data.', 'error');
+        if (manualRefresh) showToast('Sync error while loading data.', 'error');
       } finally {
         if (syncIcon) syncIcon.classList.remove('fa-spin');
+      }
+    }
+
+    function renderStudentHeroKpis() {
+      if (!currentProfile) return;
+      const welcomeEl = document.getElementById('stuHeroWelcomeTitle');
+      const parentsBadge = document.getElementById('stuHeroLinkedParentsBadge');
+      if (welcomeEl) welcomeEl.textContent = `${currentProfile.name}'s Study Command Center`;
+      if (parentsBadge) {
+        const pNames = linkedParentsProfiles.map(p => p.name).join(' & ') || 'Parent';
+        parentsBadge.innerHTML = `<i class="fa-solid fa-user-shield text-emerald-300"></i> Linked: ${escapeHtml(pNames)}`;
+      }
+
+      const todayStr = getTodayDateString();
+      const tomorrowStr = getTomorrowDateString();
+      const todayTopics = studentTopics.filter(t => t.target_date === todayStr);
+      const tmrTopics = studentTopics.filter(t => t.target_date === tomorrowStr);
+      const pendingTests = studentTests.filter(t => t.status !== 'completed');
+      const completedTests = studentTests.filter(t => t.status === 'completed');
+
+      const kpiTodayEl = document.getElementById('stuKpiTodayCount');
+      const kpiTmrEl = document.getElementById('stuKpiTomorrowCount');
+      const kpiPendingEl = document.getElementById('stuKpiPendingTests');
+      const kpiAvgNeetEl = document.getElementById('stuKpiAvgNeet');
+
+      if (kpiTodayEl) kpiTodayEl.textContent = `${todayTopics.filter(t => t.is_completed).length}/${todayTopics.length} Done`;
+      if (kpiTmrEl) kpiTmrEl.textContent = `${tmrTopics.length} Queued`;
+      if (kpiPendingEl) kpiPendingEl.textContent = `${pendingTests.length} Active`;
+
+      if (kpiAvgNeetEl) {
+        if (completedTests.length > 0) {
+          const avg = Math.round(
+            completedTests.reduce((sum, t) => sum + computeProjectedNeetScore(t.marks_obtained, t.question_count), 0) / completedTests.length
+          );
+          kpiAvgNeetEl.textContent = `${avg} / 180`;
+        } else {
+          kpiAvgNeetEl.textContent = '— / 180';
+        }
       }
     }
 
@@ -2385,11 +2462,17 @@
 
     async function handleAddSubject(event) {
       event.preventDefault();
-      if (!currentProfile) return;
+      if (!currentProfile || isSubmittingSubject) return;
       const input = document.getElementById('newSubjectNameInput');
       const name = (input.value || '').trim();
       if (!name) return;
 
+      if (studentSubjects.some(s => (s.subject_name || '').toLowerCase() === name.toLowerCase())) {
+        showToast('Subject already exists.', 'info');
+        return;
+      }
+
+      isSubmittingSubject = true;
       try {
         if (isLocalSandboxMode) {
           const all = getSandboxTable('student_subjects');
@@ -2414,6 +2497,8 @@
         await loadStudentDashboardData(false);
       } catch (err) {
         showToast('Could not add subject.', 'error');
+      } finally {
+        isSubmittingSubject = false;
       }
     }
 
@@ -2533,7 +2618,7 @@
 
     async function handleAddTopic(event) {
       event.preventDefault();
-      if (!currentProfile) return;
+      if (!currentProfile || isSubmittingTopic) return;
 
       const subjectId = document.getElementById('topicSubjectSelect').value;
       const titleInput = document.getElementById('topicTitleInput');
@@ -2546,6 +2631,7 @@
       }
       if (!title) return;
 
+      isSubmittingTopic = true;
       const targetDate = dayChoice === 'tomorrow' ? getTomorrowDateString() : getTodayDateString();
 
       try {
@@ -2579,6 +2665,8 @@
         await loadStudentDashboardData(false);
       } catch (err) {
         showToast('Could not add study topic.', 'error');
+      } finally {
+        isSubmittingTopic = false;
       }
     }
 
@@ -2625,17 +2713,19 @@
     }
 
     // -----------------------------------------------------------------------
-    // 9. SCHEDULED TESTS & NEET PROJECTED SCORE ENGINE
+    // 9. SCHEDULED TESTS & LOCKED-180 NEET PROJECTED SCORE ENGINE
     // -----------------------------------------------------------------------
     function buildRichTestCardHtml(test, viewerRole) {
       const isDone = test.status === 'completed';
-      const maxX = test.max_marks && test.max_marks > 0 ? Number(test.max_marks) : (Number(test.question_count) || 15) * 4;
+      const totalQ = Math.max(1, parseInt(test.question_count, 10) || 15);
+      const maxX = totalQ * 4;
       const rawY = test.marks_obtained !== null && test.marks_obtained !== undefined ? Number(test.marks_obtained) : 0;
       const pct = isDone && maxX > 0 ? Math.max(0, Math.round((rawY / maxX) * 100)) : 0;
-      const neetProjected = isDone ? computeProjectedNeetScore(rawY, maxX) : 0;
+      const neetProjected = isDone ? computeProjectedNeetScore(rawY, totalQ) : 0;
       const ringColor = neetProjected >= 140 ? '#059669' : neetProjected >= 100 ? '#d97706' : '#e11d48';
       const dashOffset = 100 - Math.min(100, Math.max(0, pct));
       const tagLabel = test._homeTag || (isDone ? 'Attempted Test' : 'Unattempted Test');
+      const { correctQ, wrongQ, skippedQ } = decodeTestCorrectAndWrongCounts(test);
 
       return `
         <div class="relative overflow-hidden rounded-3xl p-4 sm:p-5 transition hover:-translate-y-0.5 ${isDone ? 'test-card-completed' : 'test-card-scheduled'} flex flex-col justify-between gap-4">
@@ -2678,8 +2768,8 @@
               <span class="font-mono-code text-[10px] sm:text-[11px] font-extrabold text-slate-800 truncate block mt-0.5">${formatDateTimeShort(test.scheduled_at)}</span>
             </div>
             <div class="border-x border-slate-200/70 px-1">
-              <span class="text-[9px] font-bold uppercase text-slate-400 block">Questions</span>
-              <span class="font-mono-code text-[11px] font-extrabold text-slate-800 block mt-0.5">${test.question_count} Qs (${test.question_count * 4}M)</span>
+              <span class="text-[9px] font-bold uppercase text-slate-400 block">Total Qs (x)</span>
+              <span class="font-mono-code text-[11px] font-extrabold text-slate-800 block mt-0.5">${totalQ} Qs (${maxX}M)</span>
             </div>
             <div>
               <span class="text-[9px] font-bold uppercase text-slate-400 block">Duration</span>
@@ -2689,15 +2779,26 @@
 
           ${
             isDone
-              ? `<!-- NEET Projected Score Banner -->
-                <div class="p-3 rounded-2xl bg-slate-900 text-white flex items-center justify-between gap-2">
-                  <div>
-                    <span class="text-[9px] font-extrabold uppercase tracking-wider text-amber-300 block">Projected NEET Subject Score</span>
-                    <span class="font-mono-code text-[11px] text-slate-300">Test Score (y/x): <strong class="text-white">${rawY} / ${maxX}</strong></span>
+              ? `<!-- NEET Projected Score Banner (Strictly Scaled to 180) -->
+                <div class="p-3.5 rounded-2xl bg-slate-900 text-white space-y-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <div>
+                      <span class="text-[9px] font-extrabold uppercase tracking-wider text-amber-300 block">Projected NEET Subject Score</span>
+                      <span class="font-mono-code text-[11px] text-slate-300">Practice Score (y/x): <strong class="text-white">${rawY} / ${maxX}</strong></span>
+                    </div>
+                    <div class="text-right">
+                      <span class="font-mono-code text-base sm:text-lg font-extrabold text-emerald-400">${neetProjected} <span class="text-xs text-slate-400">/ 180</span></span>
+                    </div>
                   </div>
-                  <div class="text-right">
-                    <span class="font-mono-code text-base sm:text-lg font-extrabold text-emerald-400">${neetProjected} <span class="text-xs text-slate-400">/ 180</span></span>
-                  </div>
+                  ${
+                    correctQ !== null
+                      ? `<div class="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono-code text-slate-300">
+                          <span class="text-emerald-300 font-bold"><i class="fa-solid fa-check mr-1"></i>${correctQ} Correct (+${correctQ * 4})</span>
+                          <span class="text-rose-300 font-bold"><i class="fa-solid fa-xmark mr-1"></i>${wrongQ} Wrong (-${wrongQ})</span>
+                          <span class="text-slate-400">${skippedQ} Skipped</span>
+                        </div>`
+                      : ''
+                  }
                 </div>`
               : ''
           }
@@ -2767,43 +2868,62 @@
     function openSubmitTestReportModal(testId) {
       const test = studentTests.find(t => t.id === testId);
       if (!test) return;
-      const totalQ = Number(test.question_count) || 15;
-      const defaultMaxMarks = test.max_marks && test.max_marks > 0 ? Number(test.max_marks) : totalQ * 4;
+      const totalQ = Math.max(1, parseInt(test.question_count, 10) || 15);
+      const maxMarksX = totalQ * 4;
 
       document.getElementById('submitReportTestId').value = test.id;
       document.getElementById('submitReportTotalQuestions').value = String(totalQ);
       document.getElementById('submitReportTestTitle').textContent = `${test.subject_name} — ${test.topic_name}`;
-      document.getElementById('submitReportQCountBadge').textContent = `${totalQ} Questions`;
+      document.getElementById('submitReportQCountBadge').textContent = `${totalQ} Qs`;
+      document.getElementById('submitReportMaxMarksBadge').textContent = `${maxMarksX} Marks`;
 
-      document.getElementById('reportCorrectQInput').value = '';
-      document.getElementById('reportWrongQInput').value = '0';
-      document.getElementById('reportMaxMarksInput').value = String(defaultMaxMarks);
+      const { correctQ, wrongQ } = decodeTestCorrectAndWrongCounts(test);
+      const cInput = document.getElementById('reportCorrectQInput');
+      const wInput = document.getElementById('reportWrongQInput');
+      cInput.max = String(totalQ);
+      wInput.max = String(totalQ);
+
+      cInput.value = correctQ !== null ? String(correctQ) : '';
+      wInput.value = wrongQ !== null ? String(wrongQ) : '0';
 
       recalculateLiveNeetScorePreview();
       openModal('modalSubmitTestReport');
     }
 
     function recalculateLiveNeetScorePreview() {
-      const correctCount = parseInt(document.getElementById('reportCorrectQInput').value, 10) || 0;
-      const wrongCount = parseInt(document.getElementById('reportWrongQInput').value, 10) || 0;
-      const maxMarksX = parseFloat(document.getElementById('reportMaxMarksInput').value) || 60;
+      const totalQ = Math.max(1, parseInt(document.getElementById('submitReportTotalQuestions').value, 10) || 15);
+      const maxMarksX = totalQ * 4;
+      const correctCount = Math.max(0, parseInt(document.getElementById('reportCorrectQInput').value, 10) || 0);
+      const wrongCount = Math.max(0, parseInt(document.getElementById('reportWrongQInput').value, 10) || 0);
+      const skippedCount = Math.max(0, totalQ - correctCount - wrongCount);
 
       const scoreY = (correctCount * 4) + (wrongCount * -1);
-      const neetProjected = computeProjectedNeetScore(scoreY, maxMarksX);
+      const neetProjected = computeProjectedNeetScore(scoreY, totalQ);
 
+      const skippedEl = document.getElementById('livePreviewSkippedQ');
       const rawEl = document.getElementById('livePreviewRawScoreY');
       const neetEl = document.getElementById('livePreviewNeetScore');
+
+      if (skippedEl) {
+        skippedEl.textContent = correctCount + wrongCount > totalQ
+          ? `Exceeds ${totalQ} Qs!`
+          : `${skippedCount} of ${totalQ} Qs`;
+        skippedEl.className = correctCount + wrongCount > totalQ
+          ? 'font-mono-code font-extrabold text-rose-400'
+          : 'font-mono-code font-bold text-slate-200';
+      }
       if (rawEl) rawEl.textContent = `${scoreY} / ${maxMarksX}`;
       if (neetEl) neetEl.textContent = `${neetProjected} / 180`;
     }
 
     async function handleConfirmSubmitTestReport(event) {
       event.preventDefault();
+      if (isSubmittingTest) return;
+
       const testId = document.getElementById('submitReportTestId').value;
-      const totalQ = parseInt(document.getElementById('submitReportTotalQuestions').value, 10) || 500;
+      const totalQ = Math.max(1, parseInt(document.getElementById('submitReportTotalQuestions').value, 10) || 15);
       const correctQ = parseInt(document.getElementById('reportCorrectQInput').value, 10);
       const wrongQ = parseInt(document.getElementById('reportWrongQInput').value, 10);
-      const maxMarksX = parseFloat(document.getElementById('reportMaxMarksInput').value);
 
       if (isNaN(correctQ) || correctQ < 0 || isNaN(wrongQ) || wrongQ < 0) {
         showToast('Enter valid non-negative question counts.', 'error');
@@ -2811,23 +2931,23 @@
       }
 
       if (correctQ + wrongQ > totalQ) {
-        showToast(`Correct (${correctQ}) + Wrong (${wrongQ}) cannot exceed Total Questions (${totalQ}).`, 'error');
+        showToast(`Correct (${correctQ}) + Wrong (${wrongQ}) cannot exceed Total Assigned Questions (${totalQ}).`, 'error');
         return;
       }
 
+      const maxMarksX = totalQ * 4;
       const obtainedY = (correctQ * 4) + (wrongQ * -1);
-      if (isNaN(maxMarksX) || maxMarksX <= 0 || obtainedY > maxMarksX) {
-        showToast('Calculated marks (y) cannot exceed Max Marks (x).', 'error');
-        return;
-      }
+      // Encode correctQ in the fractional thousandths of max_marks so exact C/W/S breakdown is preserved without schema change
+      const encodedMaxMarks = Number((maxMarksX + (correctQ / 1000)).toFixed(3));
 
+      isSubmittingTest = true;
       try {
         if (isLocalSandboxMode) {
           const all = getSandboxTable('scheduled_tests');
           const idx = all.findIndex(t => t.id === testId);
           if (idx !== -1) {
             all[idx].marks_obtained = obtainedY;
-            all[idx].max_marks = maxMarksX;
+            all[idx].max_marks = encodedMaxMarks;
             all[idx].status = 'completed';
             saveSandboxTable('scheduled_tests', all);
           }
@@ -2836,7 +2956,7 @@
             .from('scheduled_tests')
             .update({
               marks_obtained: obtainedY,
-              max_marks: maxMarksX,
+              max_marks: encodedMaxMarks,
               status: 'completed'
             })
             .eq('id', testId);
@@ -2844,11 +2964,13 @@
         }
 
         closeModal('modalSubmitTestReport');
-        const neetScore = computeProjectedNeetScore(obtainedY, maxMarksX);
+        const neetScore = computeProjectedNeetScore(obtainedY, totalQ);
         showToast(`Score saved! Projected NEET Score: ${neetScore} / 180`);
         await loadStudentDashboardData(false);
       } catch (err) {
         showToast('Could not submit test score.', 'error');
+      } finally {
+        isSubmittingTest = false;
       }
     }
 
@@ -2895,7 +3017,7 @@
         if (manualRefresh) showToast('Parent console synced.');
       } catch (err) {
         console.error('Parent load error:', err);
-        showToast('Could not sync parent dashboard.', 'error');
+        if (manualRefresh) showToast('Could not sync parent dashboard.', 'error');
       } finally {
         if (syncIcon) syncIcon.classList.remove('fa-spin');
       }
@@ -2927,9 +3049,11 @@
       }
 
       renderParentMonitoredView();
-      updateUnreadChatIndicators();
       if (currentBottomTab === 'chat') {
-        renderUnifiedChatView();
+        await markIncomingChatMessagesAsSeen();
+        renderUnifiedChatView(false);
+      } else {
+        updateUnreadChatIndicators();
       }
     }
 
@@ -2970,10 +3094,10 @@
       document.getElementById('kpiWeekRatio').textContent = `${weekDone}/${weekTopics.length} Done`;
 
       // 3. Test Avg KPI (Projected NEET Avg out of 180)
-      const completedTests = monitoredTests.filter(t => t.status === 'completed' && t.max_marks > 0);
+      const completedTests = monitoredTests.filter(t => t.status === 'completed');
       if (completedTests.length > 0) {
         const avgNeet = Math.round(
-          completedTests.reduce((acc, t) => acc + computeProjectedNeetScore(t.marks_obtained, t.max_marks), 0) / completedTests.length
+          completedTests.reduce((acc, t) => acc + computeProjectedNeetScore(t.marks_obtained, t.question_count), 0) / completedTests.length
         );
         document.getElementById('kpiTestAvg').textContent = `${avgNeet}/180`;
       } else {
@@ -3259,22 +3383,29 @@
 
     async function handleCreateScheduledTest(event) {
       event.preventDefault();
-      if (!singleLinkedStudent || !currentProfile) return;
+      if (!singleLinkedStudent || !currentProfile || isSubmittingTest) return;
 
       const editingId = (document.getElementById('editingScheduledTestId').value || '').trim();
       const subjectName = document.getElementById('testSubjectSelect').value;
       const topicName = (document.getElementById('testTopicInput').value || '').trim();
       const dateTimeVal = document.getElementById('testDateTimeInput').value;
-      const qCount = parseInt(document.getElementById('testQuestionsInput').value, 10) || 15;
-      const durationMins = parseInt(document.getElementById('testDurationInput').value, 10) || 45;
+      const qCount = Math.max(1, parseInt(document.getElementById('testQuestionsInput').value, 10) || 15);
+      const durationMins = Math.max(5, parseInt(document.getElementById('testDurationInput').value, 10) || 45);
 
       if (!subjectName) {
         showToast('Please select a subject added by the student.', 'error');
         return;
       }
 
+      isSubmittingTest = true;
       try {
         if (editingId) {
+          const existingTest = monitoredTests.find(t => t.id === editingId);
+          const { correctQ } = existingTest ? decodeTestCorrectAndWrongCounts(existingTest) : { correctQ: null };
+          const updatedMaxMarks = correctQ !== null
+            ? Number(((qCount * 4) + (correctQ / 1000)).toFixed(3))
+            : qCount * 4;
+
           if (isLocalSandboxMode) {
             const all = getSandboxTable('scheduled_tests');
             const idx = all.findIndex(t => t.id === editingId);
@@ -3285,6 +3416,7 @@
                 topic_name: topicName,
                 scheduled_at: new Date(dateTimeVal).toISOString(),
                 question_count: qCount,
+                max_marks: updatedMaxMarks,
                 duration_minutes: durationMins
               };
               saveSandboxTable('scheduled_tests', all);
@@ -3297,6 +3429,7 @@
                 topic_name: topicName,
                 scheduled_at: new Date(dateTimeVal).toISOString(),
                 question_count: qCount,
+                max_marks: updatedMaxMarks,
                 duration_minutes: durationMins
               })
               .eq('id', editingId);
@@ -3344,11 +3477,13 @@
         refreshActiveSubScreensIfVisible();
       } catch (err) {
         showToast('Could not save test.', 'error');
+      } finally {
+        isSubmittingTest = false;
       }
     }
 
     // -----------------------------------------------------------------------
-    // 10B. TWO-WAY CHAT TAB & UNREAD RED DOT ENGINE
+    // 10B. UPGRADED TWO-WAY CHAT TAB & ANTI-SPOOFING ENGINE
     // -----------------------------------------------------------------------
     function parseChatMessageSender(noteRow) {
       const raw = String(noteRow.message_text || '');
@@ -3359,6 +3494,13 @@
         return { senderRole: 'parent', cleanText: raw.slice(7) };
       }
       return { senderRole: 'parent', cleanText: raw };
+    }
+
+    function fillQuickChatChip(text) {
+      const input = document.getElementById('chatMessageInput');
+      if (!input) return;
+      input.value = text;
+      input.focus();
     }
 
     function updateUnreadChatIndicators() {
@@ -3390,7 +3532,10 @@
         })
         .map(n => n.id);
 
-      if (unseenIncomingIds.length === 0) return;
+      if (unseenIncomingIds.length === 0) {
+        updateUnreadChatIndicators();
+        return;
+      }
 
       const nowIso = new Date().toISOString();
       try {
@@ -3422,7 +3567,7 @@
       }
     }
 
-    function renderUnifiedChatView() {
+    function renderUnifiedChatView(forceScrollBottom = false) {
       const feed = document.getElementById('chatMessagesFeed');
       const headerName = document.getElementById('chatPartnerNameHeader');
       const headerSub = document.getElementById('chatPartnerSubHeader');
@@ -3444,38 +3589,48 @@
       }
 
       if (!notesList || notesList.length === 0) {
+        lastRenderedChatCount = 0;
         feed.innerHTML = `
           <div class="h-full flex flex-col items-center justify-center text-center py-12 text-slate-400 space-y-2">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-lg">
               <i class="fa-regular fa-comments"></i>
             </div>
             <p class="text-xs font-bold text-slate-500">No messages yet</p>
-            <p class="text-[11px] text-slate-400 max-w-xs">Send a study update, reminder, or question below.</p>
+            <p class="text-[11px] text-slate-400 max-w-xs">Tap a quick note above or write a study message below.</p>
           </div>
         `;
         return;
       }
 
+      const wasNearBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 90;
+      const hasNewMessages = notesList.length !== lastRenderedChatCount;
+      lastRenderedChatCount = notesList.length;
+
       feed.innerHTML = notesList.map(note => {
         const { senderRole, cleanText } = parseChatMessageSender(note);
         const isMine = (isStudent && senderRole === 'student') || (!isStudent && senderRole === 'parent');
+        const senderLabel = isMine
+          ? 'You'
+          : senderRole === 'parent'
+          ? (linkedParentsProfiles[0]?.name || 'Parent')
+          : (singleLinkedStudent?.name || 'Student');
 
         return `
           <div class="flex ${isMine ? 'justify-end' : 'justify-start'}">
-            <div class="max-w-[82%] sm:max-w-[70%] rounded-2xl px-4 py-3 shadow-2xs ${
+            <div class="max-w-[84%] sm:max-w-[70%] rounded-3xl px-4 py-3 shadow-xs ${
               isMine
                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-br-xs'
                 : 'bg-white border border-slate-200/90 text-slate-900 rounded-bl-xs'
             }">
               <div class="flex items-center justify-between gap-3 mb-1">
                 <span class="text-[10px] font-extrabold uppercase tracking-wider ${isMine ? 'text-emerald-100' : 'text-indigo-600'}">
-                  ${isMine ? 'You' : (senderRole === 'parent' ? 'Parent' : 'Student')}
+                  ${escapeHtml(senderLabel)}
                 </span>
                 <div class="flex items-center gap-2">
                   <span class="text-[10px] ${isMine ? 'text-emerald-100/90' : 'text-slate-400'}">${formatDateTimeShort(note.created_at)}</span>
                   ${
                     isMine
-                      ? `<button type="button" onclick="handleDeleteChatMessage('${note.id}')" class="text-[10px] text-white/80 hover:text-white" title="Delete message">
+                      ? `<button type="button" onclick="handleDeleteChatMessage('${note.id}')" class="text-[10px] text-white/80 hover:text-white transition" title="Delete your message">
                            <i class="fa-solid fa-trash-can"></i>
                          </button>`
                       : ''
@@ -3495,15 +3650,18 @@
         `;
       }).join('');
 
-      feed.scrollTop = feed.scrollHeight;
+      if (forceScrollBottom || wasNearBottom || hasNewMessages) {
+        feed.scrollTop = feed.scrollHeight;
+      }
     }
 
     async function handleSendChatMessage(event) {
       event.preventDefault();
-      if (!currentProfile) return;
+      if (!currentProfile || isSubmittingChat) return;
 
       const input = document.getElementById('chatMessageInput');
-      const rawText = (input.value || '').trim();
+      // Strip any user-typed spoofed role prefixes
+      const rawText = (input.value || '').replace(/^\[(STU|PAR)\]::/gi, '').trim();
       if (!rawText) return;
 
       const isStudent = currentProfile.role === 'student';
@@ -3516,6 +3674,7 @@
         return;
       }
 
+      isSubmittingChat = true;
       const prefixedMessage = `${isStudent ? '[STU]::' : '[PAR]::'}${rawText}`;
 
       try {
@@ -3547,14 +3706,29 @@
         } else {
           await loadMonitoredStudentWorkspace(studentId);
         }
-        renderUnifiedChatView();
+        renderUnifiedChatView(true);
       } catch (err) {
         showToast('Could not send message.', 'error');
+      } finally {
+        isSubmittingChat = false;
       }
     }
 
     async function handleDeleteChatMessage(noteId) {
       if (!currentProfile) return;
+      const isStudent = currentProfile.role === 'student';
+      const notesList = isStudent ? studentNotes : monitoredNotes;
+      const targetNote = notesList.find(n => n.id === noteId);
+      if (!targetNote) return;
+
+      // Strict sender ownership check before deleting
+      const { senderRole } = parseChatMessageSender(targetNote);
+      const isMine = (isStudent && senderRole === 'student') || (!isStudent && senderRole === 'parent');
+      if (!isMine) {
+        showToast('You can only delete messages sent by you.', 'error');
+        return;
+      }
+
       try {
         if (isLocalSandboxMode) {
           saveSandboxTable('parent_notes', getSandboxTable('parent_notes').filter(n => n.id !== noteId));
@@ -3563,22 +3737,33 @@
           if (error) throw error;
         }
         showToast('Message deleted.');
-        if (currentProfile.role === 'student') {
+        if (isStudent) {
           await loadStudentDashboardData(false);
         } else if (singleLinkedStudent) {
           await loadMonitoredStudentWorkspace(singleLinkedStudent.id);
         }
-        renderUnifiedChatView();
+        renderUnifiedChatView(false);
       } catch (err) {
         showToast('Could not delete message.', 'error');
       }
     }
 
     // -----------------------------------------------------------------------
-    // 11. ACCOUNT SETTINGS SCREEN (UP TO 2 PARENTS) & UNBONDING ENGINE
+    // 11. UPGRADED ACCOUNT SETTINGS SCREEN (UP TO 2 PARENTS & SAFE UNBOND)
     // -----------------------------------------------------------------------
+    let cachedSettingsParentsList = [];
+
     async function renderAccountSettingsScreen() {
       if (!currentProfile) return;
+
+      // Populate Self Identity Hero Card
+      renderAvatarIntoElement(document.getElementById('settingsSelfAvatar'), currentProfile.avatar_url, currentProfile.name);
+      const selfNameEl = document.getElementById('settingsSelfUsername');
+      const selfRoleEl = document.getElementById('settingsSelfRoleBadge');
+      const selfIdEl = document.getElementById('settingsSelfPairingId');
+      if (selfNameEl) selfNameEl.textContent = currentProfile.name;
+      if (selfRoleEl) selfRoleEl.textContent = currentProfile.role === 'parent' ? 'Parent Account' : 'Student Account';
+      if (selfIdEl) selfIdEl.textContent = `#${currentProfile.device_number_id}`;
 
       const isStudent = currentProfile.role === 'student';
       const studentData = isStudent ? currentProfile : singleLinkedStudent;
@@ -3597,6 +3782,7 @@
       } else if (!isStudent) {
         parentsList = [currentProfile];
       }
+      cachedSettingsParentsList = parentsList;
 
       const parentBadge = document.getElementById('settingsParentStatusBadge');
       if (parentBadge) parentBadge.textContent = `${parentsList.length} / 2 Linked`;
@@ -3607,22 +3793,22 @@
           parentsContainer.innerHTML = `<p class="text-xs text-slate-500 py-2">No parent linked yet.</p>`;
         } else {
           parentsContainer.innerHTML = parentsList.map((par, idx) => `
-            <div class="p-3.5 rounded-2xl bg-white border border-indigo-100 flex items-center justify-between gap-3">
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-indigo-100 flex items-center justify-between gap-3">
               <div class="flex items-center gap-3 min-w-0">
                 <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-extrabold shrink-0 overflow-hidden" id="setParAvatar_${idx}"></div>
                 <div class="min-w-0">
                   <div class="flex items-center gap-1.5">
                     <p class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">${escapeHtml(par.name)}</p>
-                    <span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[9px] font-extrabold">Parent ${idx + 1}</span>
+                    <span class="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 text-[9px] font-extrabold">Parent ${idx + 1}</span>
                   </div>
-                  <p class="font-mono-code text-[10px] text-slate-500 truncate mt-0.5">ID: #${escapeHtml(par.device_number_id)}</p>
+                  <p class="font-mono-code text-[10px] text-slate-500 truncate mt-0.5">Pairing ID: #${escapeHtml(par.device_number_id)}</p>
                 </div>
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
                   onclick="copyTextToClipboard('${escapeHtml(par.device_number_id)}', 'Parent ID')"
-                  class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold transition"
+                  class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-extrabold transition"
                 >
                   Copy ID
                 </button>
@@ -3630,7 +3816,7 @@
                   studentData
                     ? `<button
                          type="button"
-                         onclick="handleUnbondSpecificParent('${par.id}', '${escapeHtml(par.name)}')"
+                         onclick="handleUnbondSpecificParent('${par.id}')"
                          class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[10px] font-extrabold transition"
                        >
                          Unbond
@@ -3665,11 +3851,11 @@
       } else {
         if (stuBody) stuBody.classList.remove('hidden');
         if (noStuMsg) noStuMsg.classList.add('hidden');
-        if (stuStatusBadge) stuStatusBadge.textContent = 'Hardware Locked';
+        if (stuStatusBadge) stuStatusBadge.textContent = 'Linked & Active';
 
         renderAvatarIntoElement(document.getElementById('settingsStudentAvatar'), studentData.avatar_url, studentData.name);
         document.getElementById('settingsStudentName').textContent = studentData.name;
-        document.getElementById('settingsStudentHardware').textContent = studentData.device_model || studentData.device_token;
+        document.getElementById('settingsStudentHardware').textContent = `Username: @${studentData.name}`;
         document.getElementById('settingsStudentLastVisit').textContent = `Last visit: ${formatRelativeTime(studentData.last_visit_at)}`;
         document.getElementById('settingsStudentDeviceId').textContent = `#${studentData.device_number_id}`;
 
@@ -3677,13 +3863,6 @@
         if (copyStuBtn) {
           copyStuBtn.onclick = () => copyTextToClipboard(studentData.device_number_id, 'Student ID');
         }
-      }
-
-      const resetLockBtn = document.getElementById('settingsResetLockBtn');
-      if (!isStudent && studentData) {
-        resetLockBtn.classList.remove('hidden');
-      } else {
-        resetLockBtn.classList.add('hidden');
       }
     }
 
@@ -3769,11 +3948,14 @@
       }
     }
 
-    function handleUnbondSpecificParent(parentIdToRemove, parentName) {
+    function handleUnbondSpecificParent(parentIdToRemove) {
       if (!currentProfile) return;
       const isStudent = currentProfile.role === 'student';
       const targetStudent = isStudent ? currentProfile : singleLinkedStudent;
       if (!targetStudent) return;
+
+      const matchedPar = cachedSettingsParentsList.find(p => p.id === parentIdToRemove);
+      const parentName = matchedPar ? matchedPar.name : 'Parent';
 
       const title = isStudent ? `Unbond ${parentName}?` : 'Unbond Student Account?';
       const desc = isStudent
@@ -3829,38 +4011,8 @@
       });
     }
 
-    function handleResetStudentDeviceLock() {
-      if (!singleLinkedStudent) return;
-      openConfirmModal(
-        'Reset Student Hardware Lock?',
-        `Allow ${singleLinkedStudent.name} to log in on a new phone or laptop? Their next login will bind to that device.`,
-        async () => {
-          try {
-            if (isLocalSandboxMode) {
-              const all = getSandboxTable('study_profiles');
-              const idx = all.findIndex(p => p.id === singleLinkedStudent.id);
-              if (idx !== -1) {
-                all[idx].device_token = 'RESET_PENDING';
-                saveSandboxTable('study_profiles', all);
-              }
-            } else {
-              const { error } = await dbClient
-                .from('study_profiles')
-                .update({ device_token: 'RESET_PENDING' })
-                .eq('id', singleLinkedStudent.id);
-              if (error) throw error;
-            }
-            showToast('Hardware lock reset! Student can now sign in on their new device.');
-            await renderAccountSettingsScreen();
-          } catch (err) {
-            showToast('Could not reset device lock.', 'error');
-          }
-        }
-      );
-    }
-
     // -----------------------------------------------------------------------
-    // 12. DAILY / WEEKLY / MONTHLY ANALYTICS FULL SCREEN
+    // 12. DAILY / WEEKLY / MONTHLY ANALYTICS FULL SCREEN (LOCAL DATE AWARE)
     // -----------------------------------------------------------------------
     function switchDashboardPeriod(period) {
       activeDashboardPeriod = period;
@@ -3902,13 +4054,13 @@
       const completionRate = periodTopics.length > 0 ? Math.round((coveredTopics.length / periodTopics.length) * 100) : 0;
 
       const periodCompletedTests = tests.filter(t => {
-        if (t.status !== 'completed' || !t.max_marks || t.max_marks <= 0) return false;
-        const testDateStr = (t.scheduled_at || '').slice(0, 10);
-        return testDateStr >= startDateStr && testDateStr <= todayStr;
+        if (t.status !== 'completed') return false;
+        const testLocalDateStr = getLocalDateStringFromIso(t.scheduled_at);
+        return testLocalDateStr >= startDateStr && testLocalDateStr <= todayStr;
       });
 
       const testAvgNeet = periodCompletedTests.length > 0
-        ? Math.round(periodCompletedTests.reduce((sum, t) => sum + computeProjectedNeetScore(t.marks_obtained, t.max_marks), 0) / periodCompletedTests.length)
+        ? Math.round(periodCompletedTests.reduce((sum, t) => sum + computeProjectedNeetScore(t.marks_obtained, t.question_count), 0) / periodCompletedTests.length)
         : null;
 
       document.getElementById('dashStatCovered').textContent = `${coveredTopics.length} / ${periodTopics.length}`;
